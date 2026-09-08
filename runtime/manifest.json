@@ -1,0 +1,251 @@
+{
+  "schema": "strixglm-runtime-v1",
+  "engine_root": "/home/funboy/ai-exp/strix-ciru-tp2",
+  "repositories": {
+    "jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4": {
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+      "metadata_url": "https://huggingface.co/api/models/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/revision/a1ab828d8bd5b0ba8e3281febfe3d34b12072040?blobs=true"
+    },
+    "incoai/GLM-5.3-Flash-DFlash2": {
+      "revision": "bf582e4eacc1810f76656d1811693ff6c6737d2a",
+      "metadata_url": "https://huggingface.co/api/models/incoai/GLM-5.3-Flash-DFlash2/revision/bf582e4eacc1810f76656d1811693ff6c6737d2a?blobs=true"
+    }
+  },
+  "weights": [
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-0.safetensors",
+      "size": 7851586392,
+      "sha256": "ef19436bd7ed4b030542f2f430bbff5461cca3196a3496ed85ba8b34d02bf1bd"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-1.safetensors",
+      "size": 8218435312,
+      "sha256": "f9481d5cbee96e04d6fa7d8ac854d9b8a3788f2578b0ea449b9b4d4428418685"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-2.safetensors",
+      "size": 8218435424,
+      "sha256": "da923ce1bc6ec9bc84218b79631259f61daa7831567202f85dc52ee5621882bc"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-3.safetensors",
+      "size": 8218435424,
+      "sha256": "4e5eb60ddefb69dd40c8f237684f85ea2f5962735d8b2381a05341d15226d14b"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-4.safetensors",
+      "size": 8218435424,
+      "sha256": "35655df15dcdd18310154faf21e89bff5ba94db900d6ff387c3dd0c911cea8f6"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-5.safetensors",
+      "size": 8218435424,
+      "sha256": "f0fb0284599e35c612be8ce091e3cb56b98e4d0113f7728ca35e667078c203a0"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-6.safetensors",
+      "size": 8218435424,
+      "sha256": "25c2ad306aebb38b0e8f1835261c4235189b6a42d2f839013995acd9d4525f34"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-7.safetensors",
+      "size": 8218435424,
+      "sha256": "42c1f7b625973f489c18c15f15ef995db98b62b425595c7f494ea3e91b7e619d"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-8.safetensors",
+      "size": 8218435424,
+      "sha256": "167074d6cf6295125735d26896aa567d7df17c381b313eb913152986bf7461de"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-9.safetensors",
+      "size": 8218435424,
+      "sha256": "c76e83307ed3ea7da0651153a4202b45b0934a72b66a1cc215fd0bcb8bdc6969"
+    },
+    {
+      "rank": 0,
+      "path": "artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-10.safetensors",
+      "size": 7563801048,
+      "sha256": "76408c5361f4f990f1ab2d6cf43729cd6e80aa709940c2c740c24a04236ff4f1"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-0.safetensors",
+      "size": 7851586392,
+      "sha256": "3c59dcf14b7e07de2e785cd54669535e182382e9d07462b27a9be562d43ffe70"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-1.safetensors",
+      "size": 8218435312,
+      "sha256": "a15e8b26dd65e990dcdddebcd1a39d6f6adb6711b5c64a7ba2acb9094e02ecfe"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-2.safetensors",
+      "size": 8218435424,
+      "sha256": "aa7604365a912e6508471168c4933e3df2d824bd5e831350293e870c609e37ff"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-3.safetensors",
+      "size": 8218435424,
+      "sha256": "d8fad4c06940747bbff7822487be448ca7af323523814039f80cfa6f22e9e77a"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-4.safetensors",
+      "size": 8218435424,
+      "sha256": "d028bef6fdbac3d4018bb0c5ff0db83eb367e812d57d91ec66a445ae2c2a328d"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-5.safetensors",
+      "size": 8218435424,
+      "sha256": "cb7af5e468a95a6cebb2d77c80eb4696a75384860545cb9cb4b90e9c4b3af7e6"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-6.safetensors",
+      "size": 8218435424,
+      "sha256": "63d6f709d50f520739f753991a20c3275dd65fa6a60144f60c9195e5d718ffcd"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-7.safetensors",
+      "size": 8218435424,
+      "sha256": "625149b168a7fc16117555925180e498a77a5d5bd6902bee4ffd3ae4a9cf9325"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-8.safetensors",
+      "size": 8218435424,
+      "sha256": "4f18105aeea29c721cf86ffd90538c74b67938d92216125b594b0b64a9bf8502"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-9.safetensors",
+      "size": 8218435424,
+      "sha256": "4b26298300acb849b141fbce2ce4c691e0115dd817134e184eaedbccc6bca852"
+    },
+    {
+      "rank": 1,
+      "path": "artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-10.safetensors",
+      "size": 7563801048,
+      "sha256": "af9104a902644e4e7f296c5ce3947e8897809e9b00bdeb3cfde011b08957b716"
+    },
+    {
+      "rank": "shared",
+      "path": "artifacts/dflash2/model.safetensors",
+      "size": 2342169800,
+      "sha256": "b038e1d9d1e7833fa3880c2c0135ba9b673013f03da1b29fb831931584759dac"
+    }
+  ],
+  "runtime_sources": [
+    {
+      "path": "artifacts/ciru/runtime/packages/GLM5.3-Flash-CIRU-STRIX-IU4-aiter-gfx1151-source-v0.1.0-rc1.tar.gz",
+      "sha256": "986e7d734d4c32e70788ad0052a4c48196487b22db1bb9de1b220e555bb3de99",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/GLM5.3-Flash-CIRU-STRIX-IU4-kernels-source-v0.1.0-rc1.tar.gz",
+      "sha256": "88e96a32dbfa01b0bce712d2ded81fbe282452afc59c0961f6c10e7a7a0b2841",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/GLM5.3-Flash-CIRU-STRIX-IU4-vllm-source-v0.1.0-rc2-dev9.tar.gz",
+      "sha256": "c9b6c30d9690591a0e01ff05fcbf2b3456e9207b92bf4268a4c62a294da965bb",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/requirements-runtime.lock",
+      "sha256": "0e27c6d236d3011c468b142c1772c1324f65e22edf406f4651afa9f6e8aa7582",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/runtime-env.sh",
+      "sha256": "023b51c21ae9ab060a702beb41a8a86c53479a9f39086d11818c6d7c9e9d2a8f",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/wheels/amd_aiter-0.1.0rc1-cp314-cp314-linux_x86_64.whl",
+      "sha256": "e392272a101a5f11809818df222ccfe68892c4d541a83eefdfd3e6e3e08d7cb1",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/runtime/packages/wheels/vllm-0.1.0rc2.dev9+g9255fd9fb9.rocm100-cp314-cp314-linux_x86_64.whl",
+      "sha256": "ba5b1c0f957c41cf0d4d0af36df59cbe25ae5d0640766baea6d7ce32506d2317",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    },
+    {
+      "path": "artifacts/ciru/tools/ciru-strixlink-0.3.2-linux-amd64.tar.gz",
+      "sha256": "906969fefea2ba4c6de3fab4404482ea2806aeba1b963518aed8f2608c9d5578",
+      "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040"
+    }
+  ],
+  "weight_integrity": "Hashes pinned from prior qualified acquisition. Startup checks size, not full rehash. Runtime identity rehashed separately.",
+  "identity": {
+    "rank0": {
+      "artifacts/ciru/config/config.json": "18485cd976c9e26c30362b034a43b4bfd7aab2e34ec7563ac97887a4c4c6faa4",
+      "artifacts/ciru/config/generation_config.json": "a07de3408f578c6a7ca8a1646aa91a41df55d539349fda15fb8b611eb007e9b7",
+      "artifacts/ciru/launch-node.sh": "bd283030785863549884906b8bdbeecbe1e1ba69804fdf7c167ca775ac89f79d",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-dense-kda.so": "12aee5aa0e88c700438345909f2e659f9016bc752a5863626fd7a04b994b4a50",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-iu4-m1.so": "aa77365274b88b42264408737b4968f22ad395daffeafe84497189347236fa37",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-m4-residual.so": "0cb7cec9af206621a4e39947b246f752190e57e98818f5fd11a90504a7e1912f",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-m8-align.so": "1709a0a5029a4f7cbb6eb02f129730307e6351ba8890b0cbef3975c5bd0a1cfc",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-nhi-m8-bf16.so": "46f4fd80444ac177b0dbfdc6edc368ef5f41324421aa742fae85ac770938febf",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-resident-g128.so": "ea4295c7ad0cd7e3e43eb43d240c58c790647b5b4a249cdd54a07f079f5072e9",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-top8-epilogue.so": "aadf78f626f210a8139a915f99fbec09257eb22910d98d68d403215940e62519",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/fused_moe/experts/triton_moe.py": "df3fe911943b85e6bd88f9d34acaeeb078e990da35d1cc0eda5f6bef70e8d2d7",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/fused_moe/router/grouped_topk_router.py": "6ef5fe0c0977410895b638de362a5341b0c033167a4caf1721292d63c9112f97",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/quantization/glm53_hybrid.py": "1dcf48459bc4773108add208f7ca20aa6cc0e2fc40566a6b8feb177a02741523",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/__init__.py": "05909e12697ea28e5285036d00253c247684e4696030391689fd43539b65656b",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/__init__.py": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/ops/__init__.py": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/ops/kpool_compress.py": "c5a1bb9add474ee7b77ca89399e90f7f51798d46d80e88e15b1dff94a15828e3",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/attention.py": "400d7063db2aa27314c79dce688060710f5ef7bdbafbddfc6698eaaaea3b3a8f",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/kda.py": "3979b5f64f9c6021ac1259e4e35b4340e92f5815c8cd87d7d8d7247dcb89cb50",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/model.py": "a421d90fbd8b32ac688a138c25ca91cf38e44d5d08da5a5c100ae2317df7b4ec",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/mtp.py": "a7dc16125bcef1bc8523cdeff69342240150562e032e04ff4fd0bef8f44bee64",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/multimodal.py": "896d9f133f97d338182f4880e2e7d3ac3b8def25ef7eaf82182f0ea01a3d72d7",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/ops/fused_eh_norm.py": "d459c88c58df05de3cc3057f3a114e28f9b3d75c40433d716b8ded14a0029eed",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/ops/kpool_compress.py": "6e19b31c50de43f7dfa9c7d9b7a3d7b856939f49bd4a3c031d2b50d28fe04f68"
+    },
+    "rank1": {
+      "artifacts/ciru/config/config.json": "18485cd976c9e26c30362b034a43b4bfd7aab2e34ec7563ac97887a4c4c6faa4",
+      "artifacts/ciru/config/generation_config.json": "a07de3408f578c6a7ca8a1646aa91a41df55d539349fda15fb8b611eb007e9b7",
+      "artifacts/ciru/launch-node.sh": "bd283030785863549884906b8bdbeecbe1e1ba69804fdf7c167ca775ac89f79d",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-dense-kda.so": "12aee5aa0e88c700438345909f2e659f9016bc752a5863626fd7a04b994b4a50",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-iu4-m1.so": "aa77365274b88b42264408737b4968f22ad395daffeafe84497189347236fa37",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-m4-residual.so": "0cb7cec9af206621a4e39947b246f752190e57e98818f5fd11a90504a7e1912f",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-m8-align.so": "1709a0a5029a4f7cbb6eb02f129730307e6351ba8890b0cbef3975c5bd0a1cfc",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-nhi-m8-bf16.so": "46f4fd80444ac177b0dbfdc6edc368ef5f41324421aa742fae85ac770938febf",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-resident-g128.so": "ea4295c7ad0cd7e3e43eb43d240c58c790647b5b4a249cdd54a07f079f5072e9",
+      "artifacts/ciru/runtime/gfx1151/GLM5.3-Flash-CIRU-STRIX-IU4-top8-epilogue.so": "aadf78f626f210a8139a915f99fbec09257eb22910d98d68d403215940e62519",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/fused_moe/experts/triton_moe.py": "df3fe911943b85e6bd88f9d34acaeeb078e990da35d1cc0eda5f6bef70e8d2d7",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/fused_moe/router/grouped_topk_router.py": "6ef5fe0c0977410895b638de362a5341b0c033167a4caf1721292d63c9112f97",
+      "venv/lib/python3.14/site-packages/vllm/model_executor/layers/quantization/glm53_hybrid.py": "1dcf48459bc4773108add208f7ca20aa6cc0e2fc40566a6b8feb177a02741523",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/__init__.py": "05909e12697ea28e5285036d00253c247684e4696030391689fd43539b65656b",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/__init__.py": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/ops/__init__.py": "e3c55cbb0d7a8bd47df6f3378835644645f5d3bc89b45793b5d5a02d013e5c58",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/amd/ops/kpool_compress.py": "c5a1bb9add474ee7b77ca89399e90f7f51798d46d80e88e15b1dff94a15828e3",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/attention.py": "400d7063db2aa27314c79dce688060710f5ef7bdbafbddfc6698eaaaea3b3a8f",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/kda.py": "3979b5f64f9c6021ac1259e4e35b4340e92f5815c8cd87d7d8d7247dcb89cb50",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/model.py": "a421d90fbd8b32ac688a138c25ca91cf38e44d5d08da5a5c100ae2317df7b4ec",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/mtp.py": "a7dc16125bcef1bc8523cdeff69342240150562e032e04ff4fd0bef8f44bee64",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/multimodal.py": "896d9f133f97d338182f4880e2e7d3ac3b8def25ef7eaf82182f0ea01a3d72d7",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/ops/fused_eh_norm.py": "d459c88c58df05de3cc3057f3a114e28f9b3d75c40433d716b8ded14a0029eed",
+      "venv/lib/python3.14/site-packages/vllm/models/glm5next/nvidia/ops/kpool_compress.py": "6e19b31c50de43f7dfa9c7d9b7a3d7b856939f49bd4a3c031d2b50d28fe04f68"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+--- a/model_executor/layers/fused_moe/router/grouped_topk_router.py
++++ b/model_executor/layers/fused_moe/router/grouped_topk_router.py
+@@ -135,10 +135,14 @@
+     # CIRU opt-in correctness profile: ROCm unsorted topk permutes identical
+     # expert sets between calls, changing routing normalization/reduction.
+     # Sort BEFORE normalization, without enabling unrelated global kernels.
+-    use_sorted = envs.VLLM_BATCH_INVARIANT or os.getenv("CIRU_CANONICAL_MOE", "0") == "1"
+-    group_idx = torch.topk(group_scores, k=topk_group, dim=-1, sorted=use_sorted)[
+-        1
+-    ]  # [n, top_k_group]
++    canonical = os.getenv("CIRU_CANONICAL_MOE", "0") == "1"
++    use_sorted = envs.VLLM_BATCH_INVARIANT or canonical
++    # sorted topk does not define a stable order for equal scores. Preserve
++    # ascending source index for ties, for both group and expert selection.
++    if canonical:
++        group_idx = torch.argsort(group_scores, dim=-1, descending=True, stable=True)[..., :topk_group]
++    else:
++        group_idx = torch.topk(group_scores, k=topk_group, dim=-1, sorted=use_sorted)[1]
+     group_mask = torch.zeros_like(group_scores)  # [n, n_group]
+     group_mask.scatter_(1, group_idx, 1)  # [n, n_group]
+     score_mask = (
+@@ -149,13 +153,18 @@
+     tmp_scores = scores.masked_fill(~score_mask.bool(), float("-inf"))  # [n, e]
+ 
+     if e_score_correction_bias is not None:
+-        topk_ids = torch.topk(tmp_scores, k=topk, dim=-1, sorted=use_sorted)[1]
++        if canonical:
++            topk_ids = torch.argsort(tmp_scores, dim=-1, descending=True, stable=True)[..., :topk]
++        else:
++            topk_ids = torch.topk(tmp_scores, k=topk, dim=-1, sorted=use_sorted)[1]
+         # Use original unbiased scores for the routing weights
+         topk_weights = original_scores.gather(1, topk_ids)
+     else:
+-        topk_weights, topk_ids = torch.topk(
+-            tmp_scores, k=topk, dim=-1, sorted=use_sorted
+-        )
++        if canonical:
++            topk_ids = torch.argsort(tmp_scores, dim=-1, descending=True, stable=True)[..., :topk]
++            topk_weights = tmp_scores.gather(1, topk_ids)
++        else:
++            topk_weights, topk_ids = torch.topk(tmp_scores, k=topk, dim=-1, sorted=use_sorted)
+ 
+     if renormalize:
+         topk_weights = topk_weights / topk_weights.sum(dim=-1, keepdim=True)

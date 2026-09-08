@@ -1,0 +1,39 @@
+--- a/model_executor/layers/quantization/glm53_hybrid.py
++++ b/model_executor/layers/quantization/glm53_hybrid.py
+@@ -242,7 +242,7 @@
+     input: torch.Tensor,
+     output: torch.Tensor,
+ ) -> bool:
+-    """Handle only canonical GLM prefill; false preserves stock moe_sum."""
++    """Canonical GLM M>1; opt-in coherent profile also handles M1."""
+     if (
+         input.is_cuda
+         and output.is_cuda
+@@ -250,7 +250,7 @@
+         and output.dtype == torch.bfloat16
+         and input.dim() == 3
+         and output.dim() == 2
+-        and input.shape[0] > 1
++        and (input.shape[0] > 1 or (_CIRU_CANONICAL_MOE and input.shape[0] == 1))
+         and tuple(input.shape[1:]) == (8, 4096)
+         and tuple(output.shape) == (input.shape[0], 4096)
+         and input.device == output.device
+--- a/model_executor/layers/fused_moe/experts/triton_moe.py
++++ b/model_executor/layers/fused_moe/experts/triton_moe.py
+@@ -962,6 +962,16 @@
+             logger.info_once(
+                 "Using canonical N32/K-word G128 weights in Triton W4A16 MoE."
+             )
++        if (
++            _CIRU_CANONICAL_MOE and use_native_n32_kword_layout
++            and 1 <= num_tokens <= 8 and (E, N, K, top_k_num) == (288, 2048, 4096, 8)
++        ):
++            # Match the existing M6 verification arithmetic also at M1:
++            # fixed K reduction tile and HIP launch options, no shape tuning.
++            config = {"BLOCK_SIZE_M": 16, "BLOCK_SIZE_N": 64, "BLOCK_SIZE_K": 32,
++                      "GROUP_SIZE_M": 1, "SPLIT_K": 1, "num_warps": 4, "num_stages": 2,
++                      "waves_per_eu": 0}
++            logger.info_once("CIRU_CANONICAL_MOE: uniform M1..8 verification tile M16/N64/K32.")
+ 
+         if hidden_states.dtype == torch.bfloat16:
+             compute_type = tl.bfloat16

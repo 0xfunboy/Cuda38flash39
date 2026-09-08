@@ -1,0 +1,25 @@
+{
+  "listen": "127.0.0.1:18093",
+  "backend": "http://127.0.0.1:18091",
+  "model": "GLM5.3-Flash-CIRU-STRIX-IU4",
+  "state_dir": "/home/funboy/StrixHaloClusterGLM/state",
+  "workspace_roots": ["/home/funboy/ai-exp", "/home/funboy/StrixHaloClusterGLM"],
+  "pair_lock": "/home/funboy/ai-exp/strix-ciru-tp2/state/pair.lock",
+  "default_profile": "fast",
+  "profiles": {
+    "fast": {"reasoning": "low", "context_tokens": 4096, "max_tokens": 4096, "max_repairs": 2},
+    "balanced": {"reasoning": "low", "context_tokens": 4096, "max_tokens": 4096, "max_repairs": 2},
+    "quality": {"reasoning": "low", "context_tokens": 4096, "max_tokens": 4096, "max_repairs": 2}
+  },
+  "profile_status": "COMPACT_CXX_QUALIFIED; FAST_BALANCED_QUALITY_ARE_LOW_ALIASES; INPUT_BUDGET_ESTIMATED; NO_LONG_CONTEXT_QUALIFICATION",
+  "context_format": "json",
+  "max_context_tokens": 50000,
+  "max_files": 300,
+  "max_file_bytes": 262144,
+  "max_repo_bytes": 33554432,
+  "model_timeout": 600,
+  "sandbox_timeout": 90,
+  "sandbox_memory_bytes": 1073741824,
+  "sandbox_tasks": 64,
+  "remote_ssh": "02-evo-x3-tb"
+}

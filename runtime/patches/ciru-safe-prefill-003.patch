@@ -1,0 +1,19 @@
+--- a/model_executor/layers/fused_moe/experts/triton_moe.py
++++ b/model_executor/layers/fused_moe/experts/triton_moe.py
+@@ -81,9 +81,13 @@
+ _ENABLE_GLM_NATIVE_N32_KWORD_LAYOUT = os.getenv(
+     "VLLM_ROCM_MOE_NATIVE_N32_KWORD_LAYOUT", "0"
+ ).lower() not in {"0", "false", "no"}
+-_ENABLE_GLM_RESIDENT_G128 = os.getenv(
+-    "VLLM_GLM53_RESIDENT_G128_ENABLED", "0"
+-).lower() not in {"0", "false", "no"}
++# CIRU local diagnostic: preserve the canonical W4A16 fallback for prefill.
++# Opt-in only; native G128 remains unchanged and the source original is retained.
++_ENABLE_GLM_RESIDENT_G128 = (
++    os.getenv("VLLM_GLM53_RESIDENT_G128_ENABLED", "0").lower()
++    not in {"0", "false", "no"}
++    and os.getenv("CIRU_SAFE_PREFILL", "0") != "1"
++)
+ _GLM_RESIDENT_G128_LIBRARY = os.getenv(
+     "VLLM_GLM53_RESIDENT_G128_LIBRARY", ""
+ )

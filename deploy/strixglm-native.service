@@ -1,0 +1,17 @@
+[Unit]
+Description=StrixHaloClusterGLM native gateway and coding agent
+After=network-online.target strixglm-pair.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/funboy/StrixHaloClusterGLM
+ExecStart=/home/funboy/StrixHaloClusterGLM/bin/strixglm serve --config /home/funboy/StrixHaloClusterGLM/config.native.json
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=1850
+Restart=no
+UMask=0077
+MemoryMax=3G
+
+[Install]
+WantedBy=default.target

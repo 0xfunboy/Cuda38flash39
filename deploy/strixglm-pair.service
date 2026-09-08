@@ -1,0 +1,18 @@
+[Unit]
+Description=StrixHaloClusterGLM native paired OpenAI coordinator
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/funboy/StrixHaloClusterGLM
+ExecStart=/home/funboy/StrixHaloClusterGLM/bin/strixglm cluster --config /home/funboy/StrixHaloClusterGLM/config.native.json serve-pair
+KillMode=control-group
+KillSignal=SIGTERM
+TimeoutStopSec=1850
+Restart=no
+UMask=0077
+NoNewPrivileges=true
+MemoryMax=2G
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,74 @@
+--- a/model_executor/layers/quantization/glm53_hybrid.py
++++ b/model_executor/layers/quantization/glm53_hybrid.py
+@@ -61,6 +61,7 @@
+ _F1_INPUT_SIZE = 4096
+ _F1_OUTPUT_SIZE = 12576
+ _F1_MAX_WMMA_M = 8
++_F1_CANONICAL_M1_PAD_M = 6
+ _F1_M1_WORKSPACE_BYTES = 5120
+ _F1_WMMA_WORKSPACE_BYTES_PER_ROW = 9216
+ _KDA_OPROJ_S4_LAYERS = frozenset(
+@@ -633,6 +634,18 @@
+                 raise ValueError(
+                     f"VLLM_GLM53_HYBRID_MAX_M must be in [1,8], got {max_m}"
+                 )
++            if _CIRU_CANONICAL_MOE and envs.VLLM_GLM53_HYBRID_F1_ENABLED:
++                if max_m < _F1_CANONICAL_M1_PAD_M:
++                    raise ValueError("Canonical F1 M1-to-6 WMMA requires MAX_M >= 6")
++                _set_buffer(
++                    layer,
++                    "f1_canonical_input_buffer",
++                    torch.empty(
++                        (_F1_CANONICAL_M1_PAD_M, _F1_INPUT_SIZE),
++                        dtype=torch.bfloat16,
++                        device=layer.weight.device,
++                    ),
++                )
+             workspace_bytes = (
+                 _F1_M1_WORKSPACE_BYTES
+                 if max_m == 1
+@@ -769,6 +782,18 @@
+         max_m = envs.VLLM_GLM53_HYBRID_MAX_M
+         if not 1 <= max_m <= _F1_MAX_WMMA_M:
+             raise ValueError(f"VLLM_GLM53_HYBRID_MAX_M must be in [1,8], got {max_m}")
++        if _CIRU_CANONICAL_MOE and envs.VLLM_GLM53_HYBRID_F1_ENABLED:
++            if max_m < _F1_CANONICAL_M1_PAD_M:
++                raise ValueError("Canonical F1 M1-to-6 WMMA requires MAX_M >= 6")
++            _set_buffer(
++                layer,
++                "f1_canonical_input_buffer",
++                torch.empty(
++                    (_F1_CANONICAL_M1_PAD_M, _F1_INPUT_SIZE),
++                    dtype=torch.bfloat16,
++                    device=device,
++                ),
++            )
+         workspace_bytes = (
+             _F1_M1_WORKSPACE_BYTES
+             if max_m == 1
+@@ -810,6 +835,16 @@
+                 raise RuntimeError(
+                     f"GLM53 hybrid F1 packet was not loaded for {self.prefix!r}"
+                 )
++            live_m = x.shape[0]
++            if _CIRU_CANONICAL_MOE and live_m == 1:
++                if self.max_m < _F1_CANONICAL_M1_PAD_M:
++                    raise RuntimeError("Canonical F1 M1-to-6 WMMA requires MAX_M >= 6")
++                # Match verify M6's WMMA arithmetic, not the M1 dot8 path.
++                padded = layer.f1_canonical_input_buffer
++                padded.zero_()
++                padded[:1].copy_(x)
++                x = padded
++                logger.info_once("CIRU canonical F1 M1-to-6 WMMA enabled.")
+             output = layer.f1_output_buffer[: x.shape[0]]
+             output = torch.ops.glm53_f1_dense_kda.linear_out(
+                 x,
+@@ -819,6 +854,8 @@
+                 output,
+                 layer.f1_workspace,
+             )
++            if x.shape[0] != live_m:
++                output = output[:live_m]
+             if bias is not None:
+                 output.add_(bias)
+             return output

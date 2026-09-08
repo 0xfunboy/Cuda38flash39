@@ -1,0 +1,102 @@
+--- a/model_executor/layers/quantization/glm53_hybrid.py
++++ b/model_executor/layers/quantization/glm53_hybrid.py
+@@ -54,6 +54,7 @@
+     from vllm.model_executor.layers.quantization.base_config import QuantizeMethodBase
+ 
+ logger = init_logger(__name__)
++_CIRU_CANONICAL_MOE = os.getenv("CIRU_CANONICAL_MOE", "0") == "1"
+ 
+ _F1_PREFIX_SUFFIX = ".self_attn.in_proj_qkvbfg_a"
+ _F1_SCHEMA = "glm53_hybrid_f1_dense_v1"
+@@ -547,8 +548,13 @@
+             topk_ids,
+             topk_weights,
+         )
+-        if x.shape[0] == 1:
++        if x.shape[0] == 1 and not _CIRU_CANONICAL_MOE:
+             return torch.ops.glm53_dot8_r3.moe_r3(*arguments)
++        if _CIRU_CANONICAL_MOE:
++            logger.info_once(
++                "CIRU_CANONICAL_MOE: canonical W4A16 MoE fallback for all M; "
++                "native M1 R3 bypassed."
++            )
+         return self.fallback.apply(
+             layer,
+             x,
+--- a/model_executor/layers/fused_moe/experts/triton_moe.py
++++ b/model_executor/layers/fused_moe/experts/triton_moe.py
+@@ -67,6 +67,7 @@
+ 
+ 
+ logger = init_logger(__name__)
++_CIRU_CANONICAL_MOE = os.getenv("CIRU_CANONICAL_MOE", "0") == "1"
+ 
+ _ENABLE_GLM_M1_DIRECT_ROUTE = os.getenv(
+     "VLLM_ROCM_MOE_M1_DIRECT_ROUTE", "0"
+@@ -87,28 +88,35 @@
+     os.getenv("VLLM_GLM53_RESIDENT_G128_ENABLED", "0").lower()
+     not in {"0", "false", "no"}
+     and os.getenv("CIRU_SAFE_PREFILL", "0") != "1"
++    and not _CIRU_CANONICAL_MOE
+ )
+ _GLM_RESIDENT_G128_LIBRARY = os.getenv(
+     "VLLM_GLM53_RESIDENT_G128_LIBRARY", ""
+ )
+ _GLM_RESIDENT_G128_LIBRARY_LOADED = False
+-_ENABLE_GLM_M4_RESIDUAL_DOT8 = os.getenv(
+-    "VLLM_GLM53_M4_RESIDUAL_DOT8_ENABLED", "0"
+-).lower() not in {"0", "false", "no"}
++_ENABLE_GLM_M4_RESIDUAL_DOT8 = (
++    os.getenv("VLLM_GLM53_M4_RESIDUAL_DOT8_ENABLED", "0").lower()
++    not in {"0", "false", "no"}
++    and not _CIRU_CANONICAL_MOE
++)
+ _GLM_M4_RESIDUAL_DOT8_LIBRARY = os.getenv(
+     "VLLM_GLM53_M4_RESIDUAL_DOT8_LIBRARY", ""
+ )
+ _GLM_M4_RESIDUAL_DOT8_LIBRARY_LOADED = False
+-_ENABLE_GLM_M8_RESIDUAL_DOT8 = os.getenv(
+-    "VLLM_GLM53_M8_RESIDUAL_DOT8_ENABLED", "0"
+-).lower() not in {"0", "false", "no"}
++_ENABLE_GLM_M8_RESIDUAL_DOT8 = (
++    os.getenv("VLLM_GLM53_M8_RESIDUAL_DOT8_ENABLED", "0").lower()
++    not in {"0", "false", "no"}
++    and not _CIRU_CANONICAL_MOE
++)
+ _GLM_M8_RESIDUAL_DOT8_LIBRARY = os.getenv(
+     "VLLM_GLM53_M8_RESIDUAL_DOT8_LIBRARY", ""
+ )
+ _GLM_M8_RESIDUAL_DOT8_LIBRARY_LOADED = False
+-_ENABLE_GLM_EXL3_K3_DUAL20 = os.getenv(
+-    "VLLM_GLM53_EXL3_K3_DUAL20_ENABLED", "0"
+-).lower() not in {"0", "false", "no"}
++_ENABLE_GLM_EXL3_K3_DUAL20 = (
++    os.getenv("VLLM_GLM53_EXL3_K3_DUAL20_ENABLED", "0").lower()
++    not in {"0", "false", "no"}
++    and not _CIRU_CANONICAL_MOE
++)
+ _GLM_EXL3_K3_DUAL20_LIBRARY = os.getenv(
+     "VLLM_GLM53_EXL3_K3_DUAL20_LIBRARY", ""
+ )
+--- a/model_executor/layers/fused_moe/router/grouped_topk_router.py
++++ b/model_executor/layers/fused_moe/router/grouped_topk_router.py
+@@ -1,6 +1,7 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ from functools import partial
++import os
+ 
+ import torch
+ 
+@@ -131,7 +132,10 @@
+         )  # [n, n_group]
+ 
+     # For batch invariance, use sorted=True to ensure deterministic expert selection
+-    use_sorted = envs.VLLM_BATCH_INVARIANT
++    # CIRU opt-in correctness profile: ROCm unsorted topk permutes identical
++    # expert sets between calls, changing routing normalization/reduction.
++    # Sort BEFORE normalization, without enabling unrelated global kernels.
++    use_sorted = envs.VLLM_BATCH_INVARIANT or os.getenv("CIRU_CANONICAL_MOE", "0") == "1"
+     group_idx = torch.topk(group_scores, k=topk_group, dim=-1, sorted=use_sorted)[
+         1
+     ]  # [n, top_k_group]

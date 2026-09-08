@@ -1,0 +1,5 @@
+/.tools/
+/bin/
+/state/
+/config.local.json
+*.test

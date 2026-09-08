@@ -1,0 +1,11 @@
+{
+  "task": "Fix parser escaping",
+  "repo": "/fixture/repository",
+  "allowed_paths": ["src/parser.c"],
+  "files": ["src/parser.c"],
+  "test_command": ["make", "test"],
+  "build_command": ["make"],
+  "test_files": {"verify.c": "/fixture/independent/verify.c"},
+  "profile": "fast",
+  "apply": true
+}
