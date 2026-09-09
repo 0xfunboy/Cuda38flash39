@@ -1,6 +1,6 @@
 import {
   SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, completionDelta, completionState, decodeRate,
-  apiSettings, displayPreferences, errorMessage, finite, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
+  apiSettings, displayPreferences, errorMessage, finite, generationPanelState, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
   IT_LABELS, markdownBlocks, markdownInline, observedRate, pathList, percent, safeSourceURL, seconds,
 } from './ui-core.mjs';
 
@@ -48,12 +48,16 @@ function applyPreferences(value) {
   $('ui-text-size').value = String(state.preferences.text_size);
   $('ui-density').value = state.preferences.density;
   $('show-thinking').checked = state.preferences.expand_thinking;
+  $('ui-show-advanced').checked = state.preferences.show_advanced;
+  $('tab-coding').hidden = !state.preferences.show_advanced;
+  if (state.activeTab === 'coding' && !state.preferences.show_advanced) selectTab('chat');
+  renderGenerationVisibility();
   document.querySelectorAll('.reasoning-details').forEach(node => { node.open = state.preferences.expand_thinking; });
   setSidebar(state.preferences.sidebar_collapsed);
 }
 
 function savePreferences() {
-  applyPreferences({ language: $('ui-language').value, text_size: $('ui-text-size').value, density: $('ui-density').value, expand_thinking: $('show-thinking').checked, sidebar_collapsed: $('ui-sidebar-collapsed').checked });
+  applyPreferences({ language: $('ui-language').value, text_size: $('ui-text-size').value, density: $('ui-density').value, expand_thinking: $('show-thinking').checked, sidebar_collapsed: $('ui-sidebar-collapsed').checked, show_advanced: $('ui-show-advanced').checked });
   try { localStorage.setItem('haloclu.preferences', JSON.stringify(state.preferences)); localStorage.removeItem('strixglm.language'); } catch { /* Preference persistence is optional; secrets are never included. */ }
 }
 
@@ -115,7 +119,17 @@ function setBadge(node, status) {
   node.className = `badge ${classifyStatus(status)}`;
 }
 
+function renderGenerationVisibility() {
+  const view = generationPanelState(state.activeTab, state.preferences.show_advanced);
+  $('generation-settings').hidden = !view.visible;
+  $('generation-chat-controls').hidden = !view.fullControls;
+  $('reasoning-request-label').hidden = view.workspace;
+  $('reasoning-workspace-label').hidden = !view.workspace;
+  $('generation-workspace-note').hidden = !view.workspace;
+}
+
 function selectTab(name, focus = false) {
+  if (!$(`tab-${name}`) || $(`tab-${name}`).hidden) name = 'chat';
   state.activeTab = name;
   for (const tab of document.querySelectorAll('[data-tab]')) {
     const active = tab.dataset.tab === name;
@@ -127,6 +141,7 @@ function selectTab(name, focus = false) {
   }
   const label = $(`tab-${name}`)?.querySelector('.nav-label')?.textContent || name;
   $('view-label').textContent = label;
+  renderGenerationVisibility();
   if (state.authenticated && name === 'models') refreshCatalog();
   if (state.authenticated && name === 'benchmarks') refreshBenchmarks();
   if (state.authenticated && name === 'workspace') refreshWorkspaces();
@@ -974,7 +989,7 @@ async function startOperation(action) {
   finally { state.operationSubmitting = false; renderOperations(); }
 }
 
-for (const id of ['ui-language', 'ui-text-size', 'ui-density', 'show-thinking', 'ui-sidebar-collapsed']) $(id).addEventListener('change', savePreferences);
+for (const id of ['ui-language', 'ui-text-size', 'ui-density', 'show-thinking', 'ui-sidebar-collapsed', 'ui-show-advanced']) $(id).addEventListener('change', savePreferences);
 $('refresh-settings').addEventListener('click', refreshSettings);
 $('api-settings-form').addEventListener('submit', saveAPISettings);
 $('rotate-api-token').addEventListener('click', rotateAPIToken);
@@ -1042,11 +1057,13 @@ $('workspace-shell-form').addEventListener('submit', async event => {
   finally { state.workspaceBusy = false; renderWorkspace(); }
 });
 
-document.querySelectorAll('[data-tab]').forEach((tab, index, tabs) => {
+document.querySelectorAll('[data-tab]').forEach(tab => {
   tab.addEventListener('click', () => selectTab(tab.dataset.tab));
   tab.addEventListener('keydown', event => {
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
+    const tabs = [...document.querySelectorAll('[data-tab]')].filter(node => !node.hidden);
+    const index = tabs.indexOf(tab);
     const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
       : (index + (['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1) + tabs.length) % tabs.length;
     selectTab(tabs[next].dataset.tab, true);

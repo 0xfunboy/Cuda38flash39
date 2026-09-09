@@ -67,8 +67,16 @@ Advanced / legacy preserves the previously tested isolated coding workflow:
 `sandbox_policy: isolated`, `apply: false`, build/test/repair attempts, task
 resume, cancel/drain, and explicit apply confirmation. Imported task JSON
 cannot weaken isolation or auto-apply. This fallback is not represented as Pi.
+Its navigation entry is hidden by default. Options can reveal it with the
+non-secret `show_advanced` preference; this does not change API authorization.
 
 ## Settings and measured statistics
+
+Generation is contextual: Chat and the opt-in legacy view expose their request
+controls. Coding/Pi exposes only new-session reasoning; existing sessions retain
+the captured setting. Chat context, output and thinking-budget controls are not
+forwarded to Pi. Models, Benchmark, Cluster and Options hide Generation without
+resetting its values. Keyboard navigation skips the hidden legacy tab.
 
 Options holds shared interface preferences, gateway authentication and explicit
 API admission controls. Token rotation requires confirmation and invalidates

@@ -267,9 +267,9 @@ test('Catalog links reject executable protocols and credential-bearing URLs', ()
   for (const url of ['javascript:alert(1)', 'data:text/html,x', 'file:///etc/passwd', 'https://token@example.com', '/local/path']) assert.equal(safeSourceURL(url), null);
 });
 
-test('Go embeds only the four production frontend assets, not tests or documentation', async () => {
+test('Go explicitly embeds production frontend and brand assets, not tests or documentation', async () => {
   const source = await readFile(new URL('../assets.go', import.meta.url), 'utf8');
   const match = source.match(/^\/\/go:embed (.+)$/m);
   assert.ok(match, 'Missing explicit production asset embed declaration');
-  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'index.html', 'styles.css', 'ui-core.mjs']);
+  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'index.html', 'styles.css', 'ui-core.mjs']);
 });

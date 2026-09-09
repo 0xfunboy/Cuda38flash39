@@ -79,7 +79,7 @@ try {
     catch (error) { if (index === 99) throw error; await delay(100); }
   }
   session = (await command('/session', { capabilities: { alwaysMatch: { browserName: 'firefox', 'moz:firefoxOptions': { args: ['-headless'] } } } })).sessionId;
-  await command(`/session/${session}/window/rect`, { width: 1440, height: 1050 });
+  await command(`/session/${session}/window/rect`, { width: 1440, height: 1280 });
   await command(`/session/${session}/url`, { url: apiURL.href });
   await until('!document.getElementById("panel-options").hidden');
   // Refuse browser-originated writes independently of the sequence below.
@@ -88,6 +88,10 @@ try {
   assert.equal(await execute('return document.getElementById("panel-options").hidden'), true, 'Never screenshot the token input.');
   assert.equal(await execute('return document.getElementById("model-pill").textContent'), observations['/v1/status'].model);
   observations.checks.push('real browser auth, live model identity, hidden token field');
+  assert.equal(await execute('return document.getElementById("tab-coding").hidden'), true);
+  assert.equal(await execute('return document.querySelectorAll("[data-tab]:not([hidden])").length'), 6);
+  await until('[...document.querySelectorAll(".brand img")].every(img=>img.complete&&img.naturalWidth>0)');
+  assert.equal(await execute('return document.getElementById("generation-settings").hidden'), false);
   const options = observations['/v1/options'];
   assert.equal(await execute('return document.getElementById("reasoning-mode").value'), options.default_reasoning);
   assert.equal(await execute('return Number(document.getElementById("context-select").value)'), options.default_context_tokens);
@@ -97,8 +101,16 @@ try {
   assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '—', 'No fabricated TPS before a real request.');
   observations.checks.push('explicit reasoning/context/output/thinking controls match live server options; no fabricated idle TPS');
   await writeFile(resolve(output, 'chat-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await execute("document.getElementById('tab-workspace').click();");
+  await until('document.getElementById("workspace-root").disabled === false && document.getElementById("workspace-capability").textContent.includes("Pi")');
+  assert.equal(await execute('return document.getElementById("generation-settings").hidden'), false);
+  assert.equal(await execute('return document.getElementById("generation-chat-controls").hidden'), true);
+  assert.equal(await execute('return document.getElementById("generation-workspace-note").hidden'), false);
+  await writeFile(resolve(output, 'coding-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  observations.checks.push('six normal tabs, supplied logos, Pi new-session reasoning only; no workspace created or model call');
   await execute("document.getElementById('tab-options').click();");
   await until('!document.getElementById("api-settings-fields").disabled');
+  assert.equal(await execute('return document.getElementById("generation-settings").hidden'), true);
   assert.equal(await execute('return document.title'), 'HaloClu');
   assert.equal(await execute('return document.getElementById("ui-language").closest("[role=tabpanel]").id'), 'panel-options');
   assert.equal(await execute('return document.getElementById("settings-listen").textContent'), observations['/v1/settings'].listen);
@@ -131,21 +143,23 @@ try {
   await writeFile(resolve(output, 'models-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   await execute("document.getElementById('tab-benchmarks').click();");
   await until('document.querySelectorAll(".operation-row").length > 0');
+  await writeFile(resolve(output, 'benchmarks-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   observations.checks.push('live catalog and operation availability rendered without starting jobs');
   await command(`/session/${session}/window/rect`, { width: 390, height: 844 });
   await execute("if(!document.body.classList.contains('sidebar-collapsed'))document.getElementById('sidebar-toggle').click();");
-  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'options', 'cluster']) {
+  for (const tab of ['chat', 'workspace', 'models', 'benchmarks', 'options', 'cluster']) {
     await execute(`document.getElementById('tab-${tab}').click();`);
     assert.equal(await execute('return document.documentElement.scrollWidth <= window.innerWidth'), true, `${tab} mobile overflow`);
+    assert.equal(await execute('return document.getElementById("generation-settings").hidden'), !['chat', 'workspace'].includes(tab), `${tab} contextual Generation`);
   }
   await delay(220);
-  observations.checks.push('mobile seven-section navigation with collapsed sidebar and no horizontal overflow');
+  observations.checks.push('mobile six-section navigation, contextual Generation, collapsed sidebar and no horizontal overflow');
   await writeFile(resolve(output, 'cluster-live-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   const requests = await execute('return window.__readonlyRequests');
   assert.ok(requests.every(row => ['GET', 'HEAD'].includes(row.method)));
   assert.equal(await execute('return sessionStorage.length'), 0);
   assert.equal(await execute('return Object.keys(localStorage).every(key=>key==="haloclu.preferences")'), true);
-  assert.equal(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences")||"{}")).every(key=>["language","text_size","density","expand_thinking","sidebar_collapsed"].includes(key))'), true);
+  assert.equal(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences")||"{}")).every(key=>["language","text_size","density","expand_thinking","sidebar_collapsed","show_advanced"].includes(key))'), true);
   observations.browser_requests = requests;
   observations.checks.push('browser GET-only and zero persisted secrets');
   observations.result = 'PASS';

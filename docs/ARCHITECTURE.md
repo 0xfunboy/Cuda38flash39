@@ -10,7 +10,7 @@ figures or qualification transferable to it.
 |---|---|
 | `cmd/strixglm/main.go` | Minimal executable entry point |
 | `internal/app/` | HTTP gateway, admission, paired ownership, workspace integration and their Go tests |
-| `web/assets.go` | Embeds the four production HTML/CSS/JavaScript assets, not browser tests |
+| `web/assets.go` | Embeds production HTML/CSS/JavaScript and selected HaloClu artwork, not browser tests |
 | `web/` | HaloClu interface and dependency-free browser logic/tests |
 | `runtime/assets.go` | Embeds the model catalog, not the inference engine or model weights |
 | `runtime/` | Pinned engine recipe, preserved patches and Pi adapters |

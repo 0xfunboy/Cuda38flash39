@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="dark">
   <meta name="referrer" content="no-referrer">
   <title>HaloClu</title>
+  <link rel="icon" type="image/png" sizes="800x800" href="./assets/haloclu-icon.png">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -13,20 +14,22 @@
 <a class="skip-link" href="#main">Skip to conversation</a>
 <div class="app-shell">
   <aside class="sidebar" id="sidebar" aria-label="Navigation and settings">
-    <div class="sidebar-heading"><a href="./" class="brand">HaloClu</a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
+    <div class="sidebar-heading"><a href="./" class="brand" aria-label="HaloClu home"><img class="brand-wordmark" src="./assets/haloclu-horizontal.png" alt="HaloClu" width="2508" height="627"><img class="brand-icon" src="./assets/haloclu-icon.png" alt="" width="800" height="800"></a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
     <nav class="nav-tabs" role="tablist" aria-label="Sections">
       <button class="nav-item active" id="tab-chat" role="tab" aria-selected="true" aria-controls="panel-chat" data-tab="chat" aria-label="Chat" title="Chat"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Chat</span></button>
       <button class="nav-item" id="tab-workspace" role="tab" aria-selected="false" aria-controls="panel-workspace" data-tab="workspace" tabindex="-1" aria-label="Coding workspace" title="Coding workspace"><span class="nav-icon" aria-hidden="true">{}</span><span class="nav-label">Coding</span></button>
       <button class="nav-item" id="tab-models" role="tab" aria-selected="false" aria-controls="panel-models" data-tab="models" tabindex="-1" aria-label="Models" title="Models"><span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">Models</span></button>
       <button class="nav-item" id="tab-benchmarks" role="tab" aria-selected="false" aria-controls="panel-benchmarks" data-tab="benchmarks" tabindex="-1" aria-label="Benchmark" title="Benchmark"><span class="nav-icon" aria-hidden="true">≡</span><span class="nav-label">Benchmark</span></button>
       <button class="nav-item" id="tab-cluster" role="tab" aria-selected="false" aria-controls="panel-cluster" data-tab="cluster" tabindex="-1" aria-label="Cluster" title="Cluster"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Cluster</span></button>
-      <button class="nav-item" id="tab-coding" role="tab" aria-selected="false" aria-controls="panel-coding" data-tab="coding" tabindex="-1" aria-label="Advanced legacy coding" title="Advanced legacy coding"><span class="nav-icon" aria-hidden="true">⋯</span><span class="nav-label">Advanced / legacy</span></button>
+      <button class="nav-item" id="tab-coding" role="tab" aria-selected="false" aria-controls="panel-coding" data-tab="coding" tabindex="-1" aria-label="Advanced legacy coding" title="Advanced legacy coding" hidden><span class="nav-icon" aria-hidden="true">⋯</span><span class="nav-label">Advanced / legacy</span></button>
       <button class="nav-item" id="tab-options" role="tab" aria-selected="false" aria-controls="panel-options" data-tab="options" tabindex="-1" aria-label="Options" title="Options"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Options</span></button>
     </nav>
-    <section class="sidebar-settings" aria-label="Request settings">
+    <section class="sidebar-settings" id="generation-settings" aria-label="Request settings">
       <h2>Generation</h2>
-      <label for="reasoning-mode">Reasoning</label><select id="reasoning-mode" disabled><option value="low">low</option><option value="high">high</option><option value="max">max</option></select>
+      <label for="reasoning-mode"><span id="reasoning-request-label">Reasoning</span><span id="reasoning-workspace-label" hidden>Reasoning for new sessions</span></label><select id="reasoning-mode" disabled><option value="low">low</option><option value="high">high</option><option value="max">max</option></select>
       <p class="control-hint">Low does not disable thinking.</p>
+      <p class="control-hint" id="generation-workspace-note" hidden>Applied when you create a Pi session. Existing sessions keep their captured reasoning. Chat context, output and thinking-budget controls are not passed to Pi.</p>
+      <div id="generation-chat-controls">
       <label for="thinking-budget">Thinking budget</label><select id="thinking-budget" disabled><option value="">Natural · no added cap</option><option value="0">0 · force reasoning closure</option><option value="128">128 token</option><option value="512">512 token</option><option value="2048">2048 token</option></select>
       <p class="control-hint">A cap changes generation; equivalent quality is not guaranteed.</p>
       <label for="context-select">Context window</label><select id="context-select" disabled><option value="8192">8K · 8192 token</option></select>
@@ -34,6 +37,7 @@
       <label for="chat-cap">Response limit (includes thinking)</label><select id="chat-cap" disabled><option value="">Auto · default server</option><option value="4096">4K</option><option value="8192">8K</option><option value="16384">16K</option><option value="32768">32K</option></select>
       <p class="control-hint" id="generation-limits">Waiting for server settings.</p>
       <p class="control-hint" id="profile-note">Settings take effect when you submit a request.</p>
+      </div>
     </section>
     <section class="sidebar-conversations" aria-label="Local conversations">
       <div class="sidebar-section-title"><h2>Conversations</h2><button class="icon-button" id="clear-chat" aria-label="New conversation" title="New conversation">+</button></div>
@@ -54,6 +58,8 @@
           <label for="ui-density">Layout density</label><select id="ui-density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select>
           <label class="checkbox-label"><input id="show-thinking" type="checkbox"> Expand thinking while responding</label>
           <label class="checkbox-label"><input id="ui-sidebar-collapsed" type="checkbox"> Collapse sidebar</label>
+          <label class="checkbox-label"><input id="ui-show-advanced" type="checkbox"> Show Advanced / legacy in navigation</label>
+          <p class="small muted">Optional snapshot/build/test fallback. Hiding the page does not disable its API or discard existing tasks.</p>
           <p class="small muted">Thinking display only. Reasoning effort and token budgets remain under Generation.</p>
         </section>
         <section class="surface options-section connection-panel" id="connection-panel" aria-label="API authentication"><h2>Connection and secrets</h2><form id="connection-form">

@@ -41,7 +41,7 @@ it does not make an incorrect change correct.
 
 ## Limits that matter during work
 
-- The output budget includes reasoning as well as the final answer. A cap hit
+- Chat's output budget includes reasoning as well as the final answer. A cap hit
   means **INCOMPLETE**, not PASS. Increasing the cap can help delivery but cannot
   prove correctness, and the backend also has a request deadline.
 - The context selector is a capacity setting, not a quality certificate.
@@ -52,6 +52,10 @@ it does not make an incorrect change correct.
   trusted project dependencies separately; large builds may exceed the sandbox.
 - Tool turns are buffered until the paired result agrees. Ordinary chat streams;
   the tool UI must not imply that a buffered result had live token delivery.
+- Pi uses the reasoning selected when its session is created. Chat's context,
+  response-limit and thinking-budget controls are not passed into Pi and are
+  hidden on Coding. Runtime limits still apply; moving a sidebar selector does
+  not reconfigure an existing Pi process or promise an unlimited response.
 - Remote SSH commands have the connected account's privileges, not the local
   sandbox's restrictions. Real-host login and remote coding are not yet
   qualified on the user's selected host. Use a restricted account, not an
@@ -70,7 +74,13 @@ Exact isolation, permissions and lifecycle behavior are documented in
 Open **Options** in the sidebar to select the interface language and display
 preferences, connect with the gateway token, or manage new API admission.
 These settings are shared across pages; reasoning, context and output budgets
-remain generation controls, not interface preferences.
+remain generation controls, not interface preferences. Generation is hidden
+on Models, Benchmark, Cluster and Options. Only the relevant reasoning control
+appears for Pi; the complete Chat controls remain on Chat.
+
+Advanced / legacy is hidden by default. Its Options checkbox can reveal the
+older snapshot/build/test/confirmed-Apply workflow when needed. Hiding that menu
+entry does not disable its API or cancel existing work.
 
 Only non-secret display preferences are stored in the browser. The connection
 token and SSH passwords stay in tab memory. Explicit token rotation invalidates

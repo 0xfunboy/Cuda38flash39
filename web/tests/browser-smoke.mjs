@@ -121,8 +121,8 @@ const server = createServer(async (request, response) => {
       });
     }
     const name = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
-    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs'].includes(name)) return json({ error: 'Not found' }, 404);
-    response.writeHead(200, { 'Content-Type': name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript' });
+    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
+    response.writeHead(200, { 'Content-Type': name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript' });
     response.end(await readFile(join(web, name)));
   } catch (error) { response.writeHead(500); response.end(error.message); }
 });
@@ -165,6 +165,26 @@ try {
   await until('!document.getElementById("panel-options").hidden');
   await execute(`document.getElementById('api-token').value=${JSON.stringify(apiToken)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
+  assert.equal(await execute('return document.getElementById("tab-coding").hidden'), true);
+  assert.equal(await execute('return document.querySelectorAll("[data-tab]:not([hidden])").length'), 6);
+  await until('[...document.querySelectorAll(".brand img")].every(img=>img.complete&&img.naturalWidth>0)');
+  await execute("document.getElementById('tab-cluster').focus();document.getElementById('tab-cluster').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));");
+  assert.equal(await execute('return document.activeElement.id'), 'tab-options', 'Keyboard must skip hidden legacy tab.');
+  for (const tab of ['chat', 'workspace', 'models', 'benchmarks', 'cluster', 'options']) {
+    await execute(`document.getElementById('tab-${tab}').click();`);
+    assert.equal(await execute('return document.getElementById("generation-settings").hidden'), !['chat', 'workspace'].includes(tab), `${tab}: Generation scope`);
+    if (tab === 'workspace') {
+      assert.equal(await execute('return document.getElementById("generation-chat-controls").hidden'), true);
+      assert.equal(await execute('return document.getElementById("generation-workspace-note").hidden'), false);
+    }
+  }
+  await execute("document.getElementById('ui-show-advanced').checked=true;document.getElementById('ui-show-advanced').dispatchEvent(new Event('change'));document.getElementById('tab-coding').click();");
+  assert.equal(await execute('return document.getElementById("panel-coding").hidden'), false);
+  assert.equal(await execute('return document.getElementById("generation-settings").hidden'), false);
+  await execute("document.getElementById('ui-show-advanced').checked=false;document.getElementById('ui-show-advanced').dispatchEvent(new Event('change'));");
+  assert.equal(await execute('return document.getElementById("panel-chat").hidden'), false, 'Hiding selected legacy falls back to Chat.');
+  assert.equal(await execute('return document.getElementById("tab-coding").getClientRects().length'), 0);
+  tests++;
   assert.equal(await execute('return document.documentElement.lang'), 'en');
   assert.equal(await execute('return document.getElementById("code-timeout").max'), '600');
   tests++;
@@ -212,7 +232,9 @@ try {
   assert.equal(calls.chat[1].max_tokens, 4096);
   assert.equal(calls.chat[1].context_tokens, 8192);
   tests++;
-  await execute("document.getElementById('tab-coding').click();");
+  await execute("document.getElementById('tab-options').click();document.getElementById('ui-show-advanced').checked=true;document.getElementById('ui-show-advanced').dispatchEvent(new Event('change'));document.getElementById('tab-coding').click();");
+  assert.equal(await execute('return document.getElementById("context-select").value'), '8192', 'Tab switches preserve settings.');
+  assert.equal(await execute('return document.getElementById("chat-cap").value'), '4096');
   const upload = await command(`/session/${session}/element`, { using: 'css selector', value: '#code-spec' });
   await command(`/session/${session}/element/${upload['element-6066-11e4-a52e-4f735466cecf']}/value`, { text: importPath });
   await until('document.getElementById("import-summary").textContent.startsWith("Imported ")');
@@ -377,7 +399,7 @@ try {
   assert.equal(await execute('return document.getElementById("api-token").value'), '');
   assert.equal(await execute('return localStorage.length + sessionStorage.length'), 1);
   assert.equal(await execute('return localStorage.key(0)'), 'haloclu.preferences');
-  assert.deepEqual(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences"))).sort()'), ['density', 'expand_thinking', 'language', 'sidebar_collapsed', 'text_size']);
+  assert.deepEqual(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences"))).sort()'), ['density', 'expand_thinking', 'language', 'show_advanced', 'sidebar_collapsed', 'text_size']);
   tests++;
   await command(`/session/${session}/refresh`, {});
   await until('!document.getElementById("panel-options").hidden');
@@ -386,6 +408,8 @@ try {
   assert.equal(await execute('return document.getElementById("ui-text-size").value'), '18');
   assert.equal(await execute('return document.body.dataset.density'), 'compact');
   assert.equal(await execute('return document.getElementById("show-thinking").checked'), true);
+  assert.equal(await execute('return document.getElementById("ui-show-advanced").checked'), true);
+  assert.equal(await execute('return document.getElementById("generation-settings").hidden'), true, 'Options never shows Generation after reload.');
   tests++;
   const summary = { result: 'PASS', browser: 'installed Firefox via WebDriver', checks: tests, backend: 'deterministic fixture, not live GLM', real_model_calls: 0, fixture_calls: { chat: calls.chat.length, coding: calls.coding.length, apply: calls.apply, cancel: calls.cancel, operation: calls.operation.length, settings: calls.settings.length, rotations: calls.rotations }, output };
   await writeFile(join(output, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');

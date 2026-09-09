@@ -119,7 +119,7 @@ try {
   report.model_requests = 1;
   await screenshot('chat-real-complete.png');
 
-  await execute("document.getElementById('tab-coding').click();");
+  await execute("document.getElementById('tab-options').click();document.getElementById('ui-show-advanced').checked=true;document.getElementById('ui-show-advanced').dispatchEvent(new Event('change'));document.getElementById('tab-coding').click();");
   const upload = await command(`/session/${session}/element`, { using: 'css selector', value: '#code-spec' });
   const elementID = upload['element-6066-11e4-a52e-4f735466cecf'];
   await command(`/session/${session}/element/${elementID}/value`, { text: specPath });

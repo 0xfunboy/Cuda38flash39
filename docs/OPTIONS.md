@@ -1,9 +1,10 @@
 # HaloClu Options
 
 The **Options** sidebar page holds controls shared by Chat, Coding, Models,
-Benchmarks and Cluster. It is separate from per-generation reasoning, thinking
-budget, context and output settings. Changing the display does not change
-model computation.
+Benchmark and Cluster. It is separate from generation settings. Generation is
+hidden on the four non-generation pages; Chat exposes its request settings,
+and Coding exposes only the reasoning used when creating a Pi session.
+Changing the display does not change model computation.
 
 ![Options on the actual reference deployment, with the credential field empty](assets/options.png)
 
@@ -11,11 +12,18 @@ model computation.
 
 English is the default; Italian is optional. Interface controls include
 conversation text size (14/16/18), comfortable or compact density, automatic
-thinking expansion and sidebar collapse. Only this non-secret preference
+thinking expansion, sidebar collapse and optional legacy navigation. Only this non-secret preference
 whitelist is saved as `haloclu.preferences` in browser storage. An existing
 `strixglm.language` preference is migrated; credentials are not migrated or
 persisted. These are not model settings and do not carry a quality or
 performance claim.
+
+**Advanced / legacy is hidden by default.** Enable the interface option to
+reveal the older isolated-snapshot coding workflow. This preference controls
+navigation only: it does not disable legacy API admission, cancel tasks, delete
+results or remove the code and regression tests. Use the separate legacy API
+switch below if the intent is to pause new legacy work. The normal **Coding**
+page remains the upstream Pi integration.
 
 Enter the local gateway token to connect. The token remains in the current
 tab's memory, not browser persistent storage. Reloading requires reconnecting.

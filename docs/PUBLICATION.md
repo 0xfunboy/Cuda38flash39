@@ -29,6 +29,11 @@ from the actual deployment: empty conversation and empty credential input,
 no visible secrets or simulated performance. Mutable API switches and rotated
 tokens remain under ignored `state/`, not in tracked configuration or images.
 
+PRODUCT-006 uses the owner's three supplied PNGs byte-for-byte and adds six
+fresh actual browser captures (Chat, Coding, Models, Benchmark, Cluster,
+Options). The credential field is cleared before capturing Options; no model
+responses, workspace activity or measured rates are fabricated for the guide.
+
 Historical task identifiers and sample ownership/invocation identifiers are
 test or deployment evidence, not login credentials. The configured home paths,
 SSH alias and private-network addresses intentionally describe the reference

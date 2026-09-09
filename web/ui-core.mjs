@@ -9,7 +9,15 @@ export function displayPreferences(value = {}) {
     density: source.density === 'compact' ? 'compact' : 'comfortable',
     expand_thinking: source.expand_thinking === true,
     sidebar_collapsed: source.sidebar_collapsed === true,
+    show_advanced: source.show_advanced === true,
   };
+}
+
+// Visibility only: switching sections must not rewrite a user's generation values.
+export function generationPanelState(tab, showAdvanced = false) {
+  const workspace = tab === 'workspace';
+  const fullControls = tab === 'chat' || (tab === 'coding' && showAdvanced === true);
+  return { visible: workspace || fullControls, workspace, fullControls };
 }
 
 export function apiSettings(value) {
@@ -21,6 +29,11 @@ export function apiSettings(value) {
 export const IT_LABELS = {
   "Options": "Opzioni",
   "Generation": "Generazione",
+  "HaloClu home": "Home HaloClu",
+  "Reasoning for new sessions": "Ragionamento per nuove sessioni",
+  "Applied when you create a Pi session. Existing sessions keep their captured reasoning. Chat context, output and thinking-budget controls are not passed to Pi.": "Applicato quando crei una sessione Pi. Le sessioni esistenti mantengono il ragionamento acquisito alla creazione. Contesto, limite risposta e budget thinking della chat non sono passati a Pi.",
+  "Show Advanced / legacy in navigation": "Mostra Advanced / legacy nella navigazione",
+  "Optional snapshot/build/test fallback. Hiding the page does not disable its API or discard existing tasks.": "Flusso opzionale snapshot/build/test. Nascondere la pagina non disabilita la sua API né elimina le attività esistenti.",
   "Refresh server settings": "Aggiorna impostazioni server",
   "Interface": "Interfaccia",
   "Saved in this browser. These preferences do not change model generation.": "Salvate in questo browser. Queste preferenze non modificano la generazione del modello.",

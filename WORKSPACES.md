@@ -26,6 +26,12 @@ mapped. Compaction and automatic retries are disabled to avoid hidden extra
 model requests or replay after an uncertain paired result. Provider compatibility
 is a separate gateway qualification gate; the UI cannot enable it itself.
 
+The reasoning value is captured when creating a workspace session. The Chat
+context-window, response-limit and thinking-budget selectors do not configure
+Pi and are not shown on Coding. Changing the sidebar does not update an
+existing Pi process. Pi/tool requests still obey gateway/runtime admission and
+request deadlines; this distinction is not a promise of unlimited output.
+
 ## Local session
 
 1. Select a project directory within a configured `workspace_roots` entry.

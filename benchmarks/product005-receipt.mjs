@@ -1,5 +1,5 @@
 // Read-only product-deployment receipt. No model calls or lifecycle operations.
-// Run from the repository root: node benchmarks/product005-receipt.mjs before|after
+// Run from the repository root: node benchmarks/product005-receipt.mjs before|after [report-directory]
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
 const root = resolve('.');
-const report = '/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-005';
+const report = resolve(process.argv[3] || '/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-005');
 const stage = process.argv[2];
 assert.ok(['before', 'after'].includes(stage), 'Expected before or after');
 const sha = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
