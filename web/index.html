@@ -6,7 +6,26 @@
   <meta name="color-scheme" content="dark">
   <meta name="referrer" content="no-referrer">
   <title>HaloClu</title>
-  <link rel="icon" type="image/png" sizes="800x800" href="./assets/haloclu-icon.png">
+  <meta name="application-name" content="HaloClu">
+  <meta name="description" content="Local AI chat and Pi coding workspaces on paired AMD Strix Halo. Manage model downloads, inspect benchmarks and monitor your cluster from one lightweight interface.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HaloClu">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="HaloClu — Local AI on paired Strix Halo">
+  <meta property="og:description" content="Chat, Pi coding workspaces, resumable model downloads and cluster diagnostics in one lightweight local interface.">
+  <meta property="og:image" content="./assets/haloclu-social.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1729">
+  <meta property="og:image:height" content="910">
+  <meta property="og:image:alt" content="HaloClu: linked off-white pillars with an orange bridge on charcoal, with Local AI. Paired Strix Halo. and Chat, Pi coding, Models.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HaloClu — Local AI on paired Strix Halo">
+  <meta name="twitter:description" content="Chat, Pi coding workspaces, resumable model downloads and cluster diagnostics in one lightweight local interface.">
+  <meta name="twitter:image" content="./assets/haloclu-social.png">
+  <meta name="twitter:image:alt" content="HaloClu — Local AI. Paired Strix Halo.">
+  <!-- HALOCLU_PUBLIC_METADATA -->
+  <link rel="icon" type="image/png" sizes="800x800" href="./assets/haloclu-icon.png?v=10">
+  <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64 128x128 256x256" href="./favicon.ico?v=10">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -14,7 +33,7 @@
 <a class="skip-link" href="#main">Skip to conversation</a>
 <div class="app-shell">
   <aside class="sidebar" id="sidebar" aria-label="Navigation and settings">
-    <div class="sidebar-heading"><a href="./" class="brand" aria-label="HaloClu home"><img class="brand-wordmark" src="./assets/haloclu-horizontal.png" alt="HaloClu" width="2508" height="627"><img class="brand-icon" src="./assets/haloclu-icon.png" alt="" width="800" height="800"></a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
+    <div class="sidebar-heading"><a href="./" class="brand" aria-label="HaloClu home"><img class="brand-wordmark" src="./assets/haloclu-horizontal.png?v=10" alt="HaloClu" width="2508" height="627"><img class="brand-icon" src="./assets/haloclu-icon.png?v=10" alt="" width="800" height="800"></a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
     <nav class="nav-tabs" role="tablist" aria-label="Sections">
       <button class="nav-item active" id="tab-chat" role="tab" aria-selected="true" aria-controls="panel-chat" data-tab="chat" aria-label="Chat" title="Chat"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Chat</span></button>
       <button class="nav-item" id="tab-workspace" role="tab" aria-selected="false" aria-controls="panel-workspace" data-tab="workspace" tabindex="-1" aria-label="Coding workspace" title="Coding workspace"><span class="nav-icon" aria-hidden="true">{}</span><span class="nav-label">Coding</span></button>
@@ -63,7 +82,7 @@
           <p class="small muted">Thinking display only. Reasoning effort and token budgets remain under Generation.</p>
         </section>
         <section class="surface options-section connection-panel" id="connection-panel" aria-label="API authentication"><h2>Connection and secrets</h2><form id="connection-form">
-          <div><label for="api-token">Local API token</label><p class="small muted">Kept only in this tab's memory.</p></div><input id="api-token" type="password" autocomplete="off" spellcheck="false" placeholder="Local token" aria-describedby="connection-result">
+          <div><label for="api-token">Local API token</label><p class="small muted">Enter once. This browser stays signed in for 180 days using an HttpOnly session cookie, not the API token.</p></div><input id="api-token" type="password" autocomplete="off" spellcheck="false" placeholder="Local token · needed only for first sign-in" aria-describedby="connection-result">
           <div class="button-row"><button class="button primary" type="submit">Connect</button><button class="button quiet" type="button" id="forget-token">Forget</button><button class="button quiet" type="button" id="copy-api-token">Copy token</button></div>
         </form><p id="connection-result" class="small" role="status">No external services.</p>
           <div class="secret-action"><button class="button danger" id="rotate-api-token" type="button" disabled>Rotate API token…</button><p class="small muted">Creates a new server token. Other clients must reconnect with it. Does not change SSH keys or passwords.</p></div>
@@ -140,7 +159,10 @@
     </section>
 
     <section id="panel-models" class="panel" role="tabpanel" aria-labelledby="tab-models" hidden>
-      <div class="section-heading"><h1>Models</h1><button class="button quiet" id="refresh-models">Refresh catalog</button></div><p class="small muted section-note">Local availability, runtime, distribution and limits come from the server catalog. Models never load automatically.</p><div id="models-list" class="catalog-list"><p class="muted">Open the catalog to inspect local availability.</p></div>
+      <div class="section-heading"><h1>Models</h1><button class="button quiet" id="refresh-models">Refresh Models</button></div>
+      <nav class="models-section-links" aria-label="Model sections"><a class="button quiet" href="#model-downloads">Find &amp; download</a><a class="button quiet" href="#models-catalog">Local &amp; tested</a></nav>
+      <p class="small muted section-note">Find downloads and inspect local models in one place. Downloading does not load a model or qualify its runtime.</p>
+      <section id="models-catalog" aria-labelledby="models-catalog-title"><h2 id="models-catalog-title">Local &amp; tested</h2><p class="small muted">Availability, architecture, distribution and test evidence come from this server's catalog. New downloads are not automatically added as qualified models.</p><div id="models-list" class="catalog-list"><p class="muted">Sign in to inspect local models and test evidence.</p></div></section>
     </section>
     <section id="panel-benchmarks" class="panel" role="tabpanel" aria-labelledby="tab-benchmarks" hidden>
       <div class="section-heading"><h1>Benchmarks and operations</h1><button class="button quiet" id="refresh-benchmarks">Refresh</button></div><p class="small muted section-note">Every run or download requires confirmation. Historical results are not measurements from this session.</p>

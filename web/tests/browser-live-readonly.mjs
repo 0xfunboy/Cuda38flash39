@@ -1,4 +1,4 @@
-// A read-only browser integration check against the real product gateway.
+// A read-only product check; browser-session login/logout are the only writes.
 // Reads a local token file into process/browser memory. Never submits a model
 // request, coding task, cancellation, apply operation or lifecycle command.
 // Usage: node web/tests/browser-live-readonly.mjs URL TOKEN_FILE ARTIFACT_DIR
@@ -19,7 +19,7 @@ assert.ok(token.length > 0, 'Local token is empty.');
 const output = resolve(outputArg);
 await mkdir(output, { recursive: true });
 const redact = text => String(text).split(token).join('[REDACTED]');
-const observations = { time_utc: new Date().toISOString(), api: apiURL.origin, readonly: true, model_requests: 0, checks: [] };
+const observations = { time_utc: new Date().toISOString(), api: apiURL.origin, readonly: true, auth_session_writes: true, model_requests: 0, screenshot_privacy: 'Conversation titles are hidden in the capture browser only.', checks: [] };
 for (const endpoint of ['/health', '/v1/status', '/v1/models', '/v1/options', '/v1/settings', '/v1/catalog', '/v1/operations/options', '/v1/operations/jobs', '/ui-core.mjs']) {
   const response = await fetch(new URL(endpoint, apiURL), {
     headers: { Authorization: `Bearer ${token}` }, redirect: 'error', signal: AbortSignal.timeout(10000),
@@ -83,7 +83,7 @@ try {
   await command(`/session/${session}/url`, { url: apiURL.href });
   await until('!document.getElementById("panel-options").hidden');
   // Refuse browser-originated writes independently of the sequence below.
-  await execute(`window.__readonlyRequests=[]; const nativeFetch=window.fetch.bind(window);window.fetch=(input,init={})=>{const method=(init.method||input.method||'GET').toUpperCase();const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;window.__readonlyRequests.push({method,path});if(method!=='GET'&&method!=='HEAD')return Promise.reject(new Error('Readonly audit refuses write'));return nativeFetch(input,init);};document.getElementById('api-token').value=${JSON.stringify(token)};document.getElementById('connection-form').requestSubmit();`);
+  await execute(`window.__readonlyRequests=[]; const nativeFetch=window.fetch.bind(window);window.fetch=(input,init={})=>{const method=(init.method||input.method||'GET').toUpperCase();const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;window.__readonlyRequests.push({method,path});if(!['GET','HEAD'].includes(method)&&!(path==='/v1/auth/session'&&['POST','DELETE'].includes(method)))return Promise.reject(new Error('Readonly audit refuses product write'));return nativeFetch(input,init);};document.getElementById('conversation-list').style.visibility='hidden';document.getElementById('api-token').value=${JSON.stringify(token)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
   assert.equal(await execute('return document.getElementById("panel-options").hidden'), true, 'Never screenshot the token input.');
   assert.equal(await execute('return document.getElementById("model-pill").textContent'), observations['/v1/status'].model);
@@ -116,8 +116,8 @@ try {
   assert.equal(await execute('return document.getElementById("settings-listen").textContent'), observations['/v1/settings'].listen);
   assert.equal(await execute('return document.getElementById("settings-backend").textContent'), observations['/v1/settings'].backend);
   for (const [key, value] of Object.entries(observations['/v1/settings'].api)) assert.equal(await execute(`return document.getElementById('api-${key.replaceAll('_', '-')}').checked`), value);
-  // Hide no evidence or settings: only clear the secret input before capturing
-  // this panel. The authenticated session stays in memory; no server mutation.
+  // Clear the secret input before capturing this panel. Browser-session auth
+  // uses an HttpOnly cookie; no API setting or production token is changed.
   await execute("document.getElementById('api-token').value='';");
   assert.equal(await execute('return document.getElementById("api-token").value'), '');
   await writeFile(resolve(output, 'options-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
@@ -141,7 +141,7 @@ try {
   await until('document.querySelectorAll(".catalog-card").length > 0');
   assert.equal(await execute('return document.querySelectorAll(".catalog-card").length'), observations['/v1/catalog'].models.length);
   await writeFile(resolve(output, 'models-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
-  await until('document.getElementById("model-downloads") !== null');
+  await until('document.getElementById("model-downloads") !== null && !document.getElementById("download-query").disabled && !document.getElementById("download-storage").textContent.includes("Sign in")');
   await execute("document.getElementById('model-downloads').scrollIntoView({block:'start'});");
   await delay(150);
   const downloadElement = await command(`/session/${session}/element`, { using: 'css selector', value: '#model-downloads' });
@@ -163,12 +163,12 @@ try {
   observations.checks.push('mobile six-section navigation, contextual Generation, collapsed sidebar and no horizontal overflow');
   await writeFile(resolve(output, 'cluster-live-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   const requests = await execute('return window.__readonlyRequests');
-  assert.ok(requests.every(row => ['GET', 'HEAD'].includes(row.method)));
+  assert.ok(requests.every(row => ['GET', 'HEAD'].includes(row.method) || (row.path === '/v1/auth/session' && ['POST','DELETE'].includes(row.method))));
   assert.equal(await execute('return sessionStorage.length'), 0);
   assert.equal(await execute('return Object.keys(localStorage).every(key=>key==="haloclu.preferences")'), true);
   assert.equal(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences")||"{}")).every(key=>["language","text_size","density","expand_thinking","sidebar_collapsed","show_advanced"].includes(key))'), true);
   observations.browser_requests = requests;
-  observations.checks.push('browser GET-only and zero persisted secrets');
+  observations.checks.push('read-only product requests, session login/logout only; no bearer in Web Storage');
   observations.result = 'PASS';
   console.log(JSON.stringify({ result: 'PASS', checks: observations.checks.length, real_model_requests: 0, api: apiURL.origin, output }, null, 2));
 } catch (error) {
@@ -176,6 +176,7 @@ try {
   observations.error = redact(error.stack);
   throw error;
 } finally {
+  if (session) await command(`/session/${session}/execute/async`, { script: `const done=arguments[arguments.length-1];fetch('/v1/auth/session',{method:'DELETE',headers:{'X-HaloClu-Session':'1','Content-Type':'application/json'},credentials:'same-origin',referrerPolicy:'same-origin',body:'{}'}).then(r=>done(r.status)).catch(()=>done(0));`, args: [] }).catch(() => {});
   if (session) await fetch(`${driverURL}/session/${session}`, { method: 'DELETE', signal: AbortSignal.timeout(10000) }).catch(() => {});
   driver.kill('SIGTERM');
   await writeFile(resolve(output, 'live-readonly.json'), redact(JSON.stringify(observations, null, 2)));

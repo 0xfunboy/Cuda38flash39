@@ -6,16 +6,32 @@ repository and its GLM reference deployment. The actual served model identity
 is separate from the product name.
 
 `web/assets.go` embeds only `index.html`, `styles.css`, `app.js`, and
-`ui-core.mjs`, `downloads.mjs` and the supplied PNG branding assets. The gateway lives in `internal/app`, with its entry point under
+`ui-core.mjs`, `downloads.mjs`, `favicon.ico` and the declared PNG branding assets,
+including the social card. The gateway lives in `internal/app`, with its entry point under
 `cmd/strixglm`. Rebuild using `make build` after changing embedded assets;
 serve `.mjs` with a JavaScript MIME type.
+
+Models has stable Download and Local & tested sections: shared refresh, explicit
+authenticated/locked states and cleared private details on sign-out. Rendering
+the catalog never replaces or pushes the downloader below that long inventory.
+The normal page metadata includes description, Open Graph and X card fields;
+optional trusted `HALOCLU_PUBLIC_URL` resolves the social image and canonical
+URL on the server. See [branding](../docs/BRANDING.md) for deployment limits.
 
 English is the default; Italian is selectable under Options. A non-secret
 whitelist of language, text size, density, thinking expansion and sidebar
 preferences is stored as `haloclu.preferences`; the old `strixglm.language`
-setting is migrated. API tokens and SSH passwords remain in tab memory;
-conversations are persisted on the server. Reloading requires authentication again. All API requests stay
+setting is migrated. SSH passwords remain transient; the entered API token is
+exchanged for a separate 180-day HttpOnly browser-session cookie. Reloading and
+reopening tabs retain authentication until expiry, Forget, cookie clearing or API
+token rotation. Conversation records remain server-side. All API requests stay
 on the gateway's origin.
+
+Authenticated fetch uses `credentials: same-origin` and `X-HaloClu-Session: 1`.
+The raw API token is never saved in web storage. POST/DELETE `/v1/auth/session`
+creates/revokes the session; GET reports only authentication/expiry metadata.
+Token rotation requires re-entry of the API key. Stale responses are guarded by
+an authentication generation, including sessions where JavaScript holds no token.
 
 ## Chat, Markdown and attachments
 

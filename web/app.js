@@ -7,16 +7,16 @@ import { initDownloads } from './downloads.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
-  token: '', model: '', reasoning: 'low', options: null, contextLimit: null,
+  token: '', authGeneration: 0, authBusy: false, model: '', reasoning: 'low', options: null, contextLimit: null,
   chat: [], chatController: null, chatSubmitting: false, historySequence: 0, listSequence: 0, task: null, taskID: '', taskTimer: null,
-  taskGeneration: 0, healthBusy: false, authenticated: false, healthTimer: null,
-  importedOptions: {}, conversations: [], conversationID: '', conversation: null, conversationTimer: null, catalog: null, actions: [], jobs: [], jobTimer: null, operationSubmitting: false,
+  taskGeneration: 0, healthBusy: false, healthDone: null, authenticated: false, healthTimer: null,
+  importedOptions: {}, conversations: [], conversationID: '', conversation: null, conversationTimer: null, catalog: null, catalogSequence: 0, actions: [], jobs: [], jobTimer: null, operationSubmitting: false,
   language: 'en', records: [], attachments: [], uploading: 0, workspaceOptions: null, workspaceSessions: [], workspace: null, workspaceTimer: null, workspaceSequence: 0, workspaceEvents: [], workspaceBusy: false,
   preferences: displayPreferences(), activeTab: 'chat', settings: null, settingsBusy: false,
 };
 
 const staticLabels = [];
-const downloader = initDownloads({ request, notice, bytes, seconds });
+const downloader = initDownloads({ request, notice, bytes, seconds, isAuthenticated: () => state.authenticated });
 function applyLanguage(language) {
   state.language = language === 'it' ? 'it' : 'en';
   document.documentElement.lang = state.language;
@@ -144,7 +144,7 @@ function selectTab(name, focus = false) {
   const label = $(`tab-${name}`)?.querySelector('.nav-label')?.textContent || name;
   $('view-label').textContent = label;
   renderGenerationVisibility();
-  if (state.authenticated && name === 'models') { refreshCatalog(); downloader.refresh(); }
+  if (name === 'models') refreshModels();
   if (state.authenticated && name === 'benchmarks') refreshBenchmarks();
   if (state.authenticated && name === 'workspace') refreshWorkspaces();
   if (state.authenticated && name === 'options') refreshSettings();
@@ -155,7 +155,7 @@ function renderSettings(settings) {
   state.settings = { ...settings, api };
   for (const [key, enabled] of Object.entries(api)) $(`api-${key.replaceAll('_', '-')}`).checked = enabled;
   $('api-settings-fields').disabled = state.settingsBusy || !state.authenticated;
-  $('rotate-api-token').disabled = state.settingsBusy || !state.authenticated || settings.token_rotation_supported !== true;
+  $('rotate-api-token').disabled = state.authBusy || state.settingsBusy || !state.authenticated || settings.token_rotation_supported !== true;
   $('settings-listen').textContent = settings.listen || 'Not reported';
   $('settings-backend').textContent = settings.backend || 'Not reported';
   $('settings-model').textContent = settings.model || state.model || 'Not reported';
@@ -189,22 +189,34 @@ async function saveAPISettings(event) {
   finally { state.settingsBusy = false; if (state.settings) renderSettings(state.settings); }
 }
 
+function setAuthBusy(busy) {
+  state.authBusy = busy;
+  $('connection-form').querySelector('button[type="submit"]').disabled = busy;
+  $('forget-token').disabled = busy;
+  $('rotate-api-token').disabled = busy || state.settingsBusy || !state.authenticated || state.settings?.token_rotation_supported !== true;
+}
+
 async function rotateAPIToken() {
-  if (!state.authenticated || state.settingsBusy || state.settings?.token_rotation_supported !== true) return;
+  if (state.authBusy || !state.authenticated || state.settingsBusy || state.settings?.token_rotation_supported !== true) return;
+  const enteredToken = $('api-token').value.trim().replace(/^Bearer\s+/i, '');
+  if (!enteredToken) { $('connection-result').textContent = 'For token rotation, re-enter the current API token in the password field. The remembered browser session never reveals that token.'; $('api-token').focus(); return; }
   const question = state.language === 'it' ? 'Sostituire il token API del server? Il vecchio token smetterà di funzionare. Questa scheda userà il nuovo token; gli altri client devono riconnettersi.' : 'Replace the server API token? The old token will stop working. This tab will use the new token; other clients must reconnect.';
   if (!window.confirm(question)) return;
+  setAuthBusy(true);
   state.settingsBusy = true; $('rotate-api-token').disabled = true; $('api-settings-fields').disabled = true;
   try {
+    state.authGeneration++; state.token = enteredToken;
     const result = await request('/v1/settings/token', { method: 'POST', body: { confirm: true } });
     if (typeof result?.token !== 'string' || !result.token) throw new Error('No new token was returned. Check the local server token file before retrying.');
     state.token = result.token; $('api-token').value = result.token;
-    $('connection-result').textContent = state.language === 'it' ? 'Token ruotato. Questa scheda è connessa; copia il nuovo token per gli altri client. Non viene salvato nel browser.' : 'Token rotated. This tab is connected; copy the new token for other clients. It is not saved in the browser.';
+    await request('/v1/auth/session', { method: 'POST', body: {} }); state.token = ''; state.authGeneration++;
+    $('connection-result').textContent = 'Token rotated and this browser remembered again. Copy the new API token from the field for other clients; it is not stored in browser storage. Other remembered sessions are revoked.';
   } catch (error) { $('connection-result').textContent = `${error.message} No automatic retry. If completion is uncertain, read the current token from the server's private state/api-token file.`; }
-  finally { state.settingsBusy = false; if (state.settings) renderSettings(state.settings); }
+  finally { state.token = ''; state.authGeneration++; state.settingsBusy = false; if (state.settings) renderSettings(state.settings); setAuthBusy(false); }
 }
 
 function headers(token = state.token) {
-  const result = { Accept: 'application/json' };
+  const result = { Accept: 'application/json', 'X-HaloClu-Session': '1' };
   if (token) result.Authorization = `Bearer ${token}`;
   return result;
 }
@@ -214,20 +226,22 @@ async function request(path, options = {}) {
   // An old in-flight response must not invalidate a credential installed by
   // reconnect or rotation while this request was awaiting the server.
   const dispatchedToken = state.token;
+  const dispatchedGeneration = state.authGeneration;
   const timeout = setTimeout(() => controller.abort(), options.timeout || 15000);
   try {
     const response = await fetch(path, {
-      method: options.method || 'GET', credentials: 'omit', cache: 'no-store',
-      mode: 'same-origin', redirect: 'error', signal: controller.signal,
+      method: options.method || 'GET', credentials: 'same-origin', cache: 'no-store',
+      mode: 'same-origin', referrerPolicy: 'same-origin', redirect: 'error', signal: controller.signal,
       headers: { ...headers(dispatchedToken), ...(options.body ? { 'Content-Type': 'application/json' } : {}) },
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
     const payload = await response.json().catch(() => null);
-    if (dispatchedToken !== state.token) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
+    if (dispatchedToken !== state.token || dispatchedGeneration !== state.authGeneration) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
     if (!response.ok) {
       if (response.status === 401 || (response.status === 403 && payload?.code !== 'api_disabled')) {
         if (dispatchedToken !== state.token) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
         state.authenticated = false;
+        syncModelsAuthentication();
         $('api-settings-fields').disabled = true;
         $('rotate-api-token').disabled = true;
         $('connection-label').textContent = "Token required";
@@ -334,13 +348,17 @@ function renderHealth(health, status) {
 async function refreshHealth(interactive = false) {
   if (state.healthBusy) return;
   state.healthBusy = true;
+  let finishHealth;
+  state.healthDone = new Promise(resolve => { finishHealth = resolve; });
   $('refresh-health').disabled = true;
   $('refresh-cluster').disabled = true;
   try {
     const health = await request('/health');
     const [status, models, options] = await Promise.all([request('/v1/status'), request('/v1/models'), request('/v1/options')]);
     renderOptions(options);
+    const restoredAuthentication = !state.authenticated;
     state.authenticated = true;
+    syncModelsAuthentication();
     state.model = status?.model || models?.data?.[0]?.id || '';
     renderHealth(health, status);
     const healthState = healthStatus(status?.health, healthStatus(health));
@@ -348,10 +366,12 @@ async function refreshHealth(interactive = false) {
     $('connection-label').textContent = bad ? "Engine needs attention" : "Local API connected";
     $('connection-dot').className = `status-dot ${bad ? 'bad' : 'good'}`;
     $('connection-result').textContent = bad ? "API reachable; check cluster health before generating." : "Authenticated: chat and workspace controls are available.";
+    if (restoredAuthentication && state.activeTab === 'models') refreshModels();
     if (interactive) notice(bad ? 'The API is reachable, but the engine reports an unhealthy state.' : '', bad ? 'bad' : 'neutral');
   } catch (error) {
     if (error.code === 'stale_credential') return;
     state.authenticated = false;
+    syncModelsAuthentication();
     $('connection-dot').className = 'status-dot bad';
     if (!$('connection-label').textContent.includes('Token')) $('connection-label').textContent = "Connection unavailable";
     $('model-pill').textContent = "API unavailable";
@@ -363,6 +383,7 @@ async function refreshHealth(interactive = false) {
     state.healthBusy = false;
     $('refresh-health').disabled = false;
     $('refresh-cluster').disabled = false;
+    finishHealth();
   }
 }
 
@@ -424,8 +445,9 @@ async function sendChat(event) {
   let settings;
   try { settings = selectedSettings(); } catch (error) { notice(error.message, 'bad'); return; }
   const requestToken = state.token;
+  const requestAuthGeneration = state.authGeneration;
   state.chatSubmitting = true; $('send-chat').disabled = true; $('clear-chat').disabled = true;
-  try { await ensureConversation(input); if (!state.authenticated || state.token !== requestToken) throw new Error('Authentication changed; no generation submitted.'); } catch (error) { notice(`History unavailable: ${error.message}`, 'bad'); state.chatSubmitting = false; $('send-chat').disabled = false; $('clear-chat').disabled = false; return; }
+  try { await ensureConversation(input); if (!state.authenticated || state.token !== requestToken || state.authGeneration !== requestAuthGeneration) throw new Error('Authentication changed; no generation submitted.'); } catch (error) { notice(`History unavailable: ${error.message}`, 'bad'); state.chatSubmitting = false; $('send-chat').disabled = false; $('clear-chat').disabled = false; return; }
   const requestConversationID = state.conversationID;
   notice('');
   const requestReasoning = settings.reasoning_effort;
@@ -468,7 +490,7 @@ async function sendChat(event) {
   }
   try {
     const response = await fetch('/v1/chat/completions', {
-      method: 'POST', credentials: 'omit', cache: 'no-store', mode: 'same-origin', redirect: 'error',
+      method: 'POST', credentials: 'same-origin', cache: 'no-store', mode: 'same-origin', referrerPolicy: 'same-origin', redirect: 'error',
       signal: controller.signal,
       headers: { ...headers(), Accept: 'text/event-stream', 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: state.model, conversation_id: requestConversationID, ...settings, messages: [...state.chat, userMessage], stream: true, stream_options: { include_usage: true, continuous_usage_stats: true } }),
@@ -812,7 +834,7 @@ async function uploadAttachments(event) {
     for (const file of files) {
       $('attachment-status').textContent = `Extracting ${file.name}… Uploading does not run inference.`;
       const form = new FormData(); form.append('file', file);
-      const response = await fetch('/v1/attachments', { method: 'POST', body: form, headers: headers(), credentials: 'omit', redirect: 'error', mode: 'same-origin', signal: AbortSignal.timeout(120000) });
+      const response = await fetch('/v1/attachments', { method: 'POST', body: form, headers: headers(), credentials: 'same-origin', redirect: 'error', mode: 'same-origin', referrerPolicy: 'same-origin', signal: AbortSignal.timeout(120000) });
       const attachment = await response.json();
       if (!response.ok) throw new Error(errorMessage(attachment, `HTTP ${response.status}`));
       if (!attachment?.id || typeof attachment.text !== 'string') throw new Error('Invalid attachment extraction response.');
@@ -954,6 +976,23 @@ function evidenceTable(entries) {
   table.append(tbody); wrapper.append(table); return wrapper;
 }
 
+function syncModelsAuthentication() {
+  $('refresh-models').disabled = !state.authenticated;
+  if (state.authenticated) { downloader.syncAuthentication(); return; }
+  state.catalogSequence++; state.catalog = null;
+  $('models-list').replaceChildren(element('p', 'muted', 'Sign in to inspect the local catalog and historical qualifications. Public-source downloads also require HaloClu sign-in.'));
+  $('benchmark-evidence').replaceChildren(element('p', 'muted', 'Sign in to inspect recorded evidence.'));
+  downloader.disconnect();
+}
+
+async function refreshModels() {
+  syncModelsAuthentication();
+  if (!state.authenticated) return;
+  // Public-source metadata and the local qualification catalog are independent:
+  // an unavailable endpoint must not remove the other section from this page.
+  await Promise.all([refreshCatalog(), downloader.refresh()]);
+}
+
 function renderCatalog() {
   const models = state.catalog?.models || [];
   $('models-list').replaceChildren(...models.map(model => {
@@ -1005,11 +1044,14 @@ function renderCatalog() {
 }
 
 async function refreshCatalog() {
+  if (!state.authenticated) { syncModelsAuthentication(); return; }
+  const sequence = ++state.catalogSequence;
   try {
-    state.catalog = await request('/v1/catalog');
-    const options = await request('/v1/operations/options'); state.actions = options?.actions || [];
+    const [catalog, options] = await Promise.all([request('/v1/catalog'), request('/v1/operations/options')]);
+    if (!state.authenticated || sequence !== state.catalogSequence) return;
+    state.catalog = catalog; state.actions = options?.actions || [];
     renderCatalog();
-  } catch (error) { $('models-list').replaceChildren(element('p', 'notice bad', `Catalog unavailable: ${error.message}`)); }
+  } catch (error) { if (state.authenticated && sequence === state.catalogSequence) $('models-list').replaceChildren(element('p', 'notice bad', `Catalog unavailable: ${error.message}. Public-source downloads remain a separate section on this page.`)); }
 }
 
 function renderOperations() {
@@ -1070,8 +1112,9 @@ $('refresh-settings').addEventListener('click', refreshSettings);
 $('api-settings-form').addEventListener('submit', saveAPISettings);
 $('rotate-api-token').addEventListener('click', rotateAPIToken);
 $('copy-api-token').addEventListener('click', async () => {
-  if (!state.token) { $('connection-result').textContent = state.language === 'it' ? 'Connettiti prima di copiare il token attivo.' : 'Connect before copying the active token.'; return; }
-  try { await navigator.clipboard.writeText(state.token); $('connection-result').textContent = state.language === 'it' ? 'Token copiato negli appunti. Trattalo come una password.' : 'Token copied to clipboard. Treat it as a password.'; }
+  const entered = $('api-token').value.trim().replace(/^Bearer\s+/i, '');
+  if (!entered) { $('connection-result').textContent = 'The remembered session does not expose the API token. Read the server token file, or enter it in the password field to copy it.'; return; }
+  try { await navigator.clipboard.writeText(entered); $('connection-result').textContent = state.language === 'it' ? 'Token copiato negli appunti. Trattalo come una password.' : 'Entered token copied to clipboard. Treat it as a password.'; }
   catch { $('connection-result').textContent = state.language === 'it' ? 'Appunti non disponibili. Leggi il token dal file privato del server.' : 'Clipboard unavailable. Read the token from the private server file.'; }
 });
 $('chat-attachments').addEventListener('change', uploadAttachments);
@@ -1206,23 +1249,40 @@ document.querySelectorAll('[data-tab]').forEach(tab => {
 document.querySelectorAll('[data-go-coding]').forEach(button => button.addEventListener('click', () => selectTab('workspace', true)));
 $('reasoning-mode').addEventListener('change', () => { state.reasoning = $('reasoning-mode').value; });
 for (const id of ['sidebar-toggle', 'sidebar-collapse']) $(id).addEventListener('click', () => { $('ui-sidebar-collapsed').checked = !document.body.classList.contains('sidebar-collapsed'); savePreferences(); });
-$('refresh-models').addEventListener('click', refreshCatalog);
+$('refresh-models').addEventListener('click', refreshModels);
 $('refresh-benchmarks').addEventListener('click', refreshBenchmarks);
 $('connection-toggle').addEventListener('click', () => showConnection());
 $('open-connection').addEventListener('click', () => showConnection());
 $('connection-form').addEventListener('submit', async event => {
   event.preventDefault();
-  state.token = $('api-token').value.trim();
-  await refreshHealth(true);
-  if (state.authenticated) { await refreshConversations(); showConnection(false); }
+  if (state.authBusy) return;
+  state.authGeneration++;
+  state.token = $('api-token').value.trim().replace(/^Bearer\s+/i, '');
+  if (!state.token) { $('connection-result').textContent = 'Enter the API token once to remember this browser.'; return; }
+  setAuthBusy(true);
+  try {
+    await request('/v1/auth/session', { method: 'POST', body: {} });
+    state.token = ''; $('api-token').value = ''; state.authGeneration++;
+    if (state.healthBusy) await state.healthDone;
+    await refreshHealth(true);
+    if (state.authenticated) { await refreshConversations(); showConnection(false); $('connection-result').textContent = 'Browser remembered for 180 days with an HttpOnly session. Refresh and reopen keep the connection; Forget signs this browser out.'; }
+  } catch (error) { state.token = ''; state.authGeneration++; $('connection-result').textContent = `Sign-in failed: ${error.message}`; }
+  finally { setAuthBusy(false); }
 });
-$('forget-token').addEventListener('click', () => {
+$('forget-token').addEventListener('click', async () => {
+  if (state.authBusy) return;
+  setAuthBusy(true);
+  state.authGeneration++;
+  try { await request('/v1/auth/session', { method: 'DELETE', body: {} }); }
+  catch (error) { $('connection-result').textContent = `Could not confirm session revocation: ${error.message}. Retry Forget, or clear this site's cookies.`; return; }
+  finally { setAuthBusy(false); }
+  state.authGeneration++;
   state.chatController?.abort();
-  downloader.disconnect();
   clearTimeout(state.conversationTimer);
   state.token = '';
   $('api-token').value = '';
   state.authenticated = false;
+  syncModelsAuthentication();
   state.settings = null;
   $('api-settings-fields').disabled = true;
   $('rotate-api-token').disabled = true;
@@ -1235,7 +1295,7 @@ $('forget-token').addEventListener('click', () => {
   renderWorkspace(); renderAttachments();
   $('connection-label').textContent = "Token forgotten";
   $('connection-dot').className = 'status-dot';
-  $('connection-result').textContent = "Token removed from this tab. Existing server tasks are not cancelled.";
+  $('connection-result').textContent = "This browser is signed out and its remembered session is revoked. Existing server tasks are not cancelled.";
 });
 $('refresh-health').addEventListener('click', () => refreshHealth(true));
 $('refresh-cluster').addEventListener('click', () => refreshHealth(true));
@@ -1334,4 +1394,5 @@ state.healthTimer = setInterval(() => {
   if (!document.hidden && state.authenticated && !state.chatController) refreshHealth();
 }, 15000);
 initializeLanguage();
-refreshHealth();
+syncModelsAuthentication();
+refreshHealth().then(() => { if (state.authenticated) return refreshConversations(); });

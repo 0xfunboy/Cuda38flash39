@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -22,11 +21,10 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-
-	webui "strixhaloclusterglm/web"
 )
 
 type App struct {
+	publicURL     string
 	cfg           Config
 	client        *http.Client
 	mu            sync.Mutex
@@ -45,6 +43,10 @@ type App struct {
 }
 
 func newApp(c Config) (*App, error) {
+	publicURL, e := validatePublicURL(os.Getenv("HALOCLU_PUBLIC_URL"))
+	if e != nil {
+		return nil, e
+	}
 	if e := os.MkdirAll(c.StateDir, 0700); e != nil {
 		return nil, e
 	}
@@ -61,6 +63,7 @@ func newApp(c Config) (*App, error) {
 		return nil, errors.New("invalid API token")
 	}
 	a := &App{cfg: c, client: &http.Client{Transport: &http.Transport{MaxIdleConnsPerHost: 4, IdleConnTimeout: 30 * time.Second}}, tasks: map[string]*Task{}, admission: make(chan struct{}, 1), token: strings.TrimSpace(string(b)), journal: Journal{Path: filepath.Join(c.StateDir, "events.jsonl")}}
+	a.publicURL = publicURL
 	a.preferred.Store(c.DefaultProfile)
 	if e := a.loadAPISettings(); e != nil {
 		return nil, e
@@ -79,12 +82,18 @@ func jsonReply(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 func (a *App) authorized(w http.ResponseWriter, r *http.Request) bool {
-	got := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-	if subtle.ConstantTimeCompare([]byte(got), []byte(a.currentToken())) != 1 {
-		jsonReply(w, 401, map[string]string{"error": "local Bearer token required"})
+	if len(r.Header.Values("Authorization")) > 0 {
+		if exactBearer(r, a.currentToken()) {
+			return true
+		}
+		jsonReply(w, 401, map[string]string{"error": "invalid Bearer API token"})
 		return false
 	}
-	return true
+	if _, e := a.authenticateBrowserSession(r); e == nil {
+		return true
+	}
+	jsonReply(w, 401, map[string]string{"error": "local Bearer token or valid same-origin browser session required"})
+	return false
 }
 func decodeBody(w http.ResponseWriter, r *http.Request, v any) error {
 	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
@@ -122,6 +131,7 @@ func (a *App) health(ctx context.Context) map[string]any {
 }
 func (a *App) routes() http.Handler {
 	mux := http.NewServeMux()
+	a.registerBrowserAuthRoutes(mux)
 	a.registerWorkspaceRoutes(mux)
 	reason := ""
 	if !a.cfg.ToolCalls {
@@ -135,7 +145,7 @@ func (a *App) routes() http.Handler {
 	a.registerOperationRoutes(mux)
 	a.registerDownloadRoutes(mux)
 	a.registerConversationRoutes(mux)
-	mux.Handle("/", http.FileServer(http.FS(webui.Assets)))
+	mux.Handle("/", publicWebHandler(a.publicURL))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		h := a.health(r.Context())
 		code := 200

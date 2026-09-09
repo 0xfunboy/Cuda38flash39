@@ -25,18 +25,32 @@ results or remove the code and regression tests. Use the separate legacy API
 switch below if the intent is to pause new legacy work. The normal **Coding**
 page remains the upstream Pi integration.
 
-Enter the local gateway token to connect. The token remains in the current
-tab's memory, not browser persistent storage. Reloading requires reconnecting.
-Forgetting the browser credential signs this tab out; it does not revoke the
-server token or cancel work already admitted. SSH passwords likewise remain
-memory-only and are supplied only when connecting a workspace.
+Enter the local gateway token once to connect. The gateway issues a separate
+random **HttpOnly, SameSite=Strict session cookie**, valid for 180 days; it is not
+the API token and is not readable through JavaScript. F5, new tabs and browser
+restarts retain authentication. Only hashed session IDs are stored server-side
+under private state; gateway restarts preserve them. This does not use
+localStorage or sessionStorage for secrets. Private browsing and clearing site
+cookies can still require another sign-in.
+
+**Forget** revokes this browser session and expires its cookie. It does not rotate
+the server API token, delete history or cancel admitted work. SSH passwords remain
+memory-only. Persistent browser authentication is accepted on loopback HTTP or
+direct HTTPS; non-loopback plain HTTP and untrusted forwarded headers are not
+used to enable it. Use the same address consistently (`127.0.0.1` and `localhost`
+have separate cookies). Cookies are scoped by host/path, not TCP port: do not
+share the host with untrusted web services. Cookie-authenticated requests require
+the same-origin browser header and mutation Origin checks; CLI bearer auth remains
+available and unchanged.
 
 ## Rotate the gateway token
 
-Token rotation is an explicit authenticated action requiring confirmation.
+Token rotation is an explicit action requiring confirmation and re-entry of the
+current API token in the password field; the remembered session cannot reveal it.
 It generates a new gateway credential and stores it in `state/api-token` with
 mode `0600`. The old token stops authorizing new requests. Other tabs and API
-clients must reconnect using the new token; already admitted work is not
+clients must reconnect using the new token. Remembered sessions are invalidated;
+the rotating browser receives a fresh session. Already admitted work is not
 silently cancelled.
 
 This controls only the HaloClu gateway bearer credential. It is not a generic

@@ -5,6 +5,13 @@ acquisition tool, not an inference runtime or an automatic model installer.
 The gateway does not load downloaded models, convert weights, extract archives,
 execute repository code, change drivers or switch either Strix Halo rank.
 
+**Find & download** is always above **Local & tested**, with section links and a
+shared **Refresh Models** action. Both require HaloClu authentication, including
+when browsing anonymous upstream sources. Public source access does not mean an
+unauthenticated browser may use the server's disk or network. Before sign-in,
+controls are locked; sign-out clears displayed inventory, paths and job details.
+The two areas load independently, so a catalog error does not hide the downloader.
+
 ## Workflow
 
 1. Connect with the gateway's local API token.

@@ -15,6 +15,10 @@ await mkdir(output, { recursive: true });
 // Keep the upload fixture beside the source: snap Firefox has a private /tmp.
 const importPath = fileURLToPath(new URL('./fixtures/import-task.json', import.meta.url));
 let apiToken = 'fixture-token-not-a-real-secret';
+const browserSessions = new Set();
+let browserSessionCounter = 0;
+let browserLogouts = 0;
+const modelReads = { catalog: 0, downloads: 0, mutations: 0 };
 const calls = { chat: [], coding: [], apply: 0, cancel: 0, interrupted_status: 0, operation: [], attachments: 0, workspace: [], terminal: 0, shell: [], settings: [], rotations: 0 };
 const conversations = new Map();
 let conversationCounter = 0;
@@ -41,6 +45,8 @@ let workspace = null;
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, 'http://127.0.0.1');
+    if (url.pathname === '/v1/catalog') modelReads.catalog++;
+    if (url.pathname.startsWith('/v1/downloads/')) { modelReads.downloads++; if (!['GET','HEAD'].includes(request.method)) modelReads.mutations++; }
     const body = [];
     for await (const chunk of request) body.push(chunk);
     const multipart = (request.headers['content-type'] || '').startsWith('multipart/form-data');
@@ -50,7 +56,24 @@ const server = createServer(async (request, response) => {
       response.end(JSON.stringify(value));
     }
     if (url.pathname === '/health') return json({ ok: true });
-    if (url.pathname.startsWith('/v1/') && request.headers.authorization !== `Bearer ${apiToken}`) return json({ error: 'Token required' }, 401);
+    const bearerOK = request.headers.authorization === `Bearer ${apiToken}`;
+    const sessionCookie = (request.headers.cookie || '').split(';').map(v => v.trim()).find(v => v.startsWith('haloclu_session='))?.slice('haloclu_session='.length);
+    const cookieOK = browserSessions.has(sessionCookie) && request.headers['x-haloclu-session'] === '1';
+    if (url.pathname === '/v1/auth/session' && request.method === 'POST') {
+      assert.equal(request.headers['x-haloclu-session'], '1'); assert.equal(request.headers.origin, `http://127.0.0.1:${server.address().port}`);
+      if (!bearerOK) return json({ error: 'Bearer token required for browser login' }, 401);
+      const value = (++browserSessionCounter).toString(16).padStart(64, '0'); browserSessions.add(value);
+      response.setHeader('Set-Cookie', `haloclu_session=${value}; Path=/v1; HttpOnly; SameSite=Strict; Max-Age=15552000`);
+      return json({ authenticated: true, auth_method: 'browser_session', expires_at: new Date(Date.now()+15552000000).toISOString(), token_rotation_requires_bearer: true });
+    }
+    if (url.pathname === '/v1/auth/session' && request.method === 'DELETE') {
+      assert.equal(request.headers['x-haloclu-session'], '1'); browserSessions.delete(sessionCookie); browserLogouts++;
+      response.setHeader('Set-Cookie', 'haloclu_session=; Path=/v1; HttpOnly; SameSite=Strict; Max-Age=0');
+      return json({ authenticated: false });
+    }
+    if (url.pathname.startsWith('/v1/') && !(bearerOK || (!request.headers.authorization && cookieOK))) return json({ error: 'Token required' }, 401);
+    if (cookieOK && !bearerOK && !['GET','HEAD'].includes(request.method)) assert.equal(request.headers.origin, `http://127.0.0.1:${server.address().port}`, 'Cookie-authenticated mutations must carry the exact browser origin.');
+    if (url.pathname === '/v1/auth/session') return json({ authenticated: true, auth_method: bearerOK ? 'bearer' : 'browser_session' });
     if (url.pathname === '/v1/status' && deferStatusFailure) {
       deferStatusFailure = false;
       releaseStatusFailure = () => json({ error: 'Expired in-flight fixture credential' }, 401);
@@ -58,7 +81,8 @@ const server = createServer(async (request, response) => {
     }
     if (url.pathname === '/v1/settings/token') {
       assert.equal(request.method, 'POST'); assert.deepEqual(payload, { confirm: true });
-      calls.rotations++; apiToken = 'rotated-fixture-not-a-real-secret'; return json({ token: apiToken });
+      if (!bearerOK) return json({ error: 'Token rotation requires explicit current API token' }, 403);
+      calls.rotations++; browserSessions.clear(); apiToken = 'rotated-fixture-not-a-real-secret'; return json({ token: apiToken });
     }
     if (url.pathname === '/v1/settings') {
       if (request.method === 'PUT') { calls.settings.push(payload); api = payload.api; }
@@ -156,7 +180,7 @@ const server = createServer(async (request, response) => {
     if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'downloads.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
     response.writeHead(200, { 'Content-Type': name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript' });
     response.end(await readFile(join(web, name)));
-  } catch (error) { response.writeHead(500); response.end(error.message); }
+  } catch (error) { console.error(JSON.stringify({ fixture_route: request.url, error: error.message })); response.writeHead(500); response.end(error.message); }
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const portHolder = createServer();
@@ -183,7 +207,8 @@ async function until(script) {
     if (await execute(`return Boolean(${script})`)) return;
     await delay(100);
   }
-  throw new Error(`Browser condition timed out: ${script}`);
+  const state = await execute('return {connection:document.getElementById("connection-label")?.textContent,result:document.getElementById("connection-result")?.textContent,notice:document.getElementById("global-notice")?.textContent}');
+  throw new Error(`Browser condition timed out: ${script}; ${JSON.stringify(state)}`);
 }
 let tests = 0;
 try {
@@ -195,8 +220,20 @@ try {
   await command(`/session/${session}/window/rect`, { width: 1440, height: 1050 });
   await command(`/session/${session}/url`, { url: `http://127.0.0.1:${server.address().port}/` });
   await until('!document.getElementById("panel-options").hidden');
+  await until('!document.getElementById("refresh-health").disabled');
+  await execute("document.getElementById('tab-models').click();");
+  assert.equal(await execute('return document.getElementById("panel-models").hidden'), false);
+  assert.equal(await execute('return document.getElementById("model-downloads").getClientRects().length > 0'), true, 'Signed-out Models still exposes the downloader section.');
+  assert.equal(await execute('return document.getElementById("download-query").disabled'), true);
+  assert.equal(await execute('return /connect|sign in/i.test(document.getElementById("download-storage").textContent)'), true);
+  assert.equal(await execute('return document.querySelectorAll(".catalog-card").length'), 0);
+  assert.deepEqual(modelReads, { catalog: 0, downloads: 0, mutations: 0 }, 'Opening signed-out Models must not probe private catalog/download APIs.');
+  await execute("document.getElementById('open-connection').click();");
+  tests++;
   await execute(`document.getElementById('api-token').value=${JSON.stringify(apiToken)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
+  assert.equal(await execute('return document.getElementById("api-token").value'), '', 'Login exchanges the API token for an HttpOnly browser session.');
+  assert.equal(await execute('return document.cookie.includes("haloclu_session")'), false);
   assert.equal(await execute('return document.getElementById("tab-coding").hidden'), true);
   assert.equal(await execute('return document.querySelectorAll("[data-tab]:not([hidden])").length'), 6);
   await until('[...document.querySelectorAll(".brand img")].every(img=>img.complete&&img.naturalWidth>0)');
@@ -317,10 +354,19 @@ try {
   tests++;
   await execute("document.getElementById('tab-models').click();");
   await until('document.querySelectorAll(".catalog-card").length === 1');
+  await until('document.getElementById("download-storage").textContent.includes("/fixture/downloads") && !document.getElementById("download-query").disabled');
+  assert.equal(await execute('return document.getElementById("model-downloads").getClientRects().length > 0 && document.getElementById("models-list").getClientRects().length > 0'), true, 'Catalog and acquisition coexist; one render must not remove the other.');
+  assert.equal(await execute('return document.getElementById("download-source").options.length >= 3'), true);
+  assert.equal(await execute('const box=document.getElementById("download-query").getBoundingClientRect();return box.top >= 0 && box.bottom <= window.innerHeight'), true, 'Download search must be visible above the desktop fold, not buried under catalog cards.');
+  assert.equal(await execute('return document.getElementById("download-url").getClientRects().length > 0'), true);
+  assert.equal(modelReads.mutations, 0, 'Showing acquisition must not plan, start or resume downloads.');
   assert.equal(await execute('return document.querySelector(".catalog-card").textContent.includes("Presence not checked")'), true);
   assert.equal(await execute('return !!document.querySelector(".catalog-card a[href^=javascript]") || !!window.__xss'), false);
   assert.equal(calls.operation.length, 0, 'Opening catalog must never start operations.');
   await writeFile(join(output, 'models-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  const modelsElement = await command(`/session/${session}/element`, { using: 'css selector', value: '#panel-models' });
+  const modelsElementID = modelsElement['element-6066-11e4-a52e-4f735466cecf'];
+  await writeFile(join(output, 'models-catalog-downloads.png'), Buffer.from(await command(`/session/${session}/element/${modelsElementID}/screenshot`), 'base64'));
   tests++;
   await execute("document.getElementById('tab-benchmarks').click();");
   await until('document.querySelectorAll(".operation-row").length === 2');
@@ -413,7 +459,7 @@ try {
   await until('document.getElementById("settings-result").textContent === "API controls saved."');
   assert.deepEqual(calls.settings, [{ api: { chat: true, workspaces: true, legacy_coding: true, operations: false } }]);
   tests++;
-  await execute("setTimeout(()=>document.getElementById('rotate-api-token').click(),0);");
+  await execute(`document.getElementById('api-token').value=${JSON.stringify(apiToken)};setTimeout(()=>document.getElementById('rotate-api-token').click(),0);`);
   await delay(200); await command(`/session/${session}/alert/dismiss`, {});
   assert.equal(calls.rotations, 0);
   deferStatusFailure = true;
@@ -422,13 +468,13 @@ try {
   assert.equal(typeof releaseStatusFailure, 'function', 'The old-credential health request must be in flight.');
   await execute("setTimeout(()=>document.getElementById('rotate-api-token').click(),0);");
   await delay(200); await command(`/session/${session}/alert/accept`, {});
-  await until('document.getElementById("connection-result").textContent.startsWith("Token rotated.")');
+  await until('document.getElementById("connection-result").textContent.startsWith("Token rotated")');
   assert.equal(calls.rotations, 1);
   assert.equal(await execute('return document.getElementById("api-token").value'), apiToken);
   releaseStatusFailure(); releaseStatusFailure = null;
   await until('!document.getElementById("refresh-health").disabled');
   assert.equal(await execute('return document.getElementById("connection-label").textContent'), 'Local API connected', 'Old in-flight401 must not log out or overwrite new authenticated state.');
-  assert.equal(await execute('return document.getElementById("connection-result").textContent.startsWith("Token rotated.")'), true);
+  assert.equal(await execute('return document.getElementById("connection-result").textContent.startsWith("Token rotated")'), true);
   tests++;
   await execute("document.getElementById('refresh-settings').click();");
   await until('document.getElementById("settings-result").textContent === "Server settings loaded."');
@@ -455,7 +501,32 @@ try {
   }
   await writeFile(join(output, 'options-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   tests++;
+  await command(`/session/${session}/refresh`, {});
+  await until('document.getElementById("connection-label").textContent === "Local API connected"');
+  assert.equal(await execute('return document.getElementById("api-token").value'), '');
+  assert.equal(await execute('return document.cookie.includes("haloclu_session")'), false);
+  assert.equal(await execute('return localStorage.getItem("haloclu.preferences").includes("fixture")'), false);
+  await execute("document.getElementById('tab-models').click();");
+  await until('document.querySelectorAll(".catalog-card").length === 1 && document.getElementById("download-storage").textContent.includes("/fixture/downloads")');
+  assert.equal(await execute('return document.getElementById("model-downloads").getClientRects().length > 0 && !document.getElementById("download-query").disabled'), true, 'Remembered login plus F5 keeps both Models functions available.');
+  assert.equal(modelReads.mutations, 0);
+  tests++;
+  await execute("document.getElementById('tab-chat').click();document.getElementById('reasoning-mode').value='high';document.getElementById('reasoning-mode').dispatchEvent(new Event('change'));document.getElementById('context-select').value='8192';document.getElementById('context-select').dispatchEvent(new Event('change'));");
+  assert.equal(await execute('return document.getElementById("reasoning-mode").disabled'), false);
+  assert.equal(await execute('return document.getElementById("context-select").value'), '8192');
+  assert.equal(calls.chat.length, 2, 'Changing generation options must not run the model.');
+  tests++;
   await execute("document.getElementById('open-connection').click();document.getElementById('forget-token').click();");
+  await until('document.getElementById("connection-label").textContent !== "Local API connected"');
+  assert.ok(browserLogouts > 0); assert.equal(browserSessions.size, 0);
+  const readsBeforeSignedOut = { ...modelReads };
+  await execute("document.getElementById('tab-models').click();document.getElementById('refresh-models').click();");
+  assert.equal(await execute('return document.querySelectorAll(".catalog-card").length'), 0, 'Forget clears previously loaded private catalog data.');
+  assert.equal(await execute('return document.getElementById("download-query").disabled'), true);
+  assert.equal(await execute('return document.getElementById("download-storage").textContent.includes("/fixture/downloads")'), false);
+  assert.deepEqual(modelReads, readsBeforeSignedOut, 'Signed-out refresh must not fetch catalog, destinations or job metadata.');
+  await execute("document.getElementById('open-connection').click();");
+  tests++;
   assert.equal(await execute('return document.getElementById("api-token").value'), '');
   assert.equal(await execute('return localStorage.length + sessionStorage.length'), 1);
   assert.equal(await execute('return localStorage.key(0)'), 'haloclu.preferences');

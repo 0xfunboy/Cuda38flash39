@@ -189,7 +189,12 @@ test('Frontend source has no dynamic HTML/eval, persisted token, CDN or external
   assert.match(script, /textContent/);
   assert.match(script, /window\.confirm/);
   assert.match(script, /apply: false/);
-  assert.match(script, /credentials: 'omit'/);
+  assert.equal([...script.matchAll(/credentials: 'same-origin'/g)].length, 3, 'All three API fetch paths use the remembered session only on this origin');
+  assert.equal([...script.matchAll(/referrerPolicy: 'same-origin'/g)].length, 3, 'Cookie-backed mutations need a same-origin Origin even with the page no-referrer policy');
+  assert.doesNotMatch(script, /credentials: 'include'|document\.cookie/);
+  assert.match(script, /'X-HaloClu-Session': '1'/);
+  assert.match(script, /request\('\/v1\/auth\/session', \{ method: 'POST'/);
+  assert.match(script, /request\('\/v1\/auth\/session', \{ method: 'DELETE'/);
   assert.match(html, /id="code-repairs"[^>]*max="6"/);
   assert.match(html, /id="code-timeout"[^>]*max="600"/);
   assert.match(script, /options\.generation_timeout_seconds/);
@@ -271,5 +276,5 @@ test('Go explicitly embeds production frontend and brand assets, not tests or do
   const source = await readFile(new URL('../assets.go', import.meta.url), 'utf8');
   const match = source.match(/^\/\/go:embed (.+)$/m);
   assert.ok(match, 'Missing explicit production asset embed declaration');
-  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'downloads.mjs', 'index.html', 'styles.css', 'ui-core.mjs']);
+  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'assets/haloclu-social.png', 'downloads.mjs', 'favicon.ico', 'index.html', 'styles.css', 'ui-core.mjs']);
 });

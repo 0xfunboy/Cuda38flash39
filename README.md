@@ -1,324 +1,218 @@
 <p align="center">
-  <img src="docs/assets/haloclu-header.png" alt="HaloClu" width="100%">
+  <img src="docs/assets/haloclu-header.png" alt="HaloClu — Local coding on paired Strix Halo" width="100%">
 </p>
 
 <p align="center">
-  <a href="#chat">Chat</a> ·
-  <a href="#coding--pi">Coding / Pi</a> ·
-  <a href="#models">Models</a> ·
-  <a href="#benchmark">Benchmark</a> ·
-  <a href="#cluster">Cluster</a> ·
-  <a href="#options">Options</a>
+  <strong>Your models. Your code. Your infrastructure.</strong>
 </p>
 
-**HaloClu** is a lightweight browser workspace for local chat, repository work
-with the actual **Pi coding agent**, and inference operations on **two GMKtec
-EVO-X3 / Strix Halo nodes**. The interface is grayscale, English by default,
-with optional Italian. A Go gateway serves the UI and authenticated APIs;
-there is no browser framework, CDN or frontend build step.
+<p align="center">
+  <a href="#get-started">Get started</a> ·
+  <a href="#chat">Chat</a> ·
+  <a href="#coding-with-pi">Coding</a> ·
+  <a href="#models">Models</a> ·
+  <a href="#technology">Technology</a> ·
+  <a href="#documentation">Documentation</a>
+</p>
 
-**StrixHaloClusterGLM** is this repository and its qualified GLM reference
-deployment. HaloClu is the product name, independent of the served model.
-Reusing the interface does not qualify another runtime or model.
+HaloClu brings local AI chat, Pi-powered development and model operations into
+one focused workspace. Built for paired AMD Strix Halo systems, it combines
+distributed inference with a lightweight Go gateway and a clean browser interface.
 
-Usable for **supervised daily coding**: review changes and run independent
-tests. This is not a promise of error-free code, autonomous production work,
-near-SOTA parity or qualified long-context coding.
+Discuss a problem, attach your files, continue in a coding workspace and review
+the changes. Manage model downloads and monitor both machines from the same place.
 
-## Start here
+## At a glance
 
-Latest product changes and test scope: [PRODUCT-007](docs/PRODUCT-007.md).
+- **Local AI chat** — streaming responses, document attachments and live token metrics.
+- **Pi coding workspaces** — repository tools, protected local edits, independent tests and reviewed Apply.
+- **Shared conversations** — persistent Chat/Pi history, explicit handoff and JSON export.
+- **Model management** — Hugging Face and ModelScope search, direct links and resumable downloads.
+- **Cluster visibility** — paired health, memory, GPU activity and benchmark results.
+- **A small footprint** — Go backend, framework-free frontend, grayscale design and responsive layout.
 
-On the existing installation, open **http://127.0.0.1:18093/**. Under
-**Options → Connection and secrets**, enter the local `state/api-token` and
-select **Connect**. Tokens stay in tab memory, not browser storage.
+## Get started
 
-- Choose **Chat** to discuss code, ask questions or inspect attached documents.
-- Choose **Coding** to let Pi read, edit and run commands in a selected project.
-- Choose **Models**, **Benchmark** or **Cluster** to inspect the installation
-  and explicitly run supported operations. Browsing never starts a model test,
-  download or model switch.
+On an existing installation, open **[HaloClu](http://127.0.0.1:18093/)**.
+Go to **Options → Connection and secrets**, enter the token from
+`state/api-token`, and select **Connect**. The browser remembers your session
+for 180 days; **Forget** signs it out.
 
-Generation controls appear only on relevant pages. Chat exposes its request
-settings; Coding exposes the reasoning setting used when creating a Pi session.
-Global display and connection preferences live in **Options**.
-
-The images below are browser captures, not generated UI mockups. Empty
-conversations and idle panels are intentional: no sample answers, credentials
-or invented measurements are inserted for presentation.
-
-## Chat
-
-![HaloClu Chat: conversation, generation settings, attachments and response metrics](docs/assets/chat.png)
-
-Chat is for questions, explanations and proposed code, without giving an agent
-write access to a repository. Responses support Markdown, tables, lists and
-copyable code blocks. Thinking can stay collapsed or expand while responding;
-that display preference does not change model computation.
-
-| Request control | Meaning |
-|---|---|
-| Reasoning: `low`, `high`, `max` | Effort requested from the model; `low` is not thinking off |
-| Thinking budget | Optional generation cap; zero forces reasoning closure, not proven equivalent quality |
-| Context window | Total chat input + output admission budget; does not resize the engine's KV cache |
-| Response limit | Maximum completion tokens, including thinking; Auto uses the server default within available space |
-
-A larger context or response limit is not a quality guarantee. A cap or timeout
-means **INCOMPLETE**, not a successfully concluded answer. Even a naturally
-concluded answer needs factual checking and executable tests where applicable.
-
-**Attach files** to inspect text, Markdown, source code, PDF text layers or DOCX
-text. Archives provide listings; binaries provide bounded hex/strings inspection.
-Scanned pages, visual diagrams and general multimodal understanding are not
-supported by this text workflow. Extraction warnings remain visible: up to eight
-files, 32 MiB per file, with bounded extracted content. An attachment does not
-authorize executing it.
-
-**Metrics retain their meaning.** Observed TPS uses real cumulative completion
-tokens divided by HTTP elapsed time, thinking included. Final decode comes from
-the engine; live TTFT is browser-observed. Reopened records label saved
-gateway-observed TTFT/HTTP explicitly; browser transit is not reconstructed.
-These are different measurements, not
-interchangeable rates. Unavailable metrics remain unavailable. **Stop stream**
-stops browser reception; it is not a promise to cancel an already admitted
-paired generation immediately.
-
-Chat and Pi now share a **local, server-persisted conversation record**. Reopen
-the same conversation across pages; explicitly transfer its transcript when
-starting a linked Pi workspace. This is context handoff, not a KV/session
-checkpoint or automatic replay of old commands. Export a copy when needed;
-explicit deletion removes the local record and owned, cleanly closed Pi records,
-not project files or copies exported elsewhere. Active work must be stopped and
-linked workspaces closed before deletion. Gateway credentials remain memory-only
-in the browser despite the persisted conversation. [Shared history and handoff](docs/CONVERSATIONS.md) ·
-[Daily-use guide](docs/DAILY_USE.md) ·
-[Frontend behavior](web/README.md).
-
-## Coding / Pi
-
-![HaloClu Coding: Pi workspace connection, conversation, file browser and command tools](docs/assets/coding.png)
-
-Coding runs **upstream Pi**, pinned to
-`@earendil-works/pi-coding-agent` 0.85.1, through its RPC interface. It is not a
-second home-built coding agent. Pi can inspect the selected repository, edit
-files and invoke tools; actual agent and tool events are visible in the browser.
-
-1. Choose **Local**, a narrowly scoped project root and the default **Protected**
-   mode. It copies bounded current source files, preserving dirty and ordinary
-   untracked originals. Inspect exclusions; it is not an arbitrary-size clone.
-2. Set reasoning and your trusted build/test commands before **Create session**.
-   Link the intended conversation and explicitly transfer its transcript if
-   needed. Original and working roots remain distinct and visible.
-3. Select **Start Pi**. Startup does not send a model prompt. Wait for the
-   session's ready/capability status.
-4. Send a bounded instruction with expected behavior, files in scope and the
-   project's test commands. Sending it authorizes Pi's available tools within
-   that session.
-5. After natural completion, wait for **independent verification** of the frozen
-   commands against a fresh candidate snapshot. Review the real command results
-   and diff, then explicitly **Apply** the exact verified version. **Abort Pi**
-   and **Close session** control the workspace, never an inference rank.
-
-**Protected is the local default; direct edits require an explicit choice.**
-Protected Pi writes its private source copy. Apply checks original/candidate
-hashes and backs up replaced originals; conflicts fail closed. No configured
-test means **UNVERIFIED**, not a passing task. **TEST_PASS** means the user-chosen
-commands exited successfully, not general correctness. Modified test/build
-definitions are flagged and require separate acknowledgement before Apply.
-Deletion/permission-change Apply is currently blocked. The older Advanced
-workflow remains a separate fallback, not the Pi implementation.
-
-Source copies use the existing limits: 300 files, 256 KiB per file and 32 MiB
-total in the reference setup. Hidden/sensitive, generated/dependency and binary
-content is excluded; symlinks, hardlinks and quota violations fail closed.
-No Git history is copied. Keep ordinary review and independent project tests.
-
-The current Pi integration takes **reasoning at session creation**. Chat's
-context, response-limit and thinking-budget selectors do not configure Pi, so
-they are not shown on this page. Changing the sidebar cannot reconfigure an
-existing Pi process. Pi/tool requests remain subject to gateway/runtime limits;
-this is not unlimited output or long-context qualification.
-
-**Files** lists directories and reads bounded text. **Terminal** offers read-only
-diagnostic presets plus an explicitly confirmed custom command when Pi is idle.
-It shows recorded execution/output; it is **not an interactive PTY** or a full
-browser IDE. Commands do not silently launch a model request.
-
-**Local sessions** use a network-isolated bubblewrap sandbox and an owned
-user-systemd scope: 2 GiB memory, no swap, 128 tasks and 200% CPU. Only the
-selected project and private session/temp state are writable. These limits
-protect the inference installation; large builds may exceed them. General
-package downloads are unavailable inside the sandbox—prepare trusted
-dependencies separately.
-
-**Remote SSH** requires explicit **Direct** mode: protected SSH and fresh
-independent remote verification are blocked, never silently downgraded.
-It uses server-side saved host metadata and an existing agent,
-private-key path or transient connect-time password. Key files and known hosts
-belong to the gateway machine, not the browser's computer. Presets never store
-passwords or key contents. Unknown/changed host keys fail closed. Remote tools
-run with the SSH account's authority, **not** a remote sandbox; real-host remote
-coding still needs qualification on the chosen host. Use a restricted account.
-
-Tool-generating model turns are buffered until the paired results agree; the UI
-does not pretend those events are live token streaming. Ordinary Chat remains
-streamed. At most one owned Pi scope runs at a time; close it before starting
-another. [Protected snapshots, checks and Apply](docs/PROTECTED_WORKSPACES.md) ·
-[Pi setup, isolation and API contract](WORKSPACES.md) ·
-[Safe daily workflow](docs/DAILY_USE.md).
-
-## Models
-
-![HaloClu Models: pinned inventory, availability, architecture and runtime evidence](docs/assets/models.png)
-
-The catalog puts the operational configuration first and records other models'
-formats, runtime compatibility, artifacts, historical results and blockers.
-Local size checks are distinguished from checksum verification; remote files
-are not silently revalidated just by opening the page. **Present on disk** is
-not the same as **loadable**, **qualified** or **active**.
-
-Architecture notes explain why techniques are not interchangeable. For example,
-Qwen Flash-Next's **PLE/ngram embedding table is part of the target model**;
-speculative ngram lookup is a separate token-history mechanism. GLM's DFlash2
-uses target hidden features, not that embedding table or text lookup. A GGUF
-layer-RPC path is not the same distribution as CIRU's safetensors TP2, and serial
-capacity splitting must not be called parallel acceleration.
-
-![HaloClu native downloader: search, selected files, resumable jobs and measured progress](docs/assets/downloads.png)
-
-**Download models** adds native Go acquisition from public Hugging Face and
-ModelScope repositories or an explicit public HTTPS file URL. Search, inspect
-the actual files, create a plan, then confirm Start. Progress, measured transfer
-rate, ETA when available, Pause/Resume and preserved receipts are separate from
-inference. No whole-model selection happens automatically. Source hashes are
-verified when available; a size-only receipt is not called checksum-verified.
-Destinations are managed privately and existing files are never overwritten.
-
-Downloading does not load a model, migrate formats or switch the active pair.
-Gated/private hosting, old aria2 partial-map import and automatic installation
-are not supported. This native downloader does not execute the older Python/
-curl scripts; keep using those scripts for their existing managed jobs.
-[Download sources, resumption and safety](docs/DOWNLOADS.md).
-Unsupported inference actions stay blocked with a reason.
-[Pinned catalog](runtime/model-catalog.json) · [Engine recipe](runtime/README.md).
-
-## Benchmark
-
-![HaloClu Benchmark: explicit operations, progress, results and preserved evidence](docs/assets/benchmarks.png)
-
-Benchmark exposes existing allowlisted operations: API smoke, natural coding
-throughput, the frozen historical 109/256 workload, compact coding checks and
-explicit context diagnostics. Each action shows its scope and requires
-confirmation; progress, failures and raw evidence remain inspectable.
-
-Natural-completion and historical fixed-length speed tests are separate
-categories. The historical speed payload intentionally ignores EOS; that is
-not a completed-answer quality test. Existing throughput figures are labelled
-historical, not presented as fresh measurements. Long-context diagnostics do
-not become qualified just because the UI offers the test. Running these actions
-uses the model and should be deliberate, not a background activity.
-[Harnesses and prerequisites](benchmarks/README.md) ·
-[Qualification and negative results](QUALIFICATION.md).
-
-## Cluster
-
-![HaloClu Cluster: live paired health and reference deployment status](docs/assets/cluster.png)
-
-Cluster displays the available paired health, activity and telemetry from the
-current installation. It distinguishes the configured model and retained
-runtime evidence from what is currently responding. Missing measurements are
-not filled in with estimates or zeroes.
-
-This is an inspection page, not an independent rank-control panel. The preserved
-ownership-aware lifecycle operates on the whole pair; UI navigation cannot
-restart one rank or change weights, kernels or drivers.
-[Whole-pair operations and rollback](runtime/OPERATIONS.md).
-
-## Options
-
-![HaloClu Options: interface preferences, connection, API controls and read-only server settings](docs/assets/options.png)
-
-Options holds settings shared across pages: English/Italian, text size, density,
-thinking display and sidebar behavior. **Advanced / legacy is hidden by
-default**; enable its interface option only when you need the older isolated
-snapshot → build/test → repair → confirmed Apply workflow. Hiding it changes
-navigation, not API authorization or existing task state.
-
-Connection controls let you connect, forget the tab's credential, copy it or
-explicitly rotate the gateway token. Rotation invalidates the old token for
-new requests; other clients must reconnect. It does not change SSH passwords,
-keys or inference-rank ownership. Do not expose tokens in screenshots or issues.
-
-Server API switches pause **new** Chat, Pi workspace, legacy coding or
-benchmark/download actions. They do not cancel admitted work, revoke a running
-agent or act as a firewall. Listen address, backend and model identity are
-informational; changing network configuration requires a controlled server
-change, not a browser toggle. [Exact Options semantics](docs/OPTIONS.md).
-
-## Reference configuration and evidence
-
-| Component | Recorded configuration |
-|---|---|
-| Machines | 2 × GMKtec EVO-X3, Ryzen AI Max+395, Radeon 8060S |
-| Memory | 128 GB UMA per node; 256 GB total, not one shared address space |
-| Target | GLM5.3-Flash-CIRU-STRIX-IU4, hybrid W4 |
-| Distribution | TP2 / PP1, RCCL Socket over USB4 |
-| Drafting | DFlash2, k5, local-draft0 |
-| Browser / API | Loopback port 18093; Bearer authentication |
-
-The retained 109-input/256-output workload measured **24.851 decode TPS** and
-**23.667 HTTP TPS**. These are workload-specific reference measurements, not
-promises for every task or new measurements from these screenshots.
-[Runtime pins](runtime/manifest.json) ·
-[Reference deployment](docs/REFERENCE_DEPLOYMENT.md).
-
-The original isolated coding workflow passed ten compact C++ repository tasks
-(nine first-pass, one repaired). The real Pi integration delivered **one C
-task** whose unedited code passed 213 independent cases: that is one problem,
-not 213 coding tasks. Audited `low` and `max` chat answers also contained real
-bugs. Keep both positive and negative evidence in view.
-[Full qualification scope](QUALIFICATION.md).
-
-## Build and deployment
-
-This source targets the recorded installation. It is **not yet a one-command
-installer for a fresh machine**: the external inference environment, weights,
-tools and host paths must be provisioned explicitly. No model weights are
-included. Adapt the reference paths before deploying elsewhere.
+To build and run the gateway against a configured inference backend:
 
 ```sh
-make build                  # Go 1.27.1; no model download
+make build
 ./bin/strixglm serve --config config.json
 ```
 
-Do not start a second gateway on an occupied port. Pi needs its pinned
-Node/package installation, bubblewrap and working user-systemd scopes.
-[Workspace prerequisites](WORKSPACES.md) ·
-[Deployment recipe](runtime/README.md).
+The reference deployment uses Linux, Go 1.27.1, a provisioned CIRU inference
+environment and model weights. Pi workspaces also use Node.js, bubblewrap and
+user-systemd scopes. Configure the backend and host paths before starting a new
+installation. Follow the [deployment guide](runtime/README.md) and
+[Pi setup](WORKSPACES.md) for the complete environment.
 
-```text
-cmd/strixglm/     Executable entry point
-internal/app/    Gateway, paired controller, Pi integration and Go tests
-web/             Browser assets and dependency-free tests
-runtime/         Engine pins, patches, model catalog and Pi adapters
-benchmarks/      Explicit qualification and regression scripts
-docs/            Product, deployment and operational documentation
+## Chat
+
+![HaloClu Chat with generation controls, attachments and response metrics](docs/assets/chat.png)
+
+A focused space for technical discussion, writing and code. Responses stream
+into readable Markdown with tables, lists and copyable code blocks. Keep
+thinking collapsed for a cleaner conversation or expand it as the model works.
+
+Tune reasoning, context window, thinking budget and response length from the
+sidebar. Track observed TPS, engine decode speed, time to first token and
+elapsed request time as you work.
+
+Attach source code, text, Markdown, PDFs or DOCX files. Archive listings and
+binary inspection extend the same workflow to project artifacts. The current
+GLM deployment uses text extraction, with up to eight files at 32 MiB each.
+
+Conversations are saved on your server. Reopen them later, export JSON or
+continue in **Coding / Pi** with the selected transcript as context. Shared
+history stays accessible from both pages.
+
+[Chat and conversation guide](docs/CONVERSATIONS.md) · [Generation settings](docs/OPTIONS.md)
+
+## Coding with Pi
+
+![HaloClu Coding workspace with Pi, project connections and independent verification](docs/assets/coding.png)
+
+Bring the Pi coding agent into your browser. HaloClu connects upstream Pi to
+your local model and adds project access, verification and review around its
+repository workflow.
+
+1. **Connect a project.** Choose a local workspace or a saved Remote SSH host.
+2. **Set the task.** Select reasoning and the project's build and test commands.
+3. **Work with Pi.** Ask it to inspect code, implement a change or investigate an issue.
+4. **Review and apply.** Inspect the diff and independent test results before applying a protected local change.
+
+Protected local mode gives Pi a separate working copy while preserving your
+original files. Independent verification runs the configured commands against
+the candidate; Apply checks for conflicts and keeps backups of replaced files.
+Direct mode is available when you want edits to reach the selected project immediately.
+
+The file browser, diagnostic presets and command terminal keep project
+inspection close to the conversation. Agent events and tool output provide a
+clear view of work in progress.
+
+Remote SSH uses saved host presets with keys or a connect-time password.
+Remote work currently uses Direct mode; protected copies and independent
+verification are available for local projects.
+
+[Workspace setup](WORKSPACES.md) · [Protected workflow](docs/PROTECTED_WORKSPACES.md)
+
+## Models
+
+![HaloClu Models with download search and local model inventory](docs/assets/models.png)
+
+Discover models and manage local inventory from one page. **Find & download**
+provides source search and direct-link acquisition. **Local & tested** brings
+together available checkpoints, architecture notes, runtime compatibility and
+recorded test results.
+
+Search Hugging Face or ModelScope, inspect the files and select the
+quantization and sidecars you need. Downloads support measured progress,
+Pause/Resume, retained partial files and integrity checks against source hashes
+when available. A shared refresh keeps the page current.
+
+![HaloClu download controls and resumable jobs](docs/assets/downloads.png)
+
+The catalog makes architecture choices visible: weight formats, PLE/ngram
+embeddings, drafting methods and distribution paths are documented alongside
+each model. Downloaded files and runtime-qualified configurations have distinct
+statuses, helping you choose the next model with the right technical context.
+
+[Download guide](docs/DOWNLOADS.md) · [Model catalog](runtime/model-catalog.json)
+
+## Benchmark
+
+![HaloClu Benchmark with available tests and recorded results](docs/assets/benchmarks.png)
+
+Run the installation's supported benchmarks and inspect the results in one place.
+Available operations include API smoke checks, coding throughput, the reference
+speed workload and context diagnostics. Each run has an explicit start,
+progress reporting and retained results.
+
+[Benchmark guide](benchmarks/README.md) · [Qualification results](QUALIFICATION.md)
+
+## Cluster
+
+![HaloClu Cluster showing paired health, memory and GPU telemetry](docs/assets/cluster.png)
+
+See what both machines are doing. Cluster brings together model identity,
+paired health, request activity, context capacity, memory use and GPU telemetry.
+The underlying controller manages the two inference ranks as an owned pair,
+with documented startup, shutdown and rollback procedures.
+
+[Cluster operations](runtime/OPERATIONS.md)
+
+## Options
+
+![HaloClu Options for interface preferences, authentication and API controls](docs/assets/options.png)
+
+Set your language, text size, layout density, sidebar behavior and thinking
+display in one place. English is the default; Italian is available.
+
+Manage remembered browser access, rotate API credentials and control which
+API categories accept new work. Connection details and the active model remain
+visible alongside those settings. Generation controls stay with Chat and Coding;
+global preferences apply across the workspace.
+
+[Options guide](docs/OPTIONS.md)
+
+## Technology
+
+HaloClu's Go gateway serves the browser interface, authenticates API clients,
+stores conversations and coordinates downloads and Pi workspaces. The frontend
+uses native HTML, CSS and JavaScript. Pi connects through its RPC interface;
+the inference runtime remains a separately provisioned service.
+
+This repository, **StrixHaloClusterGLM**, packages HaloClu with its GLM reference
+configuration. HaloClu is the shared product identity across model-specific deployments.
+
+| Reference system | Configuration |
+| --- | --- |
+| Hardware | 2 × GMKtec EVO-X3 · Ryzen AI Max+ 395 · Radeon 8060S |
+| Memory | 128 GB UMA per node · 256 GB installed across the pair |
+| Model | GLM5.3-Flash-CIRU-STRIX-IU4 · hybrid W4 |
+| Distribution | Tensor parallelism TP2 / PP1 · RCCL Socket over USB4 |
+| Speculative decoding | DFlash2 · k5 · local-draft0 |
+| Coding agent | Pi 0.85.1 · RPC integration |
+| Interface | Go gateway · native web frontend · authenticated API |
+
+The recorded 109-input / 256-output reference workload achieved **24.851 decode
+tokens/s** and **23.667 HTTP tokens/s**. Workload and measurement details are in
+the [reference deployment](docs/REFERENCE_DEPLOYMENT.md).
+
+## Documentation
+
+| Guide | Contents |
+| --- | --- |
+| [Daily use](docs/DAILY_USE.md) | Chat, coding and everyday workflows |
+| [Workspaces](WORKSPACES.md) | Pi installation, local isolation and SSH connections |
+| [API and architecture](docs/ARCHITECTURE.md) | Gateway structure and integration points |
+| [Runtime deployment](runtime/README.md) | Engine versions, patches and provisioning |
+| [Security](SECURITY.md) | Authentication, access boundaries and reporting |
+| [Qualification](QUALIFICATION.md) | Test methodology, results and current coverage |
+| [Branding](docs/BRANDING.md) | Logos, favicon and social preview configuration |
+| [Roadmap](docs/ROADMAP.md) | Planned product development |
+
+## Development
+
+```sh
+make test
 ```
 
-[Source boundaries](docs/ARCHITECTURE.md). Hosted CI checks compilation,
-selected CPU-only protocol fixtures and browser logic; it neither runs a GPU
-nor qualifies model intelligence.
+```text
+cmd/strixglm/   Application entry point
+internal/app/  Gateway, controllers and integrations
+web/           Frontend and browser tests
+runtime/       Engine manifests, adapters and model catalog
+benchmarks/    Benchmark and regression tools
+docs/          Product and technical guides
+```
 
-## Security, source and contributions
+See [Contributing](CONTRIBUTING.md) for the development workflow.
 
-Keep the gateway private; use an SSH tunnel for remote browser access. Passwords,
-API tokens, uploads, conversations, weights and machine state are excluded from
-Git. Review diffs before publishing any local evidence.
-
-The repository is public; **a license for original project code has not yet
-been selected**. Public availability and the supplied artwork are not a license
-grant. Third-party components retain their documented licenses.
-
-[Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) ·
-[Third-party notices](THIRD_PARTY_NOTICES.md) ·
-[Publication scope](docs/PUBLICATION.md) · [Roadmap](docs/ROADMAP.md).
+Original project code is public; its license is pending selection.
+[Third-party notices](THIRD_PARTY_NOTICES.md) cover external components.

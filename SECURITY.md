@@ -9,6 +9,15 @@ model weights or unredacted deployment logs. Reference hostnames, paths and
 private addresses in the source are configuration examples for the measured
 installation, not access credentials.
 
+Remembered browser login uses a separate HttpOnly, SameSite=Strict cookie with
+180-day expiry, stored only as a hash on the server. HTTPS cookies are Secure;
+plain HTTP sessions are restricted to direct loopback. Keep this a trusted,
+single-owner browser/host: cookie scoping does not isolate different local TCP
+ports. Cookie requests require a custom same-origin header and explicit Origin
+validation on mutations; an invalid explicit bearer never falls back to cookies.
+Forget revokes the session; API-token rotation invalidates remembered sessions.
+Do not publish browser session files or cookie values.
+
 Local Pi runs with filesystem/network isolation and bounded resources. Only
 its paired generation capability is exposed. It can still change the selected
 project: review the root, keep a clean branch and inspect diffs. Remote shell

@@ -93,8 +93,10 @@ Advanced / legacy is hidden by default. Its Options checkbox can reveal the
 older snapshot/build/test/confirmed-Apply workflow when needed. Hiding that menu
 entry does not disable its API or cancel existing work.
 
-Only non-secret display preferences are stored in the browser. The connection
-token and SSH passwords stay in tab memory. Explicit token rotation invalidates
+The API token and SSH passwords are not saved in browser storage. After the
+first sign-in, an independent HttpOnly session cookie remembers this browser
+for 180 days, including refresh and reopening; **Forget** revokes that session.
+Explicit token rotation invalidates previous browser sessions and
 the old gateway credential for new requests: reconnect other browser tabs, Pi
 clients and API integrations with the new token. It neither rotates SSH keys
 nor changes the paired model runtime. API switches pause new work; they are

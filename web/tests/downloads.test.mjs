@@ -27,3 +27,15 @@ test('Native downloader UI has no execution, unsafe HTML, secret persistence or 
   assert.match(source, /No model will be loaded or switched/);
   assert.match(source, /No automatic retry/);
 });
+
+test('Models keeps acquisition outside the catalog renderer and gates both sections on authentication', async () => {
+  const source = await readFile(new URL('../downloads.mjs', import.meta.url), 'utf8');
+  const app = await readFile(new URL('../app.js', import.meta.url), 'utf8');
+  assert.match(source, /panel\.insertBefore\(section, document\.getElementById\('models-catalog'\)\)/);
+  assert.match(source, /n\.disabled = !isAuthenticated\(\) \|\| state\.busy/);
+  assert.match(source, /if \(!isAuthenticated\(\)\) \{ disconnect\(\); return; \}/);
+  assert.match(app, /isAuthenticated: \(\) => state\.authenticated/);
+  assert.match(app, /Promise\.all\(\[refreshCatalog\(\), downloader\.refresh\(\)\]\)/);
+  assert.match(app, /\$\('models-list'\)\.replaceChildren/);
+  assert.doesNotMatch(app, /\$\('panel-models'\)\.(replaceChildren|innerHTML|textContent)/);
+});

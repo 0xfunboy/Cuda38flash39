@@ -4,11 +4,13 @@ Chat and Coding share one server-generated conversation ID. The canonical
 transcript is stored locally in
 `state/conversations/<id>/conversation.json`, not in browser local storage.
 The directory is private; records and atomic-write files use owner-only
-permissions. Credentials still remain outside browser persistent storage.
+permissions. API tokens and SSH passwords are not saved in browser storage;
+an independent HttpOnly session cookie remembers the browser for 180 days.
 
 ## Recovery and interchange
 
-Reload, reconnect with the gateway token and select a conversation. Chat
+Reload and select a conversation. The browser session restores authentication;
+enter the gateway token only if the session has expired or been revoked. Chat
 messages, recorded reasoning, status and settings remain available. Pi final
 messages and tool results are linked to the same history; existing Pi event
 logs are also readable after a gateway restart. Recovery does not reconnect

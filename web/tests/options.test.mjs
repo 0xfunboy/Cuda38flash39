@@ -43,7 +43,8 @@ test('Advanced is initially hidden and keyboard navigation uses only visible sec
 
 test('Supplied application marks have local URLs, dimensions and accessible branding', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /rel="icon"[^>]*href="\.\/assets\/haloclu-icon\.png"/);
+  assert.match(html, /rel="icon"[^>]*href="\.\/assets\/haloclu-icon\.png\?v=10"/);
+  assert.match(html, /rel="icon"[^>]*type="image\/x-icon"[^>]*href="\.\/favicon\.ico\?v=10"/);
   assert.match(html, /class="brand-wordmark"[^>]*alt="HaloClu"[^>]*width="2508" height="627"/);
   assert.match(html, /class="brand-icon"[^>]*alt=""[^>]*width="800" height="800"/);
 });

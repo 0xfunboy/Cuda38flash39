@@ -5,5 +5,5 @@ import "embed"
 
 // Assets deliberately excludes tests, documentation and development tooling.
 //
-//go:embed index.html styles.css app.js ui-core.mjs downloads.mjs assets/haloclu-icon.png assets/haloclu-horizontal.png
+//go:embed index.html styles.css app.js ui-core.mjs downloads.mjs favicon.ico assets/haloclu-icon.png assets/haloclu-horizontal.png assets/haloclu-social.png
 var Assets embed.FS
