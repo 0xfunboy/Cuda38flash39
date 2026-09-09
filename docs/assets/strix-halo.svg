@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-labelledby="title description">
-  <title id="title">StrixHaloClusterGLM</title>
-  <desc id="description">A local coding workspace with one GLM target distributed over two Strix Halo nodes.</desc>
+  <title id="title">HaloClu</title>
+  <desc id="description">A local coding workspace and browser API on two Strix Halo nodes. StrixHaloClusterGLM is the GLM reference deployment.</desc>
   <rect width="1280" height="300" rx="14" fill="#191919"/>
   <rect x="1" y="1" width="1278" height="298" rx="13" fill="none" stroke="#3c3c3c"/>
   <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace">
     <text x="48" y="66" fill="#a5a5a5" font-size="13" letter-spacing="3">LOCAL CODING WORKSPACE</text>
-    <text x="46" y="138" fill="#f1f1f1" font-size="43" font-weight="600" letter-spacing="-1.5">StrixHaloClusterGLM</text>
-    <text x="48" y="185" fill="#b9b9b9" font-size="18">GLM + Pi · browser + API</text>
+    <text x="46" y="138" fill="#f1f1f1" font-size="54" font-weight="600" letter-spacing="-1.5">HaloClu</text>
+    <text x="48" y="185" fill="#b9b9b9" font-size="18">Browser + API · Pi coding workspace</text>
     <path d="M48 225H754" stroke="#444"/>
     <text x="48" y="260" fill="#919191" font-size="13">TWO STRIX HALO NODES / ONE TARGET MODEL</text>
     <g fill="#222" stroke="#747474" stroke-width="1.5">

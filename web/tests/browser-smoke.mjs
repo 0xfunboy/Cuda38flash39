@@ -14,8 +14,11 @@ const output = resolve(process.argv[2] || join(tmpdir(), `strixglm-web-${Date.no
 await mkdir(output, { recursive: true });
 // Keep the upload fixture beside the source: snap Firefox has a private /tmp.
 const importPath = fileURLToPath(new URL('./fixtures/import-task.json', import.meta.url));
-const apiToken = 'fixture-token-not-a-real-secret';
-const calls = { chat: [], coding: [], apply: 0, cancel: 0, interrupted_status: 0, operation: [], attachments: 0, workspace: [], terminal: 0, shell: [] };
+let apiToken = 'fixture-token-not-a-real-secret';
+const calls = { chat: [], coding: [], apply: 0, cancel: 0, interrupted_status: 0, operation: [], attachments: 0, workspace: [], terminal: 0, shell: [], settings: [], rotations: 0 };
+let api = { chat: true, workspaces: true, legacy_coding: true, operations: true };
+let deferStatusFailure = false;
+let releaseStatusFailure = null;
 const forbidden = '<img src=x onerror="window.__xss=true">';
 let cancelled = false;
 let applied = false;
@@ -34,6 +37,19 @@ const server = createServer(async (request, response) => {
     }
     if (url.pathname === '/health') return json({ ok: true });
     if (url.pathname.startsWith('/v1/') && request.headers.authorization !== `Bearer ${apiToken}`) return json({ error: 'Token required' }, 401);
+    if (url.pathname === '/v1/status' && deferStatusFailure) {
+      deferStatusFailure = false;
+      releaseStatusFailure = () => json({ error: 'Expired in-flight fixture credential' }, 401);
+      return;
+    }
+    if (url.pathname === '/v1/settings/token') {
+      assert.equal(request.method, 'POST'); assert.deepEqual(payload, { confirm: true });
+      calls.rotations++; apiToken = 'rotated-fixture-not-a-real-secret'; return json({ token: apiToken });
+    }
+    if (url.pathname === '/v1/settings') {
+      if (request.method === 'PUT') { calls.settings.push(payload); api = payload.api; }
+      return json({ api, listen: '127.0.0.1:18093', backend: 'http://127.0.0.1:18091', model: 'fixture-glm-not-a-live-model', token_rotation_supported: true, api_note: 'Controls new requests only. Status, read, cancel and close remain available.', network_note: 'Managed by config; gateway restart required for network changes.' });
+    }
     if (url.pathname === '/v1/models') return json({ data: [{ id: 'fixture-glm-not-a-live-model' }] });
     if (url.pathname === '/v1/attachments' && request.method === 'POST') { assert.equal(multipart, true); calls.attachments++; return json({ id: 'attachment-fixture', name: 'fixture.json', kind: 'text', size_bytes: 128, sha256: 'fixture-hash-not-real', text: forbidden, extracted_bytes: 128, truncated: true, warning: 'Fixture extraction limit', created_utc: new Date().toISOString() }, 201); }
     if (url.pathname === '/v1/workspaces/options') return json({ local_roots: ['/fixture/repo'], pi: { installed: true, version: 'fixture', tools_available: true }, auth_methods: [{ id: 'key', available: true }], terminal: { commands: [{ id: 'pwd', label: 'Working directory' }] } });
@@ -52,7 +68,10 @@ const server = createServer(async (request, response) => {
     if (url.pathname === '/v1/options') return json({ reasoning_modes: ['low', 'high', 'max'], context_options: [4096, 8192, 16384, 32768, 65536], default_reasoning: 'low', default_context_tokens: 65536, default_max_tokens: 16384, max_output_tokens: 32768, engine_context_tokens: 65536, generation_timeout_seconds: 600, thinking_budget_supported: true, quality_note: 'Fixture settings are not real quality qualification.' });
     if (url.pathname === '/v1/catalog') return json({ schema: 1, models: [{ id: 'fixture-glm-not-a-live-model', name: 'GLM fixture', status: 'READY', format: 'W4', runtime: 'fixture', distribution: 'TP2', quality_limits: ['Not a live benchmark'], assets: [{ id: 'fixture-asset', path: '/fixture/model', present: null, verification: 'not_checked' }], sources: [{ url: 'javascript:alert(1)', revision: '<script>unsafe</script>' }], actions: { load: { enabled: false, reason: 'Already active' }, download: { enabled: false, reason: 'No missing asset' } }, evidence: [{ label: 'Historical fixture only', status: 'PASS', decode_tps: 24.8, http_tps: 23.1, context_tokens: 8192, report: '/fixture/raw', notes: 'Not comparable to other formats' }] }] });
     if (url.pathname === '/v1/operations/options') return json({ actions: [{ id: 'api-smoke', label: 'API smoke', description: 'One fixture request', available: true, requires_confirmation: true, requests: 1 }, { id: 'context-long', label: 'Long context', available: false, blocked_reason: 'Fixture disabled' }] });
-    if (url.pathname === '/v1/operations/jobs' && request.method === 'POST') { calls.operation.push(payload); return json({ id: 'op-1', action_id: payload.action_id, status: 'queued' }, 202); }
+    if (url.pathname === '/v1/operations/jobs' && request.method === 'POST') {
+      if (!api.operations) return json({ error: 'Operation new requests are paused in Options', code: 'api_disabled' }, 403);
+      calls.operation.push(payload); return json({ id: 'op-1', action_id: payload.action_id, status: 'queued' }, 202);
+    }
     if (url.pathname === '/v1/operations/jobs') return json({ jobs: calls.operation.length ? [{ id: 'op-1', action_id: 'api-smoke', status: 'PASS', result: { fixture: true }, raw_directory: '/fixture/raw' }] : [] });
     if (url.pathname === '/v1/status') return json({
       model: 'fixture-glm-not-a-live-model', health: 'healthy', context_limit: 8192,
@@ -143,7 +162,7 @@ try {
   session = (await command('/session', { capabilities: { alwaysMatch: { browserName: 'firefox', 'moz:firefoxOptions': { args: ['-headless'] } } } })).sessionId;
   await command(`/session/${session}/window/rect`, { width: 1440, height: 1050 });
   await command(`/session/${session}/url`, { url: `http://127.0.0.1:${server.address().port}/` });
-  await until('!document.getElementById("connection-panel").hidden');
+  await until('!document.getElementById("panel-options").hidden');
   await execute(`document.getElementById('api-token').value=${JSON.stringify(apiToken)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
   assert.equal(await execute('return document.documentElement.lang'), 'en');
@@ -290,25 +309,87 @@ try {
   tests++;
   await writeFile(join(output, 'workspace-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   tests++;
+  await execute("document.getElementById('tab-options').click();");
+  await until('!document.getElementById("api-settings-fields").disabled');
+  assert.equal(await execute('return document.title'), 'HaloClu');
+  assert.equal(await execute('return document.getElementById("ui-language").closest("[role=tabpanel]").id'), 'panel-options');
+  assert.equal(await execute('return document.getElementById("settings-listen").textContent'), '127.0.0.1:18093');
   await execute("document.getElementById('ui-language').value='it';document.getElementById('ui-language').dispatchEvent(new Event('change'));");
   assert.equal(await execute('return document.getElementById("workspace-create").textContent'), 'Crea sessione');
-  assert.equal(await execute('return localStorage.getItem("strixglm.language")'), 'it');
+  assert.equal(await execute('return JSON.parse(localStorage.getItem("haloclu.preferences")).language'), 'it');
   await execute("document.getElementById('ui-language').value='en';document.getElementById('ui-language').dispatchEvent(new Event('change'));");
+  await execute("document.getElementById('ui-text-size').value='18';document.getElementById('ui-text-size').dispatchEvent(new Event('change'));document.getElementById('ui-density').value='compact';document.getElementById('ui-density').dispatchEvent(new Event('change'));document.getElementById('show-thinking').checked=true;document.getElementById('show-thinking').dispatchEvent(new Event('change'));");
+  assert.equal(await execute('return getComputedStyle(document.documentElement).getPropertyValue("--conversation-size").trim()'), '18px');
+  assert.equal(await execute('return document.body.dataset.density'), 'compact');
+  assert.equal(await execute('return JSON.parse(localStorage.getItem("haloclu.preferences")).expand_thinking'), true);
+  tests++;
+  await execute("document.getElementById('api-operations').checked=false;setTimeout(()=>document.getElementById('api-settings-form').requestSubmit(),0);");
+  await delay(200); await command(`/session/${session}/alert/dismiss`, {});
+  assert.equal(calls.settings.length, 0);
+  await execute("setTimeout(()=>document.getElementById('api-settings-form').requestSubmit(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("settings-result").textContent === "API controls saved."');
+  assert.deepEqual(calls.settings, [{ api: { chat: true, workspaces: true, legacy_coding: true, operations: false } }]);
+  tests++;
+  await execute("setTimeout(()=>document.getElementById('rotate-api-token').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/dismiss`, {});
+  assert.equal(calls.rotations, 0);
+  deferStatusFailure = true;
+  await execute("document.getElementById('refresh-health').click();");
+  for (let wait = 0; !releaseStatusFailure && wait < 50; wait++) await delay(100);
+  assert.equal(typeof releaseStatusFailure, 'function', 'The old-credential health request must be in flight.');
+  await execute("setTimeout(()=>document.getElementById('rotate-api-token').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("connection-result").textContent.startsWith("Token rotated.")');
+  assert.equal(calls.rotations, 1);
+  assert.equal(await execute('return document.getElementById("api-token").value'), apiToken);
+  releaseStatusFailure(); releaseStatusFailure = null;
+  await until('!document.getElementById("refresh-health").disabled');
+  assert.equal(await execute('return document.getElementById("connection-label").textContent'), 'Local API connected', 'Old in-flight401 must not log out or overwrite new authenticated state.');
+  assert.equal(await execute('return document.getElementById("connection-result").textContent.startsWith("Token rotated.")'), true);
+  tests++;
+  await execute("document.getElementById('refresh-settings').click();");
+  await until('document.getElementById("settings-result").textContent === "Server settings loaded."');
+  assert.equal(await execute('return localStorage.getItem("haloclu.preferences").includes("fixture")'), false);
+  tests++;
+  await execute("document.getElementById('tab-benchmarks').click();");
+  await until('document.querySelectorAll(".operation-row").length === 2');
+  await execute("setTimeout(()=>document.querySelector('.operation-row button').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("global-notice").textContent.includes("paused in Options")');
+  assert.equal(calls.operation.length, 1, 'Disabled operation must not be started.');
+  assert.equal(await execute('return document.getElementById("panel-benchmarks").hidden'), false, 'A disabled API is not an authentication failure.');
+  await execute("document.getElementById('tab-options').click();");
+  await until('!document.getElementById("api-settings-fields").disabled');
+  assert.notEqual(await execute('return document.getElementById("connection-label").textContent'), 'Token required');
+  tests++;
+  await writeFile(join(output, 'options-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   tests++;
   await command(`/session/${session}/window/rect`, { width: 390, height: 844 });
   await execute("document.getElementById('sidebar-toggle').click();");
-  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'cluster']) {
+  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'cluster', 'options']) {
     await execute(`document.getElementById('tab-${tab}').click();`);
     assert.equal(await execute('return document.documentElement.scrollWidth <= window.innerWidth'), true, `Mobile horizontal overflow: ${tab}`);
   }
-  await writeFile(join(output, 'cluster-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await writeFile(join(output, 'options-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   tests++;
   await execute("document.getElementById('open-connection').click();document.getElementById('forget-token').click();");
   assert.equal(await execute('return document.getElementById("api-token").value'), '');
   assert.equal(await execute('return localStorage.length + sessionStorage.length'), 1);
-  assert.equal(await execute('return localStorage.key(0)'), 'strixglm.language');
+  assert.equal(await execute('return localStorage.key(0)'), 'haloclu.preferences');
+  assert.deepEqual(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences"))).sort()'), ['density', 'expand_thinking', 'language', 'sidebar_collapsed', 'text_size']);
   tests++;
-  console.log(JSON.stringify({ result: 'PASS', browser: 'installed Firefox via WebDriver', checks: tests, backend: 'deterministic fixture, not live GLM', real_model_calls: 0, fixture_calls: { chat: calls.chat.length, coding: calls.coding.length, apply: calls.apply, cancel: calls.cancel, operation: calls.operation.length }, output }, null, 2));
+  await command(`/session/${session}/refresh`, {});
+  await until('!document.getElementById("panel-options").hidden');
+  assert.equal(await execute('return document.getElementById("api-token").value'), '', 'Credentials must not survive reload.');
+  assert.equal(await execute('return document.getElementById("api-settings-fields").disabled'), true);
+  assert.equal(await execute('return document.getElementById("ui-text-size").value'), '18');
+  assert.equal(await execute('return document.body.dataset.density'), 'compact');
+  assert.equal(await execute('return document.getElementById("show-thinking").checked'), true);
+  tests++;
+  const summary = { result: 'PASS', browser: 'installed Firefox via WebDriver', checks: tests, backend: 'deterministic fixture, not live GLM', real_model_calls: 0, fixture_calls: { chat: calls.chat.length, coding: calls.coding.length, apply: calls.apply, cancel: calls.cancel, operation: calls.operation.length, settings: calls.settings.length, rotations: calls.rotations }, output };
+  await writeFile(join(output, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
+  console.log(JSON.stringify(summary, null, 2));
 } finally {
   if (session) await fetch(`${base}/session/${session}`, { method: 'DELETE', signal: AbortSignal.timeout(10000) }).catch(() => {});
   driver.kill('SIGTERM');

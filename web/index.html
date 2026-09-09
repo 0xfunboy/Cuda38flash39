@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="referrer" content="no-referrer">
-  <title>StrixHaloClusterGLM</title>
+  <title>HaloClu</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -13,7 +13,7 @@
 <a class="skip-link" href="#main">Skip to conversation</a>
 <div class="app-shell">
   <aside class="sidebar" id="sidebar" aria-label="Navigation and settings">
-    <div class="sidebar-heading"><a href="./" class="brand">StrixHaloClusterGLM</a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
+    <div class="sidebar-heading"><a href="./" class="brand">HaloClu</a><button class="icon-button" id="sidebar-collapse" aria-label="Collapse sidebar" title="Collapse sidebar">‹</button></div>
     <nav class="nav-tabs" role="tablist" aria-label="Sections">
       <button class="nav-item active" id="tab-chat" role="tab" aria-selected="true" aria-controls="panel-chat" data-tab="chat" aria-label="Chat" title="Chat"><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">Chat</span></button>
       <button class="nav-item" id="tab-workspace" role="tab" aria-selected="false" aria-controls="panel-workspace" data-tab="workspace" tabindex="-1" aria-label="Coding workspace" title="Coding workspace"><span class="nav-icon" aria-hidden="true">{}</span><span class="nav-label">Coding</span></button>
@@ -21,10 +21,10 @@
       <button class="nav-item" id="tab-benchmarks" role="tab" aria-selected="false" aria-controls="panel-benchmarks" data-tab="benchmarks" tabindex="-1" aria-label="Benchmark" title="Benchmark"><span class="nav-icon" aria-hidden="true">≡</span><span class="nav-label">Benchmark</span></button>
       <button class="nav-item" id="tab-cluster" role="tab" aria-selected="false" aria-controls="panel-cluster" data-tab="cluster" tabindex="-1" aria-label="Cluster" title="Cluster"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">Cluster</span></button>
       <button class="nav-item" id="tab-coding" role="tab" aria-selected="false" aria-controls="panel-coding" data-tab="coding" tabindex="-1" aria-label="Advanced legacy coding" title="Advanced legacy coding"><span class="nav-icon" aria-hidden="true">⋯</span><span class="nav-label">Advanced / legacy</span></button>
+      <button class="nav-item" id="tab-options" role="tab" aria-selected="false" aria-controls="panel-options" data-tab="options" tabindex="-1" aria-label="Options" title="Options"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">Options</span></button>
     </nav>
     <section class="sidebar-settings" aria-label="Request settings">
-      <h2>Settings</h2>
-      <label for="ui-language">Language</label><select id="ui-language"><option value="en">English</option><option value="it">Italiano</option></select>
+      <h2>Generation</h2>
       <label for="reasoning-mode">Reasoning</label><select id="reasoning-mode" disabled><option value="low">low</option><option value="high">high</option><option value="max">max</option></select>
       <p class="control-hint">Low does not disable thinking.</p>
       <label for="thinking-budget">Thinking budget</label><select id="thinking-budget" disabled><option value="">Natural · no added cap</option><option value="0">0 · force reasoning closure</option><option value="128">128 token</option><option value="512">512 token</option><option value="2048">2048 token</option></select>
@@ -33,19 +33,45 @@
       <p class="control-hint">Chat: input + output. Legacy coding: source-selection budget. Does not resize KV.</p>
       <label for="chat-cap">Response limit (includes thinking)</label><select id="chat-cap" disabled><option value="">Auto · default server</option><option value="4096">4K</option><option value="8192">8K</option><option value="16384">16K</option><option value="32768">32K</option></select>
       <p class="control-hint" id="generation-limits">Waiting for server settings.</p>
-      <label class="checkbox-label"><input id="show-thinking" type="checkbox"> Expand thinking while responding</label>
       <p class="control-hint" id="profile-note">Settings take effect when you submit a request.</p>
     </section>
     <section class="sidebar-conversations" aria-label="Local conversations">
       <div class="sidebar-section-title"><h2>Conversations</h2><button class="icon-button" id="clear-chat" aria-label="New conversation" title="New conversation">+</button></div>
       <div id="conversation-list"></div><button class="button quiet small-button" id="export-chat" type="button">Export JSON</button><p class="control-hint">Only in this tab. Export to keep a copy.</p>
     </section>
-    <div class="sidebar-bottom"><button class="connection-button" id="connection-toggle" aria-expanded="false" aria-controls="connection-panel"><span class="status-dot" id="connection-dot"></span><span class="nav-label" id="connection-label">Not connected</span></button></div>
+    <div class="sidebar-bottom"><button class="connection-button" id="connection-toggle" aria-controls="panel-options"><span class="status-dot" id="connection-dot"></span><span class="nav-label" id="connection-label">Not connected</span></button></div>
   </aside>
   <main class="workspace" id="main">
     <header class="topbar"><div class="topbar-left"><button class="icon-button" id="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar">☰</button><strong id="view-label">Chat</strong></div><div class="topbar-right"><span id="model-pill" class="model-pill">Waiting for connection</span><button class="icon-button" id="open-connection" aria-label="Token and connection" title="Token and connection">⌁</button><button class="icon-button" id="refresh-health" aria-label="Refresh status" title="Refresh status">↻</button></div></header>
-    <section class="connection-panel" id="connection-panel" aria-label="API authentication" hidden><form id="connection-form"><div><label for="api-token">Local API token</label><p class="small muted">Kept only in this tab's memory.</p></div><input id="api-token" type="password" autocomplete="off" spellcheck="false" placeholder="Local token" aria-describedby="connection-result"><button class="button primary" type="submit">Connect</button><button class="button quiet" type="button" id="forget-token">Forget</button></form><p id="connection-result" class="small" role="status">No external services.</p></section>
     <div id="global-notice" class="notice" role="status" hidden></div>
+
+    <section id="panel-options" class="panel options-panel" role="tabpanel" aria-labelledby="tab-options" hidden>
+      <div class="section-heading"><h1>Options</h1><button class="button quiet" id="refresh-settings" type="button">Refresh server settings</button></div>
+      <div class="options-grid">
+        <section class="surface options-section"><h2>Interface</h2><p class="small muted">Saved in this browser. These preferences do not change model generation.</p>
+          <label for="ui-language">Language</label><select id="ui-language"><option value="en">English</option><option value="it">Italiano</option></select>
+          <label for="ui-text-size">Conversation text size</label><select id="ui-text-size"><option value="14">Standard · 14 px</option><option value="16">Large · 16 px</option><option value="18">Larger · 18 px</option></select>
+          <label for="ui-density">Layout density</label><select id="ui-density"><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select>
+          <label class="checkbox-label"><input id="show-thinking" type="checkbox"> Expand thinking while responding</label>
+          <label class="checkbox-label"><input id="ui-sidebar-collapsed" type="checkbox"> Collapse sidebar</label>
+          <p class="small muted">Thinking display only. Reasoning effort and token budgets remain under Generation.</p>
+        </section>
+        <section class="surface options-section connection-panel" id="connection-panel" aria-label="API authentication"><h2>Connection and secrets</h2><form id="connection-form">
+          <div><label for="api-token">Local API token</label><p class="small muted">Kept only in this tab's memory.</p></div><input id="api-token" type="password" autocomplete="off" spellcheck="false" placeholder="Local token" aria-describedby="connection-result">
+          <div class="button-row"><button class="button primary" type="submit">Connect</button><button class="button quiet" type="button" id="forget-token">Forget</button><button class="button quiet" type="button" id="copy-api-token">Copy token</button></div>
+        </form><p id="connection-result" class="small" role="status">No external services.</p>
+          <div class="secret-action"><button class="button danger" id="rotate-api-token" type="button" disabled>Rotate API token…</button><p class="small muted">Creates a new server token. Other clients must reconnect with it. Does not change SSH keys or passwords.</p></div>
+        </section>
+        <section class="surface options-section api-options"><h2>Exposed APIs</h2><p class="small muted" id="settings-api-note">Connect to inspect the server's API controls.</p><form id="api-settings-form"><fieldset id="api-settings-fields" disabled>
+          <label class="checkbox-label"><input id="api-chat" type="checkbox"> Chat and tool completions</label>
+          <label class="checkbox-label"><input id="api-workspaces" type="checkbox"> Coding workspace / Pi</label>
+          <label class="checkbox-label"><input id="api-legacy-coding" type="checkbox"> Advanced / legacy coding</label>
+          <label class="checkbox-label"><input id="api-operations" type="checkbox"> Benchmarks and download operations</label>
+          <button class="button primary" type="submit">Save API settings…</button>
+        </fieldset></form><p id="settings-result" class="small" role="status">Server settings not loaded.</p></section>
+        <section class="surface options-section"><h2>Server configuration</h2><dl class="settings-details"><dt>Listening address</dt><dd id="settings-listen">—</dd><dt>Backend</dt><dd id="settings-backend">—</dd><dt>Active model</dt><dd id="settings-model">—</dd></dl><p class="small muted" id="settings-network-note">Network binding and backend are managed by the server configuration. Changing them requires a gateway restart, not a rank restart.</p></section>
+      </div>
+    </section>
 
     <section id="panel-chat" class="panel chat-panel" role="tabpanel" aria-labelledby="tab-chat">
       <div class="conversation" id="conversation" role="log" aria-label="Conversation" aria-live="off"><div class="empty-chat" id="chat-empty"><h1>New conversation</h1><p>Send a message. For repository work, open <button class="inline-link" data-go-coding>Coding</button>.</p></div></div>

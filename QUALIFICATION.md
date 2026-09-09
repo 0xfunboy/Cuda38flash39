@@ -320,7 +320,7 @@ These same receipts report both ranks reachable/healthy before and after.
 The snapshots do not attribute small deltas specifically to inference, distinguish
 all UMA consumers, or measure a leak. **Major/minor page faults: N/A**, absent
 from this campaign's receipts; zero faults must not be inferred. Source telemetry
-calculation is in `main.go` (`nodeStats`), raw node observations in each
+calculation is in `internal/app/main.go` (`nodeStats`), raw node observations in each
 native-feature/native-confirmation `cluster_before` / `cluster_after` object.
 
 ## Matched reasoning subset: low / high / max
@@ -483,7 +483,7 @@ path allowlists and mandatory independent compile/tests still apply.
 
 Offline regression tests explicitly cover byte preservation, null file values,
 unfinished strings/maps, unexpected outer keys, unknown/traversal paths and
-empty maps. `envelope_test.go` contains these guards; the agent rejects
+empty maps. `internal/app/envelope_test.go` contains these guards; the agent rejects
 `finish_reason=length` before parsing any source.
 
 Fresh JSON-input reconfirmation through the new normalizer passed **2/2**:

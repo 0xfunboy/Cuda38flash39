@@ -20,7 +20,7 @@ const output = resolve(outputArg);
 await mkdir(output, { recursive: true });
 const redact = text => String(text).split(token).join('[REDACTED]');
 const observations = { time_utc: new Date().toISOString(), api: apiURL.origin, readonly: true, model_requests: 0, checks: [] };
-for (const endpoint of ['/health', '/v1/status', '/v1/models', '/v1/options', '/v1/catalog', '/v1/operations/options', '/v1/operations/jobs', '/ui-core.mjs']) {
+for (const endpoint of ['/health', '/v1/status', '/v1/models', '/v1/options', '/v1/settings', '/v1/catalog', '/v1/operations/options', '/v1/operations/jobs', '/ui-core.mjs']) {
   const response = await fetch(new URL(endpoint, apiURL), {
     headers: { Authorization: `Bearer ${token}` }, redirect: 'error', signal: AbortSignal.timeout(10000),
   });
@@ -81,11 +81,11 @@ try {
   session = (await command('/session', { capabilities: { alwaysMatch: { browserName: 'firefox', 'moz:firefoxOptions': { args: ['-headless'] } } } })).sessionId;
   await command(`/session/${session}/window/rect`, { width: 1440, height: 1050 });
   await command(`/session/${session}/url`, { url: apiURL.href });
-  await until('!document.getElementById("connection-panel").hidden');
+  await until('!document.getElementById("panel-options").hidden');
   // Refuse browser-originated writes independently of the sequence below.
   await execute(`window.__readonlyRequests=[]; const nativeFetch=window.fetch.bind(window);window.fetch=(input,init={})=>{const method=(init.method||input.method||'GET').toUpperCase();const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;window.__readonlyRequests.push({method,path});if(method!=='GET'&&method!=='HEAD')return Promise.reject(new Error('Readonly audit refuses write'));return nativeFetch(input,init);};document.getElementById('api-token').value=${JSON.stringify(token)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
-  assert.equal(await execute('return document.getElementById("connection-panel").hidden'), true, 'Never screenshot the token input.');
+  assert.equal(await execute('return document.getElementById("panel-options").hidden'), true, 'Never screenshot the token input.');
   assert.equal(await execute('return document.getElementById("model-pill").textContent'), observations['/v1/status'].model);
   observations.checks.push('real browser auth, live model identity, hidden token field');
   const options = observations['/v1/options'];
@@ -97,6 +97,19 @@ try {
   assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '—', 'No fabricated TPS before a real request.');
   observations.checks.push('explicit reasoning/context/output/thinking controls match live server options; no fabricated idle TPS');
   await writeFile(resolve(output, 'chat-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await execute("document.getElementById('tab-options').click();");
+  await until('!document.getElementById("api-settings-fields").disabled');
+  assert.equal(await execute('return document.title'), 'HaloClu');
+  assert.equal(await execute('return document.getElementById("ui-language").closest("[role=tabpanel]").id'), 'panel-options');
+  assert.equal(await execute('return document.getElementById("settings-listen").textContent'), observations['/v1/settings'].listen);
+  assert.equal(await execute('return document.getElementById("settings-backend").textContent'), observations['/v1/settings'].backend);
+  for (const [key, value] of Object.entries(observations['/v1/settings'].api)) assert.equal(await execute(`return document.getElementById('api-${key.replaceAll('_', '-')}').checked`), value);
+  // Hide no evidence or settings: only clear the secret input before capturing
+  // this panel. The authenticated session stays in memory; no server mutation.
+  await execute("document.getElementById('api-token').value='';");
+  assert.equal(await execute('return document.getElementById("api-token").value'), '');
+  await writeFile(resolve(output, 'options-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  observations.checks.push('HaloClu Options: language placement, actual listener/backend/API admission flags; no setting or token changes');
   await execute("document.getElementById('tab-cluster').click();");
   assert.equal(await execute('return document.getElementById("tab-cluster").getAttribute("aria-selected")'), 'true');
   await delay(220);
@@ -121,16 +134,18 @@ try {
   observations.checks.push('live catalog and operation availability rendered without starting jobs');
   await command(`/session/${session}/window/rect`, { width: 390, height: 844 });
   await execute("if(!document.body.classList.contains('sidebar-collapsed'))document.getElementById('sidebar-toggle').click();");
-  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'cluster']) {
+  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'options', 'cluster']) {
     await execute(`document.getElementById('tab-${tab}').click();`);
     assert.equal(await execute('return document.documentElement.scrollWidth <= window.innerWidth'), true, `${tab} mobile overflow`);
   }
   await delay(220);
-  observations.checks.push('mobile five-section navigation with collapsed sidebar and no horizontal overflow');
+  observations.checks.push('mobile seven-section navigation with collapsed sidebar and no horizontal overflow');
   await writeFile(resolve(output, 'cluster-live-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   const requests = await execute('return window.__readonlyRequests');
   assert.ok(requests.every(row => ['GET', 'HEAD'].includes(row.method)));
-  assert.equal(await execute('return localStorage.length + sessionStorage.length'), 0);
+  assert.equal(await execute('return sessionStorage.length'), 0);
+  assert.equal(await execute('return Object.keys(localStorage).every(key=>key==="haloclu.preferences")'), true);
+  assert.equal(await execute('return Object.keys(JSON.parse(localStorage.getItem("haloclu.preferences")||"{}")).every(key=>["language","text_size","density","expand_thinking","sidebar_collapsed"].includes(key))'), true);
   observations.browser_requests = requests;
   observations.checks.push('browser GET-only and zero persisted secrets');
   observations.result = 'PASS';

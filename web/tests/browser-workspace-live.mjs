@@ -55,7 +55,7 @@ async function until(expression, timeout = 15000) {
   throw new Error(`Browser condition timed out: ${expression}`);
 }
 async function screenshot(name) {
-  assert.equal(await execute('return document.getElementById("connection-panel").hidden && !document.getElementById("workspace-password").value'), true, 'Credential fields must not be captured.');
+  assert.equal(await execute('return document.getElementById("panel-options").hidden && !document.getElementById("workspace-password").value'), true, 'Credential fields must not be captured.');
   await writeFile(resolve(output, name), Buffer.from(await command(`/session/${browser}/screenshot`), 'base64'));
 }
 try {
@@ -63,7 +63,7 @@ try {
   browser = (await command('/session', { capabilities: { alwaysMatch: { browserName: 'firefox', 'moz:firefoxOptions': { args: ['-headless'] } } } })).sessionId;
   await command(`/session/${browser}/window/rect`, { width: 1500, height: 1100 });
   await command(`/session/${browser}/url`, { url: apiURL.href });
-  await until('!document.getElementById("connection-panel").hidden');
+  await until('!document.getElementById("panel-options").hidden');
   await execute(`window.__workspaceAudit={requests:[],responses:[]};const nativeFetch=fetch.bind(window);window.fetch=async(input,init={})=>{const method=(init.method||'GET').toUpperCase();const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;const body=init.body?JSON.parse(init.body):null;if(method!=='GET'&&method!=='HEAD'){if(method!=='POST'||path!==${JSON.stringify(sessionPath + '/terminal')}||JSON.stringify(body)!==JSON.stringify({command:'printf workspace-shell-ok',confirm:true})||window.__workspaceAudit.requests.some(row=>row.method==='POST'))throw new Error('Live audit forbids this write or retry');}window.__workspaceAudit.requests.push({method,path,body});const response=await nativeFetch(input,init);if(path.startsWith('/v1/workspaces/'))response.clone().json().then(value=>window.__workspaceAudit.responses.push({path,status:response.status,value}));return response;};document.getElementById('api-token').value=${JSON.stringify(token)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
   await execute("document.getElementById('tab-workspace').click();");

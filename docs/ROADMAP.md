@@ -1,7 +1,8 @@
 # Product roadmap
 
-The immediate goal is a dependable, lightweight interface around the preserved
-GLM runtime and upstream Pi. The items below are proposals, not delivered
+HaloClu is the model-independent product name; this repository preserves the
+GLM reference runtime and upstream Pi. The immediate goal is a dependable,
+lightweight interface around that deployment. The items below are proposals, not delivered
 features or authorization to run additional model campaigns. Existing behavior
 and evidence remain in [qualification](../QUALIFICATION.md) and
 [workspaces](../WORKSPACES.md).
@@ -33,6 +34,8 @@ and evidence remain in [qualification](../QUALIFICATION.md) and
   improvement as small; do not hide correctness losses behind tokens/s.
 - Keep English as the product/documentation default with optional Italian UI
   localization. Avoid claims that a reasoning label guarantees quality.
+- Keep common interface and API controls in Options, apart from generation
+  settings. A shared frontend name does not qualify a different model backend.
 
 ## Deliberately out of scope
 

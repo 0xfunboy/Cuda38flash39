@@ -1,5 +1,53 @@
 // Pure, dependency-free presentation helpers. Keep this module DOM-independent.
+// Deliberately whitelist display fields: server credentials and SSH data must
+// never reach browser persistence through this object.
+export function displayPreferences(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    language: source.language === 'it' ? 'it' : 'en',
+    text_size: [14, 16, 18].includes(Number(source.text_size)) ? Number(source.text_size) : 14,
+    density: source.density === 'compact' ? 'compact' : 'comfortable',
+    expand_thinking: source.expand_thinking === true,
+    sidebar_collapsed: source.sidebar_collapsed === true,
+  };
+}
+
+export function apiSettings(value) {
+  const names = ['chat', 'workspaces', 'legacy_coding', 'operations'];
+  if (!value || !names.every(name => typeof value[name] === 'boolean')) throw new Error('The server did not provide all API settings. No changes were applied.');
+  return Object.fromEntries(names.map(name => [name, value[name]]));
+}
+
 export const IT_LABELS = {
+  "Options": "Opzioni",
+  "Generation": "Generazione",
+  "Refresh server settings": "Aggiorna impostazioni server",
+  "Interface": "Interfaccia",
+  "Saved in this browser. These preferences do not change model generation.": "Salvate in questo browser. Queste preferenze non modificano la generazione del modello.",
+  "Conversation text size": "Dimensione testo conversazione",
+  "Standard · 14 px": "Standard · 14 px",
+  "Large · 16 px": "Grande · 16 px",
+  "Larger · 18 px": "Più grande · 18 px",
+  "Layout density": "Densità interfaccia",
+  "Comfortable": "Comoda",
+  "Compact": "Compatta",
+  "Thinking display only. Reasoning effort and token budgets remain under Generation.": "Solo visualizzazione del thinking. Ragionamento e budget token rimangono sotto Generazione.",
+  "Connection and secrets": "Connessione e segreti",
+  "Copy token": "Copia token",
+  "Rotate API token…": "Ruota token API…",
+  "Creates a new server token. Other clients must reconnect with it. Does not change SSH keys or passwords.": "Crea un nuovo token server. Gli altri client devono riconnettersi con esso. Non modifica chiavi SSH o password.",
+  "Exposed APIs": "API esposte",
+  "Connect to inspect the server's API controls.": "Connettiti per consultare i controlli API del server.",
+  "Chat and tool completions": "Chat e completamenti tool",
+  "Coding workspace / Pi": "Workspace coding / Pi",
+  "Advanced / legacy coding": "Coding avanzato / legacy",
+  "Benchmarks and download operations": "Benchmark e operazioni download",
+  "Save API settings…": "Salva impostazioni API…",
+  "Server settings not loaded.": "Impostazioni server non caricate.",
+  "Server configuration": "Configurazione server",
+  "Listening address": "Indirizzo in ascolto",
+  "Active model": "Modello attivo",
+  "Network binding and backend are managed by the server configuration. Changing them requires a gateway restart, not a rank restart.": "Indirizzo di rete e backend sono gestiti dalla configurazione server. Per cambiarli serve riavviare il gateway, non un rank.",
   "Skip to conversation": "Vai alla conversazione",
   "Navigation and settings": "Navigazione e impostazioni",
   "Collapse sidebar": "Comprimi sidebar",

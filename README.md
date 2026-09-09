@@ -1,17 +1,21 @@
 <p align="center">
-  <img src="docs/assets/strix-halo.svg" alt="StrixHaloClusterGLM — local coding workspace, one GLM target on two Strix Halo nodes" width="100%">
+  <img src="docs/assets/strix-halo.svg" alt="HaloClu — local coding workspace, browser and API on two Strix Halo nodes" width="100%">
 </p>
 
 <p align="center">
   <a href="docs/DAILY_USE.md">Daily use</a> ·
+  <a href="docs/OPTIONS.md">Options</a> ·
   <a href="WORKSPACES.md">Pi workspaces</a> ·
   <a href="QUALIFICATION.md">Test evidence</a> ·
   <a href="docs/ROADMAP.md">Roadmap</a>
 </p>
 
-A local GLM chat, coding workspace and API for **two GMKtec EVO-X3 / Strix Halo
-nodes**. A lightweight Go gateway and grayscale browser UI wrap the pinned
-inference engine and the actual **Pi coding agent**.
+**HaloClu** is the browser product: local chat, a coding workspace and an API
+for **two GMKtec EVO-X3 / Strix Halo nodes**. A lightweight Go gateway and
+grayscale UI wrap the pinned inference engine and the actual **Pi coding agent**.
+**StrixHaloClusterGLM** remains this repository's name and GLM reference
+deployment. The frontend name does not depend on the model; it does not imply
+that other models or runtimes are already qualified.
 
 **Usable for supervised daily coding.** Review diffs, compile and run independent
 tests before merging. This is not a claim of autonomous production reliability,
@@ -19,7 +23,8 @@ near-SOTA parity or fully qualified long-context coding.
 
 ![Actual grayscale browser console, captured from the reference deployment](docs/assets/console.png)
 
-*Actual deployed UI. No generated mockup, invented throughput or visible credentials.*
+*Actual HaloClu deployment (PRODUCT-005). No generated mockup, invented
+throughput or visible credentials.*
 
 ## What is included
 
@@ -32,10 +37,12 @@ near-SOTA parity or fully qualified long-context coding.
   metadata, file browser, agent/tool events and a confirmed diagnostic shell.
 - **Operations:** model inventory with architecture notes and explicit
   benchmark/resumable-download actions. Opening the UI never starts a campaign.
+- **Options:** shared interface preferences, gateway authentication and explicit
+  API admission switches. Generation controls remain separate.
 - **Paired inference:** ownership-aware lifecycle and strict paired results.
   No isolated rank restart, silent model migration or relaxed correctness check.
 
-English is the default; Italian controls are selectable. The browser has no
+English is the default; Italian controls are selectable under **Options**. The browser has no
 framework, CDN or build dependency. Model weights are **not** included.
 
 ## Reference hardware and runtime
@@ -60,8 +67,8 @@ promise for every task. [Runtime pins](runtime/manifest.json) ·
 |---|---|---|
 | Original advanced coding workflow |10 compact C++ repositories passed; 9 first-pass, 1 repaired |Not a Pi score or arbitrary-repository guarantee |
 | Actual Pi integration |One C task: read/write/compile/test; 213 independent cases passed |One problem, not 213 coding problems |
-| Product regression |124 Go tests + 26 subcases with race detector; 40 Node tests |Not a model intelligence benchmark |
-| Browser |16 mocked checks; deployed read-only and real Pi/file/shell checks |Not remote SSH qualification |
+| Product regression |131 Go tests + 26 subcases with race detector; 43 Node tests |Not a model intelligence benchmark |
+| Browser |22 mocked checks; 8 deployed read-only checks; prior real Pi/file/shell checks |Not remote SSH qualification |
 | SSH |Transport, password broker and extension startup checked locally |Real-host login/coding still requires qualification |
 
 Long-context coding is not qualified. A completed `max` response can still
@@ -72,6 +79,8 @@ agree; ordinary chat remains streamed. Full scope and negative results:
 ## Use the existing installation
 
 Open **http://127.0.0.1:18093/** and authenticate with the local `state/api-token`.
+Connection settings and token rotation are under **Options**; rotating a token
+requires reconnecting other clients and does not change inference-rank secrets.
 For repository work, choose **Coding**, select a project, create a session,
 start Pi and submit a bounded task. Pi writes directly inside the selected
 workspace; the old staged-diff workflow is separate under **Advanced / legacy**.
@@ -100,6 +109,23 @@ bubblewrap and working user-systemd scopes. [Setup and limits](WORKSPACES.md) ·
 Hosted CI checks compilation, selected CPU-only protocol fixtures and browser
 logic; it does not access a GPU, download models or claim hardware qualification.
 Full local integration prerequisites are documented in [benchmarks](benchmarks/README.md).
+
+## Source layout
+
+```text
+cmd/strixglm/     Small executable entry point
+internal/app/    Gateway, paired controller, Pi integration and Go tests
+web/             Browser assets, embedded asset package and browser tests
+runtime/         Pinned engine recipe, patches, model catalog and adapters
+benchmarks/      Explicit qualification and regression scripts
+docs/            Product, deployment and operational documentation
+```
+
+Go files that belong to one package normally share a directory; dozens of root
+files are legal, but not required. The implementation now lives in one cohesive
+internal package, with a small command entry point and separately embedded
+assets. This is a source-layout change, not a new runtime or algorithm.
+[Layout and boundaries](docs/ARCHITECTURE.md).
 
 ## Security and contributions
 

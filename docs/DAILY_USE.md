@@ -1,6 +1,6 @@
 # Daily use
 
-**Yes: this system is useful now as a supervised coding assistant.** Use it to
+**HaloClu is useful now as a supervised coding assistant.** Use it to
 explain code, draft changes, investigate failures and implement bounded tasks.
 It is not qualified to make unattended production changes or to replace code
 review, a compiler and independent tests.
@@ -64,6 +64,20 @@ it does not make an incorrect change correct.
 
 Exact isolation, permissions and lifecycle behavior are documented in
 [Pi workspaces](../WORKSPACES.md).
+
+## Shared options
+
+Open **Options** in the sidebar to select the interface language and display
+preferences, connect with the gateway token, or manage new API admission.
+These settings are shared across pages; reasoning, context and output budgets
+remain generation controls, not interface preferences.
+
+Only non-secret display preferences are stored in the browser. The connection
+token and SSH passwords stay in tab memory. Explicit token rotation invalidates
+the old gateway credential for new requests: reconnect other browser tabs, Pi
+clients and API integrations with the new token. It neither rotates SSH keys
+nor changes the paired model runtime. API switches pause new work; they are
+not an emergency cancellation or a firewall. [Exact scope](OPTIONS.md).
 
 ## Useful next checks — not a prerequisite to starting
 

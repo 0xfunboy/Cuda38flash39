@@ -1,19 +1,27 @@
-# Embedded local frontend
+# HaloClu embedded frontend
 
-Dependency-free HTML/CSS/JavaScript with a compact grayscale layout. Go embeds
-only `index.html`, `styles.css`, `app.js`, and `ui-core.mjs`. Rebuild the gateway
-after changing these assets; serve `.mjs` with a JavaScript MIME type.
+Dependency-free HTML/CSS/JavaScript with a compact grayscale layout. HaloClu
+is the model-independent frontend name; StrixHaloClusterGLM remains this
+repository and its GLM reference deployment. The actual served model identity
+is separate from the product name.
 
-English is the default; Italian is selectable. Only the non-secret language
-preference is saved as `strixglm.language`. API tokens, SSH passwords and
-conversations remain in tab memory. Reloading requires authentication again.
-All API requests stay on the gateway's origin.
+`web/assets.go` embeds only `index.html`, `styles.css`, `app.js`, and
+`ui-core.mjs`. The gateway lives in `internal/app`, with its entry point under
+`cmd/strixglm`. Rebuild using `make build` after changing embedded assets;
+serve `.mjs` with a JavaScript MIME type.
+
+English is the default; Italian is selectable under Options. A non-secret
+whitelist of language, text size, density, thinking expansion and sidebar
+preferences is stored as `haloclu.preferences`; the old `strixglm.language`
+setting is migrated. API tokens, SSH passwords and conversations remain in
+tab memory. Reloading requires authentication again. All API requests stay
+on the gateway's origin.
 
 ## Chat, Markdown and attachments
 
 Markdown supports headings, paragraphs, fenced code with language labels and
 copy buttons, ordered/unordered lists, quotes, tables, inline code, emphasis
-and safe HTTP(S) links. Code fences are not displayed as code. Raw HTML is
+and safe HTTP(S) links. Fence delimiters are not shown around rendered code. Raw HTML is
 literal text, never interpreted; no image tags or model-supplied event handlers
 are created. Parsing also works incrementally during streaming.
 
@@ -62,6 +70,14 @@ cannot weaken isolation or auto-apply. This fallback is not represented as Pi.
 
 ## Settings and measured statistics
 
+Options holds shared interface preferences, gateway authentication and explicit
+API admission controls. Token rotation requires confirmation and invalidates
+the old gateway credential for new requests. Four server-persisted switches
+pause new chat, workspace, legacy coding or operations actions without hiding
+inspection and safe cancellation. Listen/backend/model values are read-only;
+no network listener or inference rank is reconfigured by the browser.
+[Options behavior and API contract](../docs/OPTIONS.md).
+
 `/v1/options` supplies explicit low/high/max reasoning, context/output limits
 and timeout. Low is not thinking OFF. A supported thinking budget of zero
 forces reasoning closure; it does not imply architectural OFF or equivalent
@@ -93,11 +109,14 @@ node --check web/app.js
 node web/tests/browser-smoke.mjs /tmp/strixglm-browser-smoke
 ```
 
-Current coverage: 25 unit tests and 16 browser checks using installed Firefox
-with a deterministic fake backend. No package/browser downloads or GLM calls.
+The PRODUCT-003 baseline recorded 25 frontend unit tests and 16 browser checks
+using installed Firefox with a deterministic fake backend. These are historical
+counts, not a claim about later UI revisions. No package/browser downloads or GLM calls.
 The browser check covers Markdown/XSS, attachment extraction and IDs, JSON
 export, language selection, workspace capability gating/files/terminal, confirmed custom shell,
-legacy coding/apply/cancel, catalog/jobs and six-section mobile layout.
+legacy coding/apply/cancel, catalog/jobs and mobile layout. Updated UI checks
+must also cover Options, preference persistence, token rotation and API admission
+without treating mock results as model-quality evidence.
 
 Explicit read-only live audit (real token read into memory, no inference):
 

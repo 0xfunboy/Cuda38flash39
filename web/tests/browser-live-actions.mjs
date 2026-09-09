@@ -74,7 +74,7 @@ async function until(expression, milliseconds = 15000) {
   throw new Error(`Browser condition timed out: ${expression}`);
 }
 async function screenshot(name) {
-  assert.equal(await execute('return document.getElementById("connection-panel").hidden'), true, 'Never screenshot the credential field.');
+  assert.equal(await execute('return document.getElementById("panel-options").hidden'), true, 'Never screenshot the credential field.');
   await delay(200);
   await writeFile(resolve(output, name), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
 }
@@ -87,7 +87,7 @@ try {
   session = (await command('/session', { capabilities: { alwaysMatch: { browserName: 'firefox', 'moz:firefoxOptions': { args: ['-headless'] } } } })).sessionId;
   await command(`/session/${session}/window/rect`, { width: 1440, height: 1100 });
   await command(`/session/${session}/url`, { url: apiURL.href });
-  await until('!document.getElementById("connection-panel").hidden');
+  await until('!document.getElementById("panel-options").hidden');
   await execute(`window.__liveAudit={requests:[],chatSSE:null};const nativeFetch=window.fetch.bind(window);window.fetch=async(input,init={})=>{const method=(init.method||input.method||'GET').toUpperCase();const path=new URL(typeof input==='string'?input:input.url,location.href).pathname;if(method==='POST'&&!['/v1/chat/completions','/v1/coding/tasks'].includes(path))throw new Error('Live qualification forbids apply, lifecycle or unrelated mutations');const body=init.body?JSON.parse(init.body):null;window.__liveAudit.requests.push({method,path,body});const response=await nativeFetch(input,init);if(method==='POST'&&path==='/v1/chat/completions'){window.__liveAudit.chatType=response.headers.get('content-type');response.clone().text().then(text=>window.__liveAudit.chatSSE=text);}return response;};document.getElementById('api-token').value=${JSON.stringify(token)};document.getElementById('connection-form').requestSubmit();`);
   await until('document.getElementById("connection-label").textContent === "Local API connected"');
   assert.equal(await execute('return !!document.getElementById("code-spec")'), true, 'Rebuild the Go embed assets to include task JSON import before this run.');

@@ -1,6 +1,6 @@
 import {
   SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, completionDelta, completionState, decodeRate,
-  errorMessage, finite, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
+  apiSettings, displayPreferences, errorMessage, finite, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
   IT_LABELS, markdownBlocks, markdownInline, observedRate, pathList, percent, safeSourceURL, seconds,
 } from './ui-core.mjs';
 
@@ -11,6 +11,7 @@ const state = {
   taskGeneration: 0, healthBusy: false, authenticated: false, healthTimer: null,
   importedOptions: {}, conversations: [], conversationID: 0, catalog: null, actions: [], jobs: [], jobTimer: null, operationSubmitting: false,
   language: 'en', records: [], attachments: [], uploading: 0, workspaceOptions: null, workspaceSessions: [], workspace: null, workspaceTimer: null, workspaceSequence: 0, workspaceEvents: [], workspaceBusy: false,
+  preferences: displayPreferences(), activeTab: 'chat', settings: null, settingsBusy: false,
 };
 
 const staticLabels = [];
@@ -23,15 +24,37 @@ function applyLanguage(language) {
     const replacement = entry.english.replace(entry.english.trim(), value);
     if (entry.attribute) entry.node.setAttribute(entry.attribute, replacement); else entry.node.data = replacement;
   }
+  $('view-label').textContent = $(`tab-${state.activeTab}`)?.querySelector('.nav-label')?.textContent || state.activeTab;
 }
 
 function initializeLanguage() {
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) if (IT_LABELS[node.data.trim()]) staticLabels.push({ node, english: node.data });
   for (const node of document.querySelectorAll('[title],[aria-label],[placeholder]')) for (const attribute of ['title', 'aria-label', 'placeholder']) { const english = node.getAttribute(attribute); if (english && IT_LABELS[english.trim()]) staticLabels.push({ node, attribute, english }); }
-  let language = 'en';
-  try { language = localStorage.getItem('strixglm.language') || 'en'; } catch { /* Storage can be disabled. */ }
-  applyLanguage(language);
+  let preferences = { sidebar_collapsed: window.matchMedia('(max-width: 760px)').matches };
+  try {
+    const saved = localStorage.getItem('haloclu.preferences');
+    if (saved) preferences = JSON.parse(saved);
+    else preferences.language = localStorage.getItem('strixglm.language') || 'en';
+  } catch { /* Storage can be disabled or malformed. */ }
+  applyPreferences(preferences);
+}
+
+function applyPreferences(value) {
+  state.preferences = displayPreferences(value);
+  applyLanguage(state.preferences.language);
+  document.documentElement.style.setProperty('--conversation-size', `${state.preferences.text_size}px`);
+  document.body.dataset.density = state.preferences.density;
+  $('ui-text-size').value = String(state.preferences.text_size);
+  $('ui-density').value = state.preferences.density;
+  $('show-thinking').checked = state.preferences.expand_thinking;
+  document.querySelectorAll('.reasoning-details').forEach(node => { node.open = state.preferences.expand_thinking; });
+  setSidebar(state.preferences.sidebar_collapsed);
+}
+
+function savePreferences() {
+  applyPreferences({ language: $('ui-language').value, text_size: $('ui-text-size').value, density: $('ui-density').value, expand_thinking: $('show-thinking').checked, sidebar_collapsed: $('ui-sidebar-collapsed').checked });
+  try { localStorage.setItem('haloclu.preferences', JSON.stringify(state.preferences)); localStorage.removeItem('strixglm.language'); } catch { /* Preference persistence is optional; secrets are never included. */ }
 }
 
 function inlineMarkdown(container, text) {
@@ -83,9 +106,8 @@ function notice(message, kind = 'neutral') {
 }
 
 function showConnection(show = true) {
-  $('connection-panel').hidden = !show;
-  $('connection-toggle').setAttribute('aria-expanded', String(show));
-  if (show) $('api-token').focus();
+  if (show) { selectTab('options'); $('api-token').focus(); }
+  else selectTab('chat');
 }
 
 function setBadge(node, status) {
@@ -94,6 +116,7 @@ function setBadge(node, status) {
 }
 
 function selectTab(name, focus = false) {
+  state.activeTab = name;
   for (const tab of document.querySelectorAll('[data-tab]')) {
     const active = tab.dataset.tab === name;
     tab.classList.toggle('active', active);
@@ -102,32 +125,93 @@ function selectTab(name, focus = false) {
     if (active && focus) tab.focus();
     $(`panel-${tab.dataset.tab}`).hidden = !active;
   }
-  $('view-label').textContent = name.toUpperCase();
+  const label = $(`tab-${name}`)?.querySelector('.nav-label')?.textContent || name;
+  $('view-label').textContent = label;
   if (state.authenticated && name === 'models') refreshCatalog();
   if (state.authenticated && name === 'benchmarks') refreshBenchmarks();
   if (state.authenticated && name === 'workspace') refreshWorkspaces();
+  if (state.authenticated && name === 'options') refreshSettings();
 }
 
-function headers() {
+function renderSettings(settings) {
+  const api = apiSettings(settings?.api);
+  state.settings = { ...settings, api };
+  for (const [key, enabled] of Object.entries(api)) $(`api-${key.replaceAll('_', '-')}`).checked = enabled;
+  $('api-settings-fields').disabled = state.settingsBusy || !state.authenticated;
+  $('rotate-api-token').disabled = state.settingsBusy || !state.authenticated || settings.token_rotation_supported !== true;
+  $('settings-listen').textContent = settings.listen || 'Not reported';
+  $('settings-backend').textContent = settings.backend || 'Not reported';
+  $('settings-model').textContent = settings.model || state.model || 'Not reported';
+  $('settings-api-note').textContent = settings.api_note || 'Disabling a category blocks new requests. Existing status, read, cancel and close controls remain available.';
+  $('settings-network-note').textContent = settings.network_note || 'Network binding and backend are managed by the server configuration. Changing them requires a gateway restart, not a rank restart.';
+}
+
+async function refreshSettings() {
+  if (!state.authenticated || state.settingsBusy) return;
+  state.settingsBusy = true;
+  $('refresh-settings').disabled = true;
+  $('api-settings-fields').disabled = true;
+  $('rotate-api-token').disabled = true;
+  try { renderSettings(await request('/v1/settings')); $('settings-result').textContent = state.language === 'it' ? 'Impostazioni server caricate.' : 'Server settings loaded.'; }
+  catch (error) { if (error.code !== 'stale_credential') { state.settings = null; $('settings-result').textContent = error.message; } }
+  finally {
+    state.settingsBusy = false; $('refresh-settings').disabled = false;
+    if (state.settings) renderSettings(state.settings);
+  }
+}
+
+async function saveAPISettings(event) {
+  event.preventDefault();
+  if (!state.authenticated || !state.settings || state.settingsBusy) return;
+  const api = Object.fromEntries(['chat', 'workspaces', 'legacy_coding', 'operations'].map(key => [key, $(`api-${key.replaceAll('_', '-')}`).checked]));
+  const question = state.language === 'it' ? 'Salvare i controlli API per tutti i client? Bloccare nuove richieste non annulla quelle attive e non cambia la rete o il modello.' : 'Save API controls for all clients? Disabling new requests does not cancel active work or change the network or model.';
+  if (!window.confirm(question)) return;
+  state.settingsBusy = true; $('api-settings-fields').disabled = true; $('rotate-api-token').disabled = true;
+  try { renderSettings(await request('/v1/settings', { method: 'PUT', body: { api: apiSettings(api) } })); $('settings-result').textContent = state.language === 'it' ? 'Controlli API salvati.' : 'API controls saved.'; }
+  catch (error) { $('settings-result').textContent = `${error.message} ${state.language === 'it' ? 'Aggiorna per verificare lo stato; nessun retry automatico.' : 'Refresh to verify the state; no automatic retry.'}`; }
+  finally { state.settingsBusy = false; if (state.settings) renderSettings(state.settings); }
+}
+
+async function rotateAPIToken() {
+  if (!state.authenticated || state.settingsBusy || state.settings?.token_rotation_supported !== true) return;
+  const question = state.language === 'it' ? 'Sostituire il token API del server? Il vecchio token smetterà di funzionare. Questa scheda userà il nuovo token; gli altri client devono riconnettersi.' : 'Replace the server API token? The old token will stop working. This tab will use the new token; other clients must reconnect.';
+  if (!window.confirm(question)) return;
+  state.settingsBusy = true; $('rotate-api-token').disabled = true; $('api-settings-fields').disabled = true;
+  try {
+    const result = await request('/v1/settings/token', { method: 'POST', body: { confirm: true } });
+    if (typeof result?.token !== 'string' || !result.token) throw new Error('No new token was returned. Check the local server token file before retrying.');
+    state.token = result.token; $('api-token').value = result.token;
+    $('connection-result').textContent = state.language === 'it' ? 'Token ruotato. Questa scheda è connessa; copia il nuovo token per gli altri client. Non viene salvato nel browser.' : 'Token rotated. This tab is connected; copy the new token for other clients. It is not saved in the browser.';
+  } catch (error) { $('connection-result').textContent = `${error.message} No automatic retry. If completion is uncertain, read the current token from the server's private state/api-token file.`; }
+  finally { state.settingsBusy = false; if (state.settings) renderSettings(state.settings); }
+}
+
+function headers(token = state.token) {
   const result = { Accept: 'application/json' };
-  if (state.token) result.Authorization = `Bearer ${state.token}`;
+  if (token) result.Authorization = `Bearer ${token}`;
   return result;
 }
 
 async function request(path, options = {}) {
   const controller = new AbortController();
+  // An old in-flight response must not invalidate a credential installed by
+  // reconnect or rotation while this request was awaiting the server.
+  const dispatchedToken = state.token;
   const timeout = setTimeout(() => controller.abort(), options.timeout || 15000);
   try {
     const response = await fetch(path, {
       method: options.method || 'GET', credentials: 'omit', cache: 'no-store',
       mode: 'same-origin', redirect: 'error', signal: controller.signal,
-      headers: { ...headers(), ...(options.body ? { 'Content-Type': 'application/json' } : {}) },
+      headers: { ...headers(dispatchedToken), ...(options.body ? { 'Content-Type': 'application/json' } : {}) },
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401 || (response.status === 403 && payload?.code !== 'api_disabled')) {
+        if (dispatchedToken !== state.token) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
         state.authenticated = false;
+        $('api-settings-fields').disabled = true;
+        $('rotate-api-token').disabled = true;
         $('connection-label').textContent = "Token required";
         $('connection-dot').className = 'status-dot bad';
         showConnection();
@@ -248,10 +332,11 @@ async function refreshHealth(interactive = false) {
     $('connection-result').textContent = bad ? "API reachable; check cluster health before generating." : "Authenticated: chat and workspace controls are available.";
     if (interactive) notice(bad ? 'The API is reachable, but the engine reports an unhealthy state.' : '', bad ? 'bad' : 'neutral');
   } catch (error) {
+    if (error.code === 'stale_credential') return;
     state.authenticated = false;
     $('connection-dot').className = 'status-dot bad';
     if (!$('connection-label').textContent.includes('Token')) $('connection-label').textContent = "Connection unavailable";
-    $('model-pill').textContent = "GLM · API unavailable";
+    $('model-pill').textContent = "API unavailable";
     $('connection-result').textContent = error.message;
     $('cluster-check-note').textContent = 'Latest check failed; previously displayed telemetry is stale.';
     setBadge($('cluster-health'), 'unknown');
@@ -266,9 +351,9 @@ async function refreshHealth(interactive = false) {
 function message(role, content = '') {
   $('chat-empty').hidden = true;
   const outer = element('article', `message ${role}`);
-  const avatar = element('span', 'message-avatar', role === 'assistant' ? 'GLM' : "YOU");
+  const avatar = element('span', 'message-avatar', role === 'assistant' ? 'AI' : "YOU");
   const body = element('div');
-  const meta = element('div', 'message-meta', role === 'assistant' ? `reasoning ${state.reasoning} · GLM` : "YOU");
+  const meta = element('div', 'message-meta', role === 'assistant' ? `reasoning ${state.reasoning} · ${state.model || 'Assistant'}` : "YOU");
   const text = element('div', 'message-content', content);
   const details = element('details', 'reasoning-details');
   const summary = element('summary', '', 'Reasoning');
@@ -618,6 +703,7 @@ function renderConversations() {
 
 function setSidebar(collapsed) {
   document.body.classList.toggle('sidebar-collapsed', collapsed);
+  $('ui-sidebar-collapsed').checked = collapsed;
   for (const id of ['sidebar-toggle', 'sidebar-collapse']) $(id).setAttribute('aria-expanded', String(!collapsed));
 }
 
@@ -888,13 +974,18 @@ async function startOperation(action) {
   finally { state.operationSubmitting = false; renderOperations(); }
 }
 
-$('ui-language').addEventListener('change', () => {
-  applyLanguage($('ui-language').value);
-  try { localStorage.setItem('strixglm.language', state.language); } catch { /* Preference persistence is optional. */ }
+for (const id of ['ui-language', 'ui-text-size', 'ui-density', 'show-thinking', 'ui-sidebar-collapsed']) $(id).addEventListener('change', savePreferences);
+$('refresh-settings').addEventListener('click', refreshSettings);
+$('api-settings-form').addEventListener('submit', saveAPISettings);
+$('rotate-api-token').addEventListener('click', rotateAPIToken);
+$('copy-api-token').addEventListener('click', async () => {
+  if (!state.token) { $('connection-result').textContent = state.language === 'it' ? 'Connettiti prima di copiare il token attivo.' : 'Connect before copying the active token.'; return; }
+  try { await navigator.clipboard.writeText(state.token); $('connection-result').textContent = state.language === 'it' ? 'Token copiato negli appunti. Trattalo come una password.' : 'Token copied to clipboard. Treat it as a password.'; }
+  catch { $('connection-result').textContent = state.language === 'it' ? 'Appunti non disponibili. Leggi il token dal file privato del server.' : 'Clipboard unavailable. Read the token from the private server file.'; }
 });
 $('chat-attachments').addEventListener('change', uploadAttachments);
 $('export-chat').addEventListener('click', () => {
-  downloadJSON({ schema: 1, exported_utc: new Date().toISOString(), model: state.model, conversation_id: state.conversationID, messages: state.records, replay_history: state.chat, note: 'Messages marked incomplete/error were not included in model replay history. Attachment IDs require the original server; extracted file text is not duplicated here.' }, `strixglm-conversation-${state.conversationID || 'new'}.json`);
+  downloadJSON({ schema: 1, exported_utc: new Date().toISOString(), model: state.model, conversation_id: state.conversationID, messages: state.records, replay_history: state.chat, note: 'Messages marked incomplete/error were not included in model replay history. Attachment IDs require the original server; extracted file text is not duplicated here.' }, `haloclu-conversation-${state.conversationID || 'new'}.json`);
 });
 $('workspace-kind').addEventListener('change', () => { $('workspace-ssh').hidden = $('workspace-kind').value !== 'ssh'; });
 $('workspace-preset').addEventListener('change', () => { const root = $('workspace-preset').selectedOptions[0]?.dataset.root; if (root) $('workspace-root').value = root; });
@@ -963,12 +1054,11 @@ document.querySelectorAll('[data-tab]').forEach((tab, index, tabs) => {
 });
 document.querySelectorAll('[data-go-coding]').forEach(button => button.addEventListener('click', () => selectTab('workspace', true)));
 $('reasoning-mode').addEventListener('change', () => { state.reasoning = $('reasoning-mode').value; });
-$('show-thinking').addEventListener('change', () => document.querySelectorAll('.reasoning-details').forEach(node => { node.open = $('show-thinking').checked; }));
-for (const id of ['sidebar-toggle', 'sidebar-collapse']) $(id).addEventListener('click', () => setSidebar(!document.body.classList.contains('sidebar-collapsed')));
+for (const id of ['sidebar-toggle', 'sidebar-collapse']) $(id).addEventListener('click', () => { $('ui-sidebar-collapsed').checked = !document.body.classList.contains('sidebar-collapsed'); savePreferences(); });
 $('refresh-models').addEventListener('click', refreshCatalog);
 $('refresh-benchmarks').addEventListener('click', refreshBenchmarks);
-$('connection-toggle').addEventListener('click', () => showConnection($('connection-panel').hidden));
-$('open-connection').addEventListener('click', () => showConnection($('connection-panel').hidden));
+$('connection-toggle').addEventListener('click', () => showConnection());
+$('open-connection').addEventListener('click', () => showConnection());
 $('connection-form').addEventListener('submit', async event => {
   event.preventDefault();
   state.token = $('api-token').value.trim();
@@ -979,6 +1069,9 @@ $('forget-token').addEventListener('click', () => {
   state.token = '';
   $('api-token').value = '';
   state.authenticated = false;
+  state.settings = null;
+  $('api-settings-fields').disabled = true;
+  $('rotate-api-token').disabled = true;
   clearTimeout(state.taskTimer);
   clearTimeout(state.jobTimer);
   clearTimeout(state.workspaceTimer);
@@ -1086,6 +1179,5 @@ document.addEventListener('visibilitychange', () => {
 state.healthTimer = setInterval(() => {
   if (!document.hidden && state.authenticated && !state.chatController) refreshHealth();
 }, 15000);
-setSidebar(window.matchMedia('(max-width: 760px)').matches);
 initializeLanguage();
 refreshHealth();

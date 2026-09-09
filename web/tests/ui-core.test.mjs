@@ -182,7 +182,9 @@ test('Frontend source has no dynamic HTML/eval, persisted token, CDN or external
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.doesNotMatch(script, /(?:innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(|new Function|sessionStorage)/);
   const persistedKeys = [...script.matchAll(/localStorage\.(?:getItem|setItem)\('([^']+)'/g)].map(match => match[1]);
-  assert.deepEqual(persistedKeys, ['strixglm.language', 'strixglm.language']);
+  assert.deepEqual(persistedKeys, ['haloclu.preferences', 'strixglm.language', 'haloclu.preferences']);
+  assert.match(script, /localStorage\.setItem\('haloclu\.preferences', JSON\.stringify\(state\.preferences\)\)/);
+  assert.match(script, /state\.preferences = displayPreferences\(value\)/);
   assert.doesNotMatch(html, /(?:src|href)=["']https?:\/\//);
   assert.match(script, /textContent/);
   assert.match(script, /window\.confirm/);
@@ -266,8 +268,8 @@ test('Catalog links reject executable protocols and credential-bearing URLs', ()
 });
 
 test('Go embeds only the four production frontend assets, not tests or documentation', async () => {
-  const source = await readFile(new URL('../../main.go', import.meta.url), 'utf8');
+  const source = await readFile(new URL('../assets.go', import.meta.url), 'utf8');
   const match = source.match(/^\/\/go:embed (.+)$/m);
   assert.ok(match, 'Missing explicit production asset embed declaration');
-  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['web/app.js', 'web/index.html', 'web/styles.css', 'web/ui-core.mjs']);
+  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'index.html', 'styles.css', 'ui-core.mjs']);
 });

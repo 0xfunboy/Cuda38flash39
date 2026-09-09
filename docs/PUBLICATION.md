@@ -23,6 +23,12 @@ matches were explicit negative-test fixtures: a fake credential URL and a
 string labeled as a non-secret fixture token. This is a bounded source review,
 not a guarantee that any arbitrary future addition is safe to publish.
 
+PRODUCT-005 updates the presentation to HaloClu and the source layout to
+`cmd/strixglm` and `internal/app`. Its console and Options screenshots come
+from the actual deployment: empty conversation and empty credential input,
+no visible secrets or simulated performance. Mutable API switches and rotated
+tokens remain under ignored `state/`, not in tracked configuration or images.
+
 Historical task identifiers and sample ownership/invocation identifiers are
 test or deployment evidence, not login credentials. The configured home paths,
 SSH alias and private-network addresses intentionally describe the reference
@@ -31,7 +37,8 @@ hardware. They must not be mistaken for a working installation on another host.
 ## Material that remains private
 
 - `state/`: bearer token, conversation/session state, uploads, saved host
-  configuration, runtime ownership, rollback snapshots, and generated receipts.
+  configuration, API admission settings, runtime ownership, rollback snapshots,
+  and generated receipts.
 - `.tools/`: downloaded toolchains, Pi installation and dependency trees.
 - `bin/`: compiled local gateway and rollback executables.
 - `config.local.json`: local override configuration, when present.

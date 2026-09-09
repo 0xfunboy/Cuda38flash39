@@ -5,6 +5,22 @@ Preserve the existing qualified engine and whole-pair ownership. Do not add a
 second agent loop: Pi owns coding; this repository supplies the UI, transport,
 controls and verification boundaries.
 
+## Source layout
+
+- `cmd/strixglm/`: the executable entry point; `make build` still writes
+  `bin/strixglm` and does not change the installed service names.
+- `internal/app/`: gateway, CLI, cluster controls, Pi transport and their tests.
+  These remain one cohesive package so behavior-preserving moves do not require
+  exporting private implementation details merely to split files.
+- `web/`: browser sources and the explicit four-file production asset embed.
+- `runtime/`: pinned runtime recipes, adapters and the embedded model catalog;
+  model weights and runtime binaries are not compiled into the gateway.
+- `benchmarks/`: opt-in harnesses and fixtures; `docs/`: product documentation.
+
+Run build and test commands from the repository root. Direct builds use
+`go build -o bin/strixglm ./cmd/strixglm`; `go build .` is no longer an executable
+target. Runtime configuration and private state paths are unchanged.
+
 ## Checks
 
 Hosted [portable checks](.github/workflows/checks.yml) compile Go, run static
