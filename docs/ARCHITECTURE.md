@@ -41,6 +41,13 @@ not make the recorded absolute deployment paths portable.
 
 ## Runtime separation
 
+`internal/app/conversations*.go` owns canonical transcript records and lifecycle;
+the Chat stream is persisted by the gateway even after browser disconnection.
+`workspace_protection.go` prepares bounded source copies and independently runs
+captured build/test commands; it does not implement another coding agent.
+`download*.go` uses a separate public-only HTTPS transport, durable manifests and
+byte-range resume. Acquiring files neither installs nor switches the model.
+
 The gateway serves the UI and authenticated APIs. It does not replace the
 target model, the paired coordinator or the Pi agent. Frontend changes require
 a gateway rebuild; a gateway restart must drain its work and must not restart

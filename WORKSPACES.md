@@ -3,8 +3,16 @@
 The workspace UI uses the actual upstream Pi coding agent, not the previous
 product coding loop. Starting a session starts `pi --mode rpc`; it does not
 submit a model request. Sending a prompt explicitly lets Pi read, edit, write
-and run commands in the selected workspace. Changes are direct, not deferred
-until the old Apply button. Use a clean Git branch or a disposable worktree.
+and run commands in the selected workspace. New local sessions default to a
+protected, bounded source copy with independent checks and explicit verified
+Apply. Direct mode must be deliberately selected and acknowledged. This is
+separate from the older Advanced coding loop. Keep using a clean branch or
+disposable worktree for reviewed changes.
+
+[Protected snapshots, limits, receipts and Apply](docs/PROTECTED_WORKSPACES.md)
+define the safety contract. Protected mode copies current dirty/untracked
+eligible sources, not Git history or an unlimited full repository. The original
+root is never reset/stashed. Remote protected mode is explicitly blocked.
 
 ## Pinned implementation
 
@@ -37,16 +45,23 @@ request deadlines; this distinction is not a promise of unlimited output.
 1. Select a project directory within a configured `workspace_roots` entry.
    The broad root itself is not suitable if it contains live runtime, weights
    or product state. Such mounts are rejected. A project subdirectory is required.
-2. Create the session with explicit confirmation. It becomes `CONNECTED`.
+2. Choose protected mode, reasoning and trusted build/test commands, then create
+   the session with explicit confirmation. It becomes `CONNECTED`; original and
+   working roots are separately reported. An optional canonical conversation
+   links Chat and Pi without implicitly submitting its old transcript or tools.
 3. Start Pi. This runs RPC startup/get_state only; state becomes `READY`.
 4. Send a prompt only when `capabilities.prompt` is true. An accepted RPC
    response means admission, not completed work. Actual Pi events distinguish
    agent activity, tool execution and final responses.
-5. Abort clears Pi's pending queue and asks Pi to become idle. Close drains an
+5. Natural completion starts independent checking on a new snapshot using the
+   preconfigured commands. Inspect `verification`, review the diff and explicitly
+   apply only its exact `TEST_PASS` candidate. Agent self-reports do not qualify
+   code. Changed test definitions require an additional acknowledgement.
+6. Abort clears Pi's pending queue and asks Pi to become idle. Close drains an
    active generation before ending the owned process tree. It never stops ranks.
 
 Pi runs in bubblewrap with separate filesystem, PID and **network** namespaces.
-Only the selected project is writable, alongside private Pi configuration,
+Only the protected working copy (or explicitly direct project) is writable, alongside private Pi configuration,
 session records and temporary storage. Runtime and operating-system tools are
 read-only. The sandbox does not mount the host home, SSH keys or systemd bus.
 Project extensions, skills, templates and context-file discovery are disabled.
@@ -77,6 +92,12 @@ They can also prevent large project builds; that is a visible resource failure,
 not a reason to silently remove the limits.
 
 ## SSH sessions
+
+SSH currently supports **explicit direct mode only**, requiring
+`mode:"direct", allow_direct:true`. Protected SSH snapshots, safe remote Apply
+and independent fresh remote verification are not implemented. They fail
+explicitly rather than silently granting direct writes. All remaining remote
+permissions and caveats below still apply.
 
 Save a host preset containing only name, explicit hostname/IP, port, user,
 project root and optional private-key **path**. Key contents are neither read
@@ -154,6 +175,14 @@ events/8 MiB. Upstream Pi session data is kept separately in that private
 session directory. On gateway restart, saved sessions become closed records;
 they are never implicitly reconnected or restarted, and credentials are not
 resurrected. Create a new session to reconnect. No generation is retried.
+
+New sessions link to the same local canonical conversation used by Chat.
+Explicit transcript handoff stages context for the next new Pi prompt; it is
+not native process/KV restoration and never replays tools. Original role and
+origin are retained. Explicit conversation deletion requires linked workspaces
+to have closed cleanly and removes their owned private records, snapshots and
+receipts; it does not delete project files or exported copies. History and a
+live agent process are different resources.
 
 ## CPU-only verification
 

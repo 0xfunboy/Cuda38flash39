@@ -133,6 +133,8 @@ func (a *App) routes() http.Handler {
 	a.registerAttachmentRoutes(mux)
 	registerCatalogRoutes(a, mux)
 	a.registerOperationRoutes(mux)
+	a.registerDownloadRoutes(mux)
+	a.registerConversationRoutes(mux)
 	mux.Handle("/", http.FileServer(http.FS(webui.Assets)))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		h := a.health(r.Context())
@@ -326,6 +328,12 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
 	}
+	history, e := a.prepareConversationChat(p)
+	if e != nil {
+		jsonReply(w, 409, map[string]string{"error": e.Error()})
+		return
+	}
+	defer history.close()
 	if e := a.expandChatAttachments(p); e != nil {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
@@ -363,6 +371,10 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 		a.proxyToolChat(w, r, p, settings, started)
 		return
 	}
+	if e := history.start(p, settings); e != nil {
+		jsonReply(w, 409, map[string]string{"error": e.Error()})
+		return
+	}
 	body, _ := json.Marshal(p)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(a.cfg.ModelTimeout)*time.Second)
 	defer cancel()
@@ -381,7 +393,7 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(resp.Header.Get("Content-Type"), "text/event-stream") && resp.StatusCode == 200 {
 		var result ModelResult
 		detached := false
-		streamErr := consumeSSE(resp.Body, started, func(b []byte) {
+		streamErr := consumeSSEProgress(resp.Body, started, func(b []byte) {
 			if detached {
 				return
 			}
@@ -393,11 +405,12 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			}
-		}, &result)
+		}, &result, func(_ Metrics) { history.progress(result) })
 		if streamErr != nil {
 			a.journal.Log("chat_stream_error", map[string]any{"error": streamErr.Error()})
 		}
 		result.Metrics.HTTPSeconds = time.Since(started).Seconds()
+		history.finish(result, streamErr == nil)
 		a.mu.Lock()
 		a.lastMetrics = result.Metrics
 		a.mu.Unlock()
@@ -410,6 +423,18 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 			a.mu.Lock()
 			a.lastMetrics = m
 			a.mu.Unlock()
+			result := ModelResult{Metrics: m, StreamComplete: true}
+			if choices, ok := p["choices"].([]any); ok && len(choices) > 0 {
+				choice := object(choices[0])
+				msg := object(choice["message"])
+				result.Content = stringValue(msg["content"])
+				result.Reasoning = stringValue(msg["reasoning_content"])
+				if result.Reasoning == "" {
+					result.Reasoning = stringValue(msg["reasoning"])
+				}
+				result.FinishReason = stringValue(choice["finish_reason"])
+			}
+			history.finish(result, true)
 		}
 		_, _ = w.Write(b)
 	}
@@ -519,6 +544,7 @@ func entry(args []string) error {
 			shutdown, cancel := context.WithTimeout(context.Background(), time.Duration(max(cfg.ModelTimeout, 1800)+10)*time.Second)
 			defer cancel()
 			_ = a.shutdownOperations(shutdown)
+			_ = a.shutdownDownloads(shutdown)
 			_ = a.shutdownWorkspaces(shutdown)
 			a.mu.Lock()
 			pending := []*Task{}

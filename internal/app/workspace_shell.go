@@ -102,6 +102,12 @@ func (s *PiWorkspaceSession) shell(ctx context.Context, command string) (map[str
 	if state != "READY" {
 		return nil, errors.New("shell requires an idle started Pi session; cannot overlap generation")
 	}
+	if s.Mode != "" {
+		s.mu.Lock()
+		s.Verification = &WorkspaceVerification{Status: "UNVERIFIED", Origin: "shell", Completion: s.lastCompletion, Error: "Custom shell may change candidate files; rerun independent verification"}
+		_ = s.persistLocked()
+		s.mu.Unlock()
+	}
 	s.setState("SHELL", "")
 	start := time.Now()
 	if s.Kind == "ssh" {

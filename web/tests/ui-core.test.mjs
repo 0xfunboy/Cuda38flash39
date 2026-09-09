@@ -271,5 +271,5 @@ test('Go explicitly embeds production frontend and brand assets, not tests or do
   const source = await readFile(new URL('../assets.go', import.meta.url), 'utf8');
   const match = source.match(/^\/\/go:embed (.+)$/m);
   assert.ok(match, 'Missing explicit production asset embed declaration');
-  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'index.html', 'styles.css', 'ui-core.mjs']);
+  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'downloads.mjs', 'index.html', 'styles.css', 'ui-core.mjs']);
 });

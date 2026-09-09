@@ -141,6 +141,13 @@ try {
   await until('document.querySelectorAll(".catalog-card").length > 0');
   assert.equal(await execute('return document.querySelectorAll(".catalog-card").length'), observations['/v1/catalog'].models.length);
   await writeFile(resolve(output, 'models-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await until('document.getElementById("model-downloads") !== null');
+  await execute("document.getElementById('model-downloads').scrollIntoView({block:'start'});");
+  await delay(150);
+  const downloadElement = await command(`/session/${session}/element`, { using: 'css selector', value: '#model-downloads' });
+  const downloadElementID = downloadElement['element-6066-11e4-a52e-4f735466cecf'];
+  await writeFile(resolve(output, 'downloads-live-desktop.png'), Buffer.from(await command(`/session/${session}/element/${downloadElementID}/screenshot`), 'base64'));
+  observations.checks.push('native download controls and stored jobs inspected without metadata search or acquisition');
   await execute("document.getElementById('tab-benchmarks').click();");
   await until('document.querySelectorAll(".operation-row").length > 0');
   await writeFile(resolve(output, 'benchmarks-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));

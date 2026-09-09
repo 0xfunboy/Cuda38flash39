@@ -34,10 +34,14 @@ and the newer Pi integration. A naturally concluded answer can still be wrong.
 5. Commit only after checking the result. Keep generated changes away from
    production until the ordinary project review and release process passes.
 
-**Pi changes files directly.** Sending a prompt authorizes its available tools
-within the selected session. It does not stage every change behind the legacy
-coding workflow's Apply button. Local sandboxing limits access and resources;
-it does not make an incorrect change correct.
+**Local Pi now defaults to protected mode.** It changes a bounded source copy,
+then the gateway independently runs your preconfigured commands on a fresh
+snapshot. Inspect the actual result and diff before explicit verified Apply.
+No configured test means UNVERIFIED; agent text is not a passing receipt.
+Modified test/build definitions require separate review acknowledgement.
+Direct mode deliberately bypasses the source-copy/Apply boundary and requires
+explicit confirmation. Local sandboxing limits access/resources; neither mode
+turns an incorrect change into a correct one. [Exact scope and limits](PROTECTED_WORKSPACES.md).
 
 ## Limits that matter during work
 
@@ -60,11 +64,18 @@ it does not make an incorrect change correct.
   sandbox's restrictions. Real-host login and remote coding are not yet
   qualified on the user's selected host. Use a restricted account, not an
   account controlling the inference ranks.
+- Protected SSH and fresh independent remote verification are blocked; remote
+  use requires an explicit direct-mode choice. Close the existing Pi scope
+  before starting another. Protected local copying is limited to the configured
+  source quota, not a complete arbitrary-size clone with Git history.
 - PDF support reads its text layer, not scanned pages or visual diagrams.
   Binary attachments expose limited hex/strings, not general binary analysis.
-- Export important chat conversations before reloading. Pi stores session
-  records, but a gateway restart does not automatically resume an agent or SSH
-  connection. Never publish tokens, private keys, session logs or uploaded files.
+- Chat and Pi share local, persisted canonical conversations. Explicit handoff
+  transfers transcript context, not a running agent/KV state or tool replay.
+  Keep exports as needed; deleting a conversation removes its owned cleanly
+  closed Pi records, not project files or external copies. Gateway restart does
+  not automatically resume an agent or SSH connection. Never publish tokens,
+  private keys, session logs or uploaded files.
 
 Exact isolation, permissions and lifecycle behavior are documented in
 [Pi workspaces](../WORKSPACES.md).

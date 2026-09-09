@@ -6,15 +6,15 @@ repository and its GLM reference deployment. The actual served model identity
 is separate from the product name.
 
 `web/assets.go` embeds only `index.html`, `styles.css`, `app.js`, and
-`ui-core.mjs`. The gateway lives in `internal/app`, with its entry point under
+`ui-core.mjs`, `downloads.mjs` and the supplied PNG branding assets. The gateway lives in `internal/app`, with its entry point under
 `cmd/strixglm`. Rebuild using `make build` after changing embedded assets;
 serve `.mjs` with a JavaScript MIME type.
 
 English is the default; Italian is selectable under Options. A non-secret
 whitelist of language, text size, density, thinking expansion and sidebar
 preferences is stored as `haloclu.preferences`; the old `strixglm.language`
-setting is migrated. API tokens, SSH passwords and conversations remain in
-tab memory. Reloading requires authentication again. All API requests stay
+setting is migrated. API tokens and SSH passwords remain in tab memory;
+conversations are persisted on the server. Reloading requires authentication again. All API requests stay
 on the gateway's origin.
 
 ## Chat, Markdown and attachments
@@ -39,6 +39,20 @@ or failed replies are retained for auditing but excluded from replay history.
 Export does not contain the tab's bearer credential. Attachment IDs are not
 portable without the original server; extracted payloads are not re-embedded.
 
+Conversations use one server-owned ID in Chat and Coding/Pi. Refresh lists saved
+records; open restores completed text for Chat replay and retains incomplete
+answers for inspection. The gateway saves streaming output independently of the
+browser; Stop stream detaches the browser, not the in-flight engine request.
+Import JSON creates a new record without executing anything. Stage shared history
+explicitly supplies transcript context to the next Pi instruction; it does not
+replay tools or restore a native KV checkpoint. Old Pi sessions can be explicitly
+recovered from Open in Chat. No automatic reconnect or retry occurs.
+
+Delete removes the canonical record, its linked owned Pi session directories
+and unshared attachment files after active work is closed. Original projects,
+exports and external backups are not deleted. This is filesystem removal, not
+a claim of irreversible physical SSD erasure. See [conversation storage](../docs/CONVERSATIONS.md).
+
 ## Coding workspace and advanced fallback
 
 The main Coding panel is a Pi workspace client, using `/v1/workspaces/*`:
@@ -53,9 +67,17 @@ The main Coding panel is a Pi workspace client, using `/v1/workspaces/*`:
    File browsing is read-only. Custom shell requires an idle READY Pi session
    and the server's explicit shell capability; each command needs confirmation.
    It uses the existing Pi RPC/SSH executor, not a new agent loop or interactive
-   PTY. Local commands can write/delete workspace files immediately in the
-   sandbox, without a deferred Apply step. SSH commands use the remote account's
+   PTY. Protected mode is the local default: source files are copied with current
+   edits intact and the original is untouched until explicit verified Apply.
+   Direct mode needs a separate deliberate confirmation. SSH commands use the remote account's
    privileges. Review the exact command and target before confirming.
+
+Captured build/test commands run independently on a fresh snapshot after a natural
+Pi completion. The UI shows actual reasoning, roots, mode and command receipts.
+No configured tests means UNVERIFIED. TEST_PASS means the recorded commands passed,
+not a guarantee of correctness. Review modified test definitions separately.
+Protected SSH and arbitrary binary/large-repository copying are not implemented.
+See [protection and verification limits](../docs/PROTECTED_WORKSPACES.md).
 
 Mutating workspace actions require confirmation. Capability failures are shown
 as unavailable, not simulated success. Failed requests are not automatically
@@ -108,6 +130,13 @@ final text and SSE `[DONE]` are required before a reply enters replay history.
 Catalog and operations keep source-backed availability and historical evidence
 distinct from live measurements. Benchmarks/downloads require confirmation.
 The UI never restarts one rank independently.
+
+Models also contains the native Go downloader: public Hugging Face/ModelScope
+search, exact-file selection and public HTTPS direct links. Create plan does not
+start a download; Start requires confirmation. Durable progress includes bytes,
+rate and ETA. Pause/cancel preserves partial files; restart pauses active jobs
+until explicit Resume. File acquisition is separate from runtime compatibility,
+conversion or model loading. [Sources, validation and resume contract](../docs/DOWNLOADS.md).
 
 ## Regression checks
 

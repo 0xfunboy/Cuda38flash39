@@ -3,18 +3,20 @@ import {
   apiSettings, displayPreferences, errorMessage, finite, generationPanelState, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
   IT_LABELS, markdownBlocks, markdownInline, observedRate, pathList, percent, safeSourceURL, seconds,
 } from './ui-core.mjs';
+import { initDownloads } from './downloads.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
   token: '', model: '', reasoning: 'low', options: null, contextLimit: null,
-  chat: [], chatController: null, task: null, taskID: '', taskTimer: null,
+  chat: [], chatController: null, chatSubmitting: false, historySequence: 0, listSequence: 0, task: null, taskID: '', taskTimer: null,
   taskGeneration: 0, healthBusy: false, authenticated: false, healthTimer: null,
-  importedOptions: {}, conversations: [], conversationID: 0, catalog: null, actions: [], jobs: [], jobTimer: null, operationSubmitting: false,
+  importedOptions: {}, conversations: [], conversationID: '', conversation: null, conversationTimer: null, catalog: null, actions: [], jobs: [], jobTimer: null, operationSubmitting: false,
   language: 'en', records: [], attachments: [], uploading: 0, workspaceOptions: null, workspaceSessions: [], workspace: null, workspaceTimer: null, workspaceSequence: 0, workspaceEvents: [], workspaceBusy: false,
   preferences: displayPreferences(), activeTab: 'chat', settings: null, settingsBusy: false,
 };
 
 const staticLabels = [];
+const downloader = initDownloads({ request, notice, bytes, seconds });
 function applyLanguage(language) {
   state.language = language === 'it' ? 'it' : 'en';
   document.documentElement.lang = state.language;
@@ -142,7 +144,7 @@ function selectTab(name, focus = false) {
   const label = $(`tab-${name}`)?.querySelector('.nav-label')?.textContent || name;
   $('view-label').textContent = label;
   renderGenerationVisibility();
-  if (state.authenticated && name === 'models') refreshCatalog();
+  if (state.authenticated && name === 'models') { refreshCatalog(); downloader.refresh(); }
   if (state.authenticated && name === 'benchmarks') refreshBenchmarks();
   if (state.authenticated && name === 'workspace') refreshWorkspaces();
   if (state.authenticated && name === 'options') refreshSettings();
@@ -221,6 +223,7 @@ async function request(path, options = {}) {
       body: options.body ? JSON.stringify(options.body) : undefined,
     });
     const payload = await response.json().catch(() => null);
+    if (dispatchedToken !== state.token) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
     if (!response.ok) {
       if (response.status === 401 || (response.status === 403 && payload?.code !== 'api_disabled')) {
         if (dispatchedToken !== state.token) throw Object.assign(new Error('Authentication changed while this request was in flight. Refresh to inspect its current state.'), { code: 'stale_credential' });
@@ -413,13 +416,17 @@ function updateChatMetrics(usage, timings, firstTokenMS, started, finished = fal
 
 async function sendChat(event) {
   event.preventDefault();
-  if (state.chatController) return;
+  if (state.chatController || state.chatSubmitting) return;
   if (state.uploading) { notice('Wait for attachment extraction before sending.'); return; }
   const input = $('chat-input').value.trim();
   if (!input) return;
   if (!state.authenticated || !state.model) { showConnection(); notice('Connect the local API before sending a message.'); return; }
   let settings;
   try { settings = selectedSettings(); } catch (error) { notice(error.message, 'bad'); return; }
+  const requestToken = state.token;
+  state.chatSubmitting = true; $('send-chat').disabled = true; $('clear-chat').disabled = true;
+  try { await ensureConversation(input); if (!state.authenticated || state.token !== requestToken) throw new Error('Authentication changed; no generation submitted.'); } catch (error) { notice(`History unavailable: ${error.message}`, 'bad'); state.chatSubmitting = false; $('send-chat').disabled = false; $('clear-chat').disabled = false; return; }
+  const requestConversationID = state.conversationID;
   notice('');
   const requestReasoning = settings.reasoning_effort;
   state.reasoning = requestReasoning;
@@ -464,7 +471,7 @@ async function sendChat(event) {
       method: 'POST', credentials: 'omit', cache: 'no-store', mode: 'same-origin', redirect: 'error',
       signal: controller.signal,
       headers: { ...headers(), Accept: 'text/event-stream', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: state.model, ...settings, messages: [...state.chat, userMessage], stream: true, stream_options: { include_usage: true, continuous_usage_stats: true } }),
+      body: JSON.stringify({ model: state.model, conversation_id: requestConversationID, ...settings, messages: [...state.chat, userMessage], stream: true, stream_options: { include_usage: true, continuous_usage_stats: true } }),
     });
     if (!response.ok) {
       const failure = await response.json().catch(() => null);
@@ -495,11 +502,11 @@ async function sendChat(event) {
     }
     if (protocolError) throw new Error(protocolError);
     const resultState = completionState(done, finish, text);
-    if (resultState === 'incomplete-stream') throw new Error('The stream ended without a completion marker ([DONE]). Partial output was not added to history.');
+    if (resultState === 'incomplete-stream') throw new Error('The stream ended without a completion marker ([DONE]). Check the saved record; partial output is not replayed as a completed answer.');
     if (resultState !== 'complete') {
       output.error.hidden = false;
-      output.error.textContent = finish === 'length' ? 'INCOMPLETE: output cap reached. This answer was not added to conversation history.'
-        : `Not a completed text answer (${finish || 'no finish reason'}). This output was not added to history.`;
+      output.error.textContent = finish === 'length' ? 'INCOMPLETE: output cap reached. Saved for review, not replayed as a completed answer.'
+        : `Not a completed text answer (${finish || 'no finish reason'}). Saved for review only.`;
     } else {
       state.chat.push(userMessage, { role: 'assistant', content: text });
     }
@@ -510,11 +517,12 @@ async function sendChat(event) {
     output.record.error = error.message;
     output.error.hidden = false;
     output.error.textContent = error.name === 'AbortError'
-      ? 'Stream stopped. Partial output was not added to history; the engine may be draining the request.' : error.message;
+      ? 'Browser stream stopped. The engine may still be draining; the server saves its result. Refresh history to check completion.' : error.message;
     output.meta.textContent = `reasoning ${requestReasoning} · ${error.name === 'AbortError' ? "interrupted" : "error"}`;
   } finally {
     clearInterval(ticker);
     state.chatController = null;
+    state.chatSubmitting = false;
     output.record.content = text;
     output.record.reasoning = reasoning;
     output.record.finish_reason = finish;
@@ -525,7 +533,8 @@ async function sendChat(event) {
     $('clear-chat').disabled = false;
     $('stop-chat').hidden = true;
     $('chat-input').focus();
-    saveConversation(input);
+    await refreshConversations();
+    if (state.conversationID) await openConversation(state.conversationID).catch(error => notice(`History refresh: ${error.message}`, 'bad'));
   }
 }
 
@@ -685,35 +694,91 @@ async function taskAction(action) {
   }
 }
 
-function saveConversation(title = '') {
-  const existing = state.conversations.find(item => item.id === state.conversationID);
-  const item = existing || { id: ++state.conversationID, title: title.slice(0, 50) || "Conversation" };
-  item.chat = state.chat;
-  item.records = state.records;
-  item.nodes = [...$('conversation').querySelectorAll('.message')];
-  item.metrics = Object.fromEntries(['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context'].map(id => [id, $(id).textContent]));
-  if (!existing) state.conversations.push(item);
+async function ensureConversation(title = 'Conversation') {
+  if (state.conversationID) return state.conversationID;
+  const c = await request('/v1/conversations', { method: 'POST', body: { title: title.slice(0, 100) } });
+  state.conversation = c; state.conversationID = c.id;
+  await refreshConversations(); return c.id;
+}
+
+async function refreshConversations() {
+  if (!state.authenticated) return;
+  const sequence = ++state.listSequence;
+  try {
+    const data = await request('/v1/conversations');
+    if (sequence !== state.listSequence || !state.authenticated) return;
+    state.conversations = data.conversations || []; renderConversations();
+  } catch (error) { notice(`History: ${error.message}`, 'bad'); }
+}
+
+function resetConversation() {
+  state.historySequence++; state.listSequence++;
+  clearTimeout(state.conversationTimer);
+  state.conversationID = ''; state.conversation = null; state.chat = []; state.records = [];
+  $('conversation').querySelectorAll('.message').forEach(node => node.remove());
+  $('chat-empty').hidden = false; $('conversation-title').textContent = 'New conversation';
   renderConversations();
+}
+
+async function openConversation(id) {
+  if (state.chatController || state.chatSubmitting) { notice('Wait for or stop the browser stream before switching conversations.'); return; }
+  const sequence = ++state.historySequence;
+  clearTimeout(state.conversationTimer);
+  const c = await request(`/v1/conversations/${encodeURIComponent(id)}`);
+  if (sequence !== state.historySequence || !state.authenticated) return;
+  state.conversationID = c.id; state.conversation = c;
+  state.chat = c.replay_messages || [];
+  // Old servers do not expose replay_messages. Never replay tool events or partial answers.
+  if (!c.replay_messages) state.chat = (c.messages || []).filter(m => m.role === 'user' || (m.role === 'assistant' && m.status === 'complete')).map(m => ({ role: m.role, content: m.content || '', ...(m.attachment_ids?.length ? { attachment_ids: m.attachment_ids } : {}) }));
+  state.records = [];
+  $('conversation').querySelectorAll('.message').forEach(node => node.remove());
+  for (const m of c.messages || []) {
+    if (!['user', 'assistant'].includes(m.role)) continue;
+    const view = message(m.role); Object.assign(view.record, m);
+    renderMarkdown(view.text, m.content || ''); view.reasoning.textContent = m.reasoning || ''; view.details.hidden = !m.reasoning;
+    view.meta.textContent = `${m.origin || 'chat'} · ${m.role} · ${m.status}${m.settings?.reasoning_effort ? ` · reasoning ${m.settings.reasoning_effort}` : ''}`;
+    if (m.role === 'assistant' && !['complete', 'completed', 'concluded'].includes(m.status)) { view.error.hidden = false; view.error.textContent = `${String(m.status || 'unknown').toUpperCase()} · retained for review, not replayed as a completed answer.`; }
+  }
+  state.records = c.messages || [];
+  $('chat-empty').hidden = !!state.records.length; $('conversation-title').textContent = c.title;
+  for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context']) $(id).textContent = '—';
+  const recorded = [...state.records].reverse().find(m => m.role === 'assistant')?.settings?.metrics;
+  if (recorded) {
+    $('chat-tps').textContent = finite(recorded.decode_tps) === null ? '—' : `${number(recorded.decode_tps, 2)} tok/s`;
+    $('chat-ttft').textContent = finite(recorded.ttft_ms) === null ? '—' : seconds(recorded.ttft_ms / 1000);
+    $('chat-ttft').title = 'Saved gateway-observed first content/reasoning token. Not browser network transit.';
+    $('chat-wall').textContent = finite(recorded.http_seconds) === null ? '—' : seconds(recorded.http_seconds);
+    $('chat-wall').title = 'Saved gateway HTTP wall time, not engine decode time.';
+    $('chat-tokens').textContent = number(recorded.completion_tokens, 0);
+    $('chat-context').textContent = number(recorded.prompt_tokens, 0);
+  }
+  renderConversations(); renderSharedPiHistory();
+  if (c.messages?.some(m => m.status === 'pending' || m.status === 'streaming')) state.conversationTimer = setTimeout(() => { if (state.conversationID === c.id && !state.chatController) openConversation(c.id).catch(error => notice(error.message, 'bad')); }, 2500);
+  return c;
+}
+
+function renderSharedPiHistory() {
+  if (state.workspace && state.workspace.conversation_id !== state.conversationID) return;
+  const rows = (state.conversation?.messages || []).filter(m => ['user', 'assistant'].includes(m.role));
+  $('workspace-messages').replaceChildren(...rows.map(m => {
+    const item = element('div', `pi-${m.role}-message`); item.append(element('p', 'small muted', `${m.origin} · ${m.role} · ${m.status}`));
+    const body = element('div'); renderMarkdown(body, m.content || ''); item.append(body); return item;
+  }));
 }
 
 function renderConversations() {
   $('conversation-list').replaceChildren(...state.conversations.map(item => {
     const button = element('button', item.id === state.conversationID ? 'conversation-item active' : 'conversation-item', item.title);
-    button.type = 'button';
-    button.addEventListener('click', () => {
-      if (state.chatController) { notice("Wait for or stop the stream before switching conversations."); return; }
-      state.conversationID = item.id;
-      state.chat = item.chat;
-      state.records = item.records;
-      $('conversation').querySelectorAll('.message').forEach(node => node.remove());
-      $('conversation').append(...item.nodes);
-      $('chat-empty').hidden = true;
-      for (const [id, value] of Object.entries(item.metrics)) $(id).textContent = value;
-      renderConversations();
-      selectTab('chat');
-    });
-    return button;
+    button.type = 'button'; button.addEventListener('click', () => openConversation(item.id).catch(error => notice(error.message, 'bad'))); return button;
   }));
+  for (const id of ['rename-conversation', 'delete-conversation', 'chat-to-pi']) $(id).disabled = !state.conversationID || !!state.chatController;
+}
+
+async function stagePiHistory() {
+  if (!state.workspace?.id || !state.conversationID) throw new Error('Select a conversation and create its linked Pi session first.');
+  const c = await request(`/v1/conversations/${state.conversationID}`);
+  const result = await request(`/v1/conversations/${c.id}/handoff`, { method: 'POST', body: { workspace_id: state.workspace.id, revision: c.revision, confirm: true } });
+  notice(result.note || 'History staged as context. Submit an explicit new instruction to run Pi.');
 }
 
 function setSidebar(collapsed) {
@@ -775,15 +840,24 @@ function renderWorkspace() {
   $('workspace-command').replaceChildren(...commandList.map(command => { const id = typeof command === 'string' ? command : command.id; const option = element('option', '', typeof command === 'string' ? command : command.label || id); option.value = id; return option; }));
   const connected = ['CONNECTED', 'READY', 'RUNNING', 'ABORTING'].includes(current);
   $('workspace-create').disabled = !options || state.workspaceBusy;
-  $('workspace-connect').disabled = !state.workspace || !['CREATED', 'FAILED'].includes(current) || state.workspaceBusy;
+  $('workspace-connect').disabled = !state.workspace || current !== 'CREATED' || state.workspaceBusy;
   $('workspace-start').disabled = !pi.tools_available || state.workspace?.capabilities?.pi !== true || current !== 'CONNECTED' || state.workspaceBusy;
   $('workspace-send').disabled = !pi.tools_available || state.workspace?.capabilities?.prompt !== true || current !== 'READY' || state.workspaceBusy;
   $('workspace-abort').disabled = !['RUNNING', 'STARTING'].includes(current) || state.workspaceBusy;
-  $('workspace-close').disabled = !state.workspace || current === 'CLOSED' || state.workspaceBusy;
+  $('workspace-close').disabled = !state.workspace || (current === 'CLOSED' && state.workspace.closed_cleanly === true) || state.workspaceBusy;
   $('workspace-files-button').disabled = !connected || state.workspace?.capabilities?.files !== true || state.workspaceBusy;
   for (const id of ['workspace-terminal-run', 'workspace-command']) $(id).disabled = !connected || state.workspace?.capabilities?.terminal !== true || state.workspaceBusy;
   for (const id of ['workspace-shell-run', 'workspace-shell-command']) $(id).disabled = !canRunWorkspaceShell(state.workspace) || state.workspaceBusy;
   $('workspace-status').textContent = state.workspace ? `${state.workspace.id} · ${current} · ${state.workspace.root || ''}${state.workspace.error || state.workspace.blocked_reason ? ` · ${state.workspace.error || state.workspace.blocked_reason}` : ''}` : 'No active workspace.';
+  const ws = state.workspace;
+  $('workspace-effective').textContent = ws ? `Mode: ${ws.mode || 'legacy direct'} · actual reasoning: ${ws.reasoning_effort || 'not reported'} · original: ${ws.original_root || ws.root} · working: ${ws.working_root || ws.root} · context: ${ws.context_tokens || 'not reported by Pi'}` : 'No session selected.';
+  const verdict = ws?.verification?.status || 'UNVERIFIED';
+  $('workspace-verdict').textContent = verdict;
+  $('workspace-review').disabled = !ws || ws.mode !== 'protected' || state.workspaceBusy;
+  $('workspace-verify').disabled = !ws || !['READY', 'CONNECTED'].includes(current) || state.workspaceBusy;
+  $('workspace-apply').disabled = !ws || ws.mode !== 'protected' || verdict !== 'TEST_PASS' || !['READY', 'CONNECTED'].includes(current) || state.workspaceBusy;
+  $('pi-handoff').disabled = !ws || ws.conversation_id !== state.conversationID || !['CREATED', 'CONNECTED', 'READY'].includes(current) || state.workspaceBusy;
+  $('workspace-shell-note').textContent = ws?.mode === 'protected' ? 'Commands modify the protected copy. Applying changes to the original requires independent verification and explicit confirmation.' : 'Direct mode: commands can modify the selected project immediately. SSH uses the remote account privileges.';
 }
 
 async function refreshWorkspaces() {
@@ -811,6 +885,7 @@ async function workspaceAction(action, body = {}) {
     if (result?.id) state.workspace = result;
     if (action === 'prompt') { $('workspace-messages').append(element('p', 'pi-user-message', body.message)); $('workspace-prompt').value = ''; }
     await pollWorkspace();
+    await refreshConversations();
   } catch (error) { notice(`${error.message} No automatic retry. Refresh the workspace before resubmitting.`, 'bad'); }
   finally { state.workspaceBusy = false; $('workspace-password').value = ''; renderWorkspace(); }
 }
@@ -841,7 +916,8 @@ async function pollWorkspace() {
     state.workspaceSequence = payload.next_seq ?? state.workspaceEvents.at(-1)?.seq ?? state.workspaceSequence;
     $('workspace-events').textContent = JSON.stringify(state.workspaceEvents, null, 2);
     renderWorkspace();
-    if (['STARTING', 'READY', 'RUNNING', 'ABORTING'].includes(workspaceState()) && state.authenticated) state.workspaceTimer = setTimeout(pollWorkspace, 1500);
+    if (session.conversation_id === state.conversationID && (payload.events || []).some(item => ['agent_end', 'message_end'].includes(item.event?.type)) && !state.chatController) await openConversation(session.conversation_id);
+    if (['STARTING', 'READY', 'RUNNING', 'ABORTING', 'VERIFYING'].includes(workspaceState()) && state.authenticated) state.workspaceTimer = setTimeout(pollWorkspace, 1500);
   } catch (error) { $('workspace-status').textContent = `Workspace polling stopped: ${error.message} Refresh to resume; no prompt is replayed.`; }
 }
 
@@ -999,6 +1075,59 @@ $('copy-api-token').addEventListener('click', async () => {
   catch { $('connection-result').textContent = state.language === 'it' ? 'Appunti non disponibili. Leggi il token dal file privato del server.' : 'Clipboard unavailable. Read the token from the private server file.'; }
 });
 $('chat-attachments').addEventListener('change', uploadAttachments);
+$('refresh-conversations').addEventListener('click', async () => { await refreshConversations(); if (state.conversationID) await openConversation(state.conversationID).catch(error => notice(error.message, 'bad')); });
+$('rename-conversation').addEventListener('click', async () => {
+  if (!state.conversationID) return;
+  const title = window.prompt('Conversation title', state.conversation?.title || ''); if (!title?.trim()) return;
+  try { const c = await request(`/v1/conversations/${state.conversationID}`); await request(`/v1/conversations/${c.id}`, { method: 'PUT', body: { revision: c.revision, title: title.trim(), messages: c.messages } }); await openConversation(c.id); await refreshConversations(); } catch (error) { notice(error.message, 'bad'); }
+});
+$('delete-conversation').addEventListener('click', async () => {
+  if (!state.conversationID || !window.confirm('Delete this conversation from Chat AND Pi, including linked owned session files and unshared attachments? Close active sessions first. Originals and exported copies are not deleted. This cannot be undone in HaloClu.')) return;
+  try {
+    const c = await request(`/v1/conversations/${state.conversationID}`);
+    await request(`/v1/conversations/${c.id}`, { method: 'DELETE', body: { revision: c.revision, confirm: true } });
+    if (state.workspace?.conversation_id === c.id) { clearTimeout(state.workspaceTimer); state.workspace = null; $('workspace-messages').replaceChildren(); $('workspace-events').textContent = 'No events.'; $('workspace-review-output').textContent = 'No review collected.'; }
+    resetConversation(); await refreshConversations(); await refreshWorkspaces(); notice('Owned conversation files deleted from both views. External exports and backups are outside HaloClu.');
+  } catch (error) { notice(error.message, 'bad'); }
+});
+$('import-conversation').addEventListener('change', async event => {
+  const file = event.target.files?.[0]; event.target.value = ''; if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { notice('Import exceeds 8 MiB.', 'bad'); return; }
+  if (!window.confirm('Import this JSON as a new conversation? No model request or tool command will run. Attachment files are not included in exported JSON.')) return;
+  try {
+    const data = JSON.parse(await file.text()); if (!Array.isArray(data.messages)) throw new Error('Expected a messages array.');
+    const messages = data.messages.filter(m => ['user', 'assistant'].includes(m.role)).map(m => ({ id: crypto.randomUUID(), role: m.role, origin: 'chat', content: String(m.content || ''), reasoning: String(m.reasoning || ''), status: m.role === 'user' ? 'submitted' : ['complete', 'completed', 'concluded'].includes(m.status) ? 'complete' : 'incomplete' }));
+    const c = await request('/v1/conversations', { method: 'POST', body: { title: String(data.title || file.name).slice(0, 100) } });
+    await request(`/v1/conversations/${c.id}`, { method: 'PUT', body: { revision: c.revision, title: c.title, messages } });
+    await refreshConversations(); await openConversation(c.id);
+  } catch (error) { notice(`Import failed: ${error.message}`, 'bad'); }
+});
+$('chat-to-pi').addEventListener('click', async () => { selectTab('workspace'); renderSharedPiHistory(); notice('Create or select a Pi session linked to this conversation, then Stage shared history. No old tool commands are replayed.'); });
+$('pi-handoff').addEventListener('click', async () => { if (!window.confirm('Stage the selected shared transcript as context for the next Pi instruction? This does not run inference or replay tools.')) return; try { await stagePiHistory(); } catch (error) { notice(error.message, 'bad'); } });
+$('pi-to-chat').addEventListener('click', async () => {
+  try {
+    if (state.workspace && !state.workspace.conversation_id) {
+      if (!window.confirm('Recover this old Pi session as a shared conversation, read-only? No commands will run.')) return;
+      const recovered = await request(`/v1/workspaces/sessions/${state.workspace.id}/recover-conversation`, { method: 'POST', body: { confirm: true } });
+      state.workspace.conversation_id = recovered.id || recovered.conversation_id;
+    }
+    if (state.workspace?.conversation_id) await openConversation(state.workspace.conversation_id);
+    await refreshConversations(); selectTab('chat');
+  } catch (error) { notice(error.message, 'bad'); }
+});
+for (const action of ['review', 'verify', 'apply']) $(`workspace-${action}`).addEventListener('click', async () => {
+  if (!state.workspace?.id) return;
+  if (action !== 'review' && !window.confirm(action === 'apply' ? 'Apply the independently passing, hash-bound changes to the ORIGINAL project? Concurrent changes must be refused. Review the diff first.' : 'Run the captured build/test commands independently in a fresh snapshot? This does not ask the model.')) return;
+  let allowTestChanges = false;
+  if (action === 'apply' && state.workspace.verification?.changed_test_definitions?.length) {
+    if (!window.confirm(`Test/build definitions changed:\n${state.workspace.verification.changed_test_definitions.join('\n')}\n\nPassing modified tests is NOT the same as passing an unchanged independent oracle. Have you reviewed these changes and still want to apply them?`)) return;
+    allowTestChanges = true;
+  }
+  state.workspaceBusy = true; renderWorkspace();
+  try { const output = await request(`/v1/workspaces/sessions/${state.workspace.id}/${action}`, action === 'review' ? {} : { method: 'POST', body: { confirm: true, ...(action === 'apply' ? { allow_test_changes: allowTestChanges } : {}) }, timeout: 65000 }); $('workspace-review-output').textContent = typeof output.diff === 'string' ? `${output.diff}\n\n${JSON.stringify({ ...output, diff: undefined }, null, 2)}` : JSON.stringify(output, null, 2); await pollWorkspace(); }
+  catch (error) { $('workspace-review-output').textContent = error.message; }
+  finally { state.workspaceBusy = false; renderWorkspace(); }
+});
 $('export-chat').addEventListener('click', () => {
   downloadJSON({ schema: 1, exported_utc: new Date().toISOString(), model: state.model, conversation_id: state.conversationID, messages: state.records, replay_history: state.chat, note: 'Messages marked incomplete/error were not included in model replay history. Attachment IDs require the original server; extracted file text is not duplicated here.' }, `haloclu-conversation-${state.conversationID || 'new'}.json`);
 });
@@ -1008,15 +1137,20 @@ $('workspace-refresh').addEventListener('click', async () => { await refreshWork
 $('workspace-session').addEventListener('change', async () => {
   clearTimeout(state.workspaceTimer); state.workspace = state.workspaceSessions.find(session => session.id === $('workspace-session').value) || null;
   state.workspaceSequence = 0; state.workspaceEvents = []; state.workspaceAssistant = null; $('workspace-messages').replaceChildren();
-  renderWorkspace(); if (state.workspace) await pollWorkspace();
+  renderWorkspace(); if (state.workspace) { await pollWorkspace(); if (state.workspace.conversation_id) await openConversation(state.workspace.conversation_id).catch(error => notice(error.message, 'bad')); }
 });
 $('workspace-form').addEventListener('submit', async event => {
   event.preventDefault(); if (!state.authenticated || state.workspaceBusy) return;
   if (!window.confirm(`Create ${$('workspace-kind').value} workspace at ${$('workspace-root').value}? This does not send a model prompt.`)) return;
   state.workspaceBusy = true; renderWorkspace();
-  const body = { kind: $('workspace-kind').value, root: $('workspace-root').value.trim(), reasoning_effort: $('reasoning-mode').value, confirm: true };
+  const body = { kind: $('workspace-kind').value, root: $('workspace-root').value.trim(), mode: $('workspace-mode').value, build_command: $('workspace-build').value.trim(), test_command: $('workspace-test').value.trim(), reasoning_effort: $('reasoning-mode').value, confirm: true };
+  if (body.mode === 'direct') {
+    if (!window.confirm('DIRECT MODE: Pi and shell commands may immediately change or delete files in the ORIGINAL project. No protected copy or deferred Apply. Continue?')) { state.workspaceBusy = false; renderWorkspace(); return; }
+    body.allow_direct = true;
+  }
+  if (state.conversationID) body.conversation_id = state.conversationID;
   if (body.kind === 'ssh') body.preset_id = $('workspace-preset').value;
-  try { state.workspace = await request('/v1/workspaces/sessions', { method: 'POST', body, timeout: 60000 }); state.workspaceSequence = 0; state.workspaceEvents = []; $('workspace-messages').replaceChildren(); await refreshWorkspaces(); }
+  try { state.workspace = await request('/v1/workspaces/sessions', { method: 'POST', body, timeout: 60000 }); state.workspaceSequence = 0; state.workspaceEvents = []; $('workspace-messages').replaceChildren(); await refreshWorkspaces(); if (state.workspace.conversation_id) await openConversation(state.workspace.conversation_id); await refreshConversations(); }
   catch (error) { notice(`${error.message} No automatic retry.`, 'bad'); }
   finally { state.workspaceBusy = false; renderWorkspace(); }
 });
@@ -1046,7 +1180,7 @@ $('workspace-shell-form').addEventListener('submit', async event => {
   const root = state.workspace.root || state.workspace.id;
   const warning = state.workspace.kind === 'ssh'
     ? (state.language === 'it' ? 'SSH: usa i privilegi dell’account remoto e può modificare o eliminare file.' : 'SSH: this runs with the remote account privileges and can modify or delete files.')
-    : (state.language === 'it' ? 'Locale: agisce nella sandbox workspace e può modificare o eliminare file subito. Non esiste un Applica differito.' : 'Local: this runs inside the workspace sandbox and can modify or delete workspace files immediately. There is no deferred Apply step.');
+    : (state.workspace.mode === 'protected' ? 'Protected mode: this modifies the private working copy, not the original project.' : 'Direct mode: this can modify or delete original project files immediately. No deferred Apply.');
   if (!window.confirm(`${warning}\nWorkspace: ${root}\n\n${command}\n\n${state.language === 'it' ? 'Eseguire esattamente questo comando?' : 'Run this exact command?'}`)) return;
   state.workspaceBusy = true; renderWorkspace();
   try {
@@ -1080,9 +1214,12 @@ $('connection-form').addEventListener('submit', async event => {
   event.preventDefault();
   state.token = $('api-token').value.trim();
   await refreshHealth(true);
-  if (state.authenticated) showConnection(false);
+  if (state.authenticated) { await refreshConversations(); showConnection(false); }
 });
 $('forget-token').addEventListener('click', () => {
+  state.chatController?.abort();
+  downloader.disconnect();
+  clearTimeout(state.conversationTimer);
   state.token = '';
   $('api-token').value = '';
   state.authenticated = false;
@@ -1092,6 +1229,10 @@ $('forget-token').addEventListener('click', () => {
   clearTimeout(state.taskTimer);
   clearTimeout(state.jobTimer);
   clearTimeout(state.workspaceTimer);
+  state.conversations = []; resetConversation();
+  state.workspace = null; state.workspaceSessions = []; state.workspaceEvents = []; state.attachments = [];
+  $('workspace-messages').replaceChildren(); $('workspace-events').textContent = 'No events.'; $('workspace-review-output').textContent = 'No review collected.';
+  renderWorkspace(); renderAttachments();
   $('connection-label').textContent = "Token forgotten";
   $('connection-dot').className = 'status-dot';
   $('connection-result').textContent = "Token removed from this tab. Existing server tasks are not cancelled.";
@@ -1105,11 +1246,7 @@ $('chat-input').addEventListener('keydown', event => {
 $('stop-chat').addEventListener('click', () => state.chatController?.abort());
 $('clear-chat').addEventListener('click', () => {
   if (state.chatController) return;
-  state.chat = [];
-  state.records = [];
-  state.conversationID = Math.max(0, ...state.conversations.map(item => item.id)) + 1;
-  document.querySelectorAll('.message').forEach(node => node.remove());
-  $('chat-empty').hidden = false;
+  resetConversation();
   for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context']) $(id).textContent = '—';
   renderConversations();
   $('chat-input').focus();

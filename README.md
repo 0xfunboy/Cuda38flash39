@@ -27,6 +27,8 @@ near-SOTA parity or qualified long-context coding.
 
 ## Start here
 
+Latest product changes and test scope: [PRODUCT-007](docs/PRODUCT-007.md).
+
 On the existing installation, open **http://127.0.0.1:18093/**. Under
 **Options → Connection and secrets**, enter the local `state/api-token` and
 select **Connect**. Tokens stay in tab memory, not browser storage.
@@ -41,7 +43,7 @@ Generation controls appear only on relevant pages. Chat exposes its request
 settings; Coding exposes the reasoning setting used when creating a Pi session.
 Global display and connection preferences live in **Options**.
 
-The six images below are browser captures, not generated UI mockups. Empty
+The images below are browser captures, not generated UI mockups. Empty
 conversations and idle panels are intentional: no sample answers, credentials
 or invented measurements are inserted for presentation.
 
@@ -74,13 +76,22 @@ authorize executing it.
 
 **Metrics retain their meaning.** Observed TPS uses real cumulative completion
 tokens divided by HTTP elapsed time, thinking included. Final decode comes from
-the engine; TTFT is browser-observed. These are different measurements, not
+the engine; live TTFT is browser-observed. Reopened records label saved
+gateway-observed TTFT/HTTP explicitly; browser transit is not reconstructed.
+These are different measurements, not
 interchangeable rates. Unavailable metrics remain unavailable. **Stop stream**
 stops browser reception; it is not a promise to cancel an already admitted
 paired generation immediately.
 
-Conversations live only in the current tab. Use **Export JSON** before reloading
-or closing it. [Daily-use guide](docs/DAILY_USE.md) ·
+Chat and Pi now share a **local, server-persisted conversation record**. Reopen
+the same conversation across pages; explicitly transfer its transcript when
+starting a linked Pi workspace. This is context handoff, not a KV/session
+checkpoint or automatic replay of old commands. Export a copy when needed;
+explicit deletion removes the local record and owned, cleanly closed Pi records,
+not project files or copies exported elsewhere. Active work must be stopped and
+linked workspaces closed before deletion. Gateway credentials remain memory-only
+in the browser despite the persisted conversation. [Shared history and handoff](docs/CONVERSATIONS.md) ·
+[Daily-use guide](docs/DAILY_USE.md) ·
 [Frontend behavior](web/README.md).
 
 ## Coding / Pi
@@ -92,22 +103,35 @@ Coding runs **upstream Pi**, pinned to
 second home-built coding agent. Pi can inspect the selected repository, edit
 files and invoke tools; actual agent and tool events are visible in the browser.
 
-1. Start from a clean branch or disposable worktree. Choose **Local** or
-   **Remote SSH** and a narrowly scoped project root.
-2. Set reasoning before **Create session**. For SSH, select a saved host preset
-   and explicitly **Connect**; local sessions connect to the allowed directory.
+1. Choose **Local**, a narrowly scoped project root and the default **Protected**
+   mode. It copies bounded current source files, preserving dirty and ordinary
+   untracked originals. Inspect exclusions; it is not an arbitrary-size clone.
+2. Set reasoning and your trusted build/test commands before **Create session**.
+   Link the intended conversation and explicitly transfer its transcript if
+   needed. Original and working roots remain distinct and visible.
 3. Select **Start Pi**. Startup does not send a model prompt. Wait for the
    session's ready/capability status.
 4. Send a bounded instruction with expected behavior, files in scope and the
    project's test commands. Sending it authorizes Pi's available tools within
    that session.
-5. Inspect the events and actual diff, run independent tests, then commit the
-   reviewed result. **Abort Pi** and **Close session** control the workspace,
-   never an individual inference rank.
+5. After natural completion, wait for **independent verification** of the frozen
+   commands against a fresh candidate snapshot. Review the real command results
+   and diff, then explicitly **Apply** the exact verified version. **Abort Pi**
+   and **Close session** control the workspace, never an inference rank.
 
-**Pi writes directly to the workspace.** There is no deferred Apply button for
-these changes. The hidden legacy workflow uses isolated snapshots and confirmed
-patch application instead; it is a separate fallback, not Pi's execution model.
+**Protected is the local default; direct edits require an explicit choice.**
+Protected Pi writes its private source copy. Apply checks original/candidate
+hashes and backs up replaced originals; conflicts fail closed. No configured
+test means **UNVERIFIED**, not a passing task. **TEST_PASS** means the user-chosen
+commands exited successfully, not general correctness. Modified test/build
+definitions are flagged and require separate acknowledgement before Apply.
+Deletion/permission-change Apply is currently blocked. The older Advanced
+workflow remains a separate fallback, not the Pi implementation.
+
+Source copies use the existing limits: 300 files, 256 KiB per file and 32 MiB
+total in the reference setup. Hidden/sensitive, generated/dependency and binary
+content is excluded; symlinks, hardlinks and quota violations fail closed.
+No Git history is copied. Keep ordinary review and independent project tests.
 
 The current Pi integration takes **reasoning at session creation**. Chat's
 context, response-limit and thinking-budget selectors do not configure Pi, so
@@ -127,7 +151,9 @@ protect the inference installation; large builds may exceed them. General
 package downloads are unavailable inside the sandbox—prepare trusted
 dependencies separately.
 
-**Remote SSH** uses server-side saved host metadata and an existing agent,
+**Remote SSH** requires explicit **Direct** mode: protected SSH and fresh
+independent remote verification are blocked, never silently downgraded.
+It uses server-side saved host metadata and an existing agent,
 private-key path or transient connect-time password. Key files and known hosts
 belong to the gateway machine, not the browser's computer. Presets never store
 passwords or key contents. Unknown/changed host keys fail closed. Remote tools
@@ -136,7 +162,9 @@ coding still needs qualification on the chosen host. Use a restricted account.
 
 Tool-generating model turns are buffered until the paired results agree; the UI
 does not pretend those events are live token streaming. Ordinary Chat remains
-streamed. [Pi setup, isolation and API contract](WORKSPACES.md) ·
+streamed. At most one owned Pi scope runs at a time; close it before starting
+another. [Protected snapshots, checks and Apply](docs/PROTECTED_WORKSPACES.md) ·
+[Pi setup, isolation and API contract](WORKSPACES.md) ·
 [Safe daily workflow](docs/DAILY_USE.md).
 
 ## Models
@@ -156,10 +184,22 @@ uses target hidden features, not that embedding table or text lookup. A GGUF
 layer-RPC path is not the same distribution as CIRU's safetensors TP2, and serial
 capacity splitting must not be called parallel acceleration.
 
-Supported downloads require an explicit pinned asset selection and confirmation;
-the downloader resumes partial transfers and verifies the completed artifact.
-Opening a model card never downloads weights, migrates formats or switches the
-active pair. Unsupported actions stay blocked with a reason.
+![HaloClu native downloader: search, selected files, resumable jobs and measured progress](docs/assets/downloads.png)
+
+**Download models** adds native Go acquisition from public Hugging Face and
+ModelScope repositories or an explicit public HTTPS file URL. Search, inspect
+the actual files, create a plan, then confirm Start. Progress, measured transfer
+rate, ETA when available, Pause/Resume and preserved receipts are separate from
+inference. No whole-model selection happens automatically. Source hashes are
+verified when available; a size-only receipt is not called checksum-verified.
+Destinations are managed privately and existing files are never overwritten.
+
+Downloading does not load a model, migrate formats or switch the active pair.
+Gated/private hosting, old aria2 partial-map import and automatic installation
+are not supported. This native downloader does not execute the older Python/
+curl scripts; keep using those scripts for their existing managed jobs.
+[Download sources, resumption and safety](docs/DOWNLOADS.md).
+Unsupported inference actions stay blocked with a reason.
 [Pinned catalog](runtime/model-catalog.json) · [Engine recipe](runtime/README.md).
 
 ## Benchmark

@@ -42,47 +42,63 @@ type WorkspaceEvent struct {
 	Event json.RawMessage `json:"event"`
 }
 type PiWorkspaceSession struct {
-	ID              string `json:"id"`
-	Kind            string `json:"kind"`
-	Root            string `json:"root"`
-	State           string `json:"state"`
-	Reasoning       string `json:"reasoning_effort"`
-	PresetID        string `json:"preset_id,omitempty"`
-	Created         string `json:"created"`
-	BlockedReason   string `json:"blocked_reason,omitempty"`
-	ScopeUnit       string `json:"scope_unit,omitempty"`
-	ScopeInvocation string `json:"scope_invocation,omitempty"`
-	mu              sync.Mutex
-	writeMu         sync.Mutex
-	opMu            sync.Mutex
-	manager         *workspaceManager
-	dir             string
-	cmd             *exec.Cmd
-	stdin           io.WriteCloser
-	done            chan struct{}
-	pending         map[string]chan map[string]any
-	events          []WorkspaceEvent
-	seq             int64
-	eventBytes      int
-	logBytes        int
-	logCapped       bool
-	ssh             *exec.Cmd
-	sshDone         chan struct{}
-	preset          WorkspacePreset
-	bridgeServer    *http.Server
-	bridgeToken     string
-	bridgeURL       string
-	bridgeDir       string
+	Mode                string                 `json:"mode,omitempty"`
+	OriginalRoot        string                 `json:"original_root,omitempty"`
+	WorkingRoot         string                 `json:"working_root,omitempty"`
+	BuildCommand        Command                `json:"build_command,omitempty"`
+	TestCommand         Command                `json:"test_command,omitempty"`
+	Verification        *WorkspaceVerification `json:"verification,omitempty"`
+	protectedOriginal   protectedTree
+	verificationRunning bool
+	lastCompletion      string
+	ConversationID      string `json:"conversation_id,omitempty"`
+	ClosedCleanly       bool   `json:"closed_cleanly"`
+	HandoffRevision     int64  `json:"handoff_revision,omitempty"`
+	PendingTranscript   string `json:"-"`
+	deleted             bool
+	ID                  string `json:"id"`
+	Kind                string `json:"kind"`
+	Root                string `json:"root"`
+	State               string `json:"state"`
+	Reasoning           string `json:"reasoning_effort"`
+	PresetID            string `json:"preset_id,omitempty"`
+	Created             string `json:"created"`
+	BlockedReason       string `json:"blocked_reason,omitempty"`
+	ScopeUnit           string `json:"scope_unit,omitempty"`
+	ScopeInvocation     string `json:"scope_invocation,omitempty"`
+	mu                  sync.Mutex
+	writeMu             sync.Mutex
+	opMu                sync.Mutex
+	manager             *workspaceManager
+	dir                 string
+	cmd                 *exec.Cmd
+	stdin               io.WriteCloser
+	done                chan struct{}
+	pending             map[string]chan map[string]any
+	events              []WorkspaceEvent
+	seq                 int64
+	eventBytes          int
+	logBytes            int
+	logCapped           bool
+	ssh                 *exec.Cmd
+	sshDone             chan struct{}
+	preset              WorkspacePreset
+	bridgeServer        *http.Server
+	bridgeToken         string
+	bridgeURL           string
+	bridgeDir           string
 }
 type workspaceManager struct {
-	app      *App
-	mu       sync.Mutex
-	sessions map[string]*PiWorkspaceSession
-	presets  map[string]WorkspacePreset
-	ready    bool
-	reason   string
-	closing  bool
-	initErr  error
+	activePi       string
+	verificationMu sync.Mutex
+	app            *App
+	mu             sync.Mutex
+	sessions       map[string]*PiWorkspaceSession
+	presets        map[string]WorkspacePreset
+	ready          bool
+	reason         string
+	closing        bool
+	initErr        error
 }
 
 var workspaceManagers sync.Map
@@ -134,7 +150,9 @@ func workspacesFor(a *App) *workspaceManager {
 		}
 		s.manager = m
 		s.dir = filepath.Join(dir, s.ID)
+		s.loadProtectionOriginal()
 		s.pending = map[string]chan map[string]any{}
+		s.loadRecordedEvents()
 		if s.State != "CLOSED" {
 			s.State = "CLOSED"
 			s.BlockedReason = "Gateway restarted: explicit new session required; no process adopted"
@@ -153,6 +171,9 @@ func (a *App) setWorkspaceToolCapability(ready bool, reason string) {
 }
 func workspaceID(s string) bool { return len(s) == 32 && strings.Trim(s, "0123456789abcdef") == "" }
 func (s *PiWorkspaceSession) persistLocked() error {
+	if s.deleted {
+		return os.ErrNotExist
+	}
 	return writeJSON(filepath.Join(s.dir, "session.json"), s)
 }
 func (s *PiWorkspaceSession) snapshot() map[string]any {
@@ -165,7 +186,7 @@ func (s *PiWorkspaceSession) snapshot() map[string]any {
 	out := map[string]any{}
 	_ = json.Unmarshal(b, &out)
 	connected := s.State == "CONNECTED" || s.State == "READY" || s.State == "RUNNING" || s.State == "ABORTING"
-	out["capabilities"] = map[string]bool{"files": connected, "terminal": connected, "pi": connected, "prompt": ready && s.State == "READY", "shell": s.State == "READY"}
+	out["capabilities"] = map[string]bool{"files": connected, "terminal": connected, "pi": connected, "prompt": ready && s.State == "READY", "shell": s.State == "READY", "review": s.Mode != "" && s.Kind == "local" && (s.State == "READY" || s.State == "CONNECTED" || s.State == "CLOSED"), "verify": s.Mode != "" && s.Kind == "local" && (s.State == "READY" || s.State == "CONNECTED"), "apply": s.Mode == "protected" && (s.State == "READY" || s.State == "CONNECTED") && s.Verification != nil && s.Verification.Status == "TEST_PASS" && !s.Verification.Applied}
 	out["next_seq"] = s.seq
 	return out
 }
@@ -187,6 +208,9 @@ func (s *PiWorkspaceSession) emit(raw []byte) {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if s.deleted {
+		return
+	}
 	s.seq++
 	ev := WorkspaceEvent{s.seq, time.Now().UTC().Format(time.RFC3339Nano), append(json.RawMessage(nil), raw...)}
 	s.events = append(s.events, ev)
@@ -227,6 +251,7 @@ func workspaceBody(w http.ResponseWriter, r *http.Request, v any) error {
 }
 func (a *App) registerWorkspaceRoutes(mux *http.ServeMux) {
 	m := workspacesFor(a)
+	a.registerProtectionRoutes(mux)
 	mux.HandleFunc("GET /v1/workspaces/options", func(w http.ResponseWriter, r *http.Request) {
 		if !a.authorized(w, r) {
 			return
@@ -294,6 +319,8 @@ func (a *App) registerWorkspaceRoutes(mux *http.ServeMux) {
 			return
 		}
 		var v struct {
+			ConversationID string `json:"conversation_id"`
+			WorkspaceProtectionOptions
 			Kind      string `json:"kind"`
 			Root      string `json:"root"`
 			PresetID  string `json:"preset_id"`
@@ -309,7 +336,7 @@ func (a *App) registerWorkspaceRoutes(mux *http.ServeMux) {
 			jsonReply(w, 400, map[string]string{"error": "password belongs only to explicit connect; it is never saved with session metadata"})
 			return
 		}
-		s, e := m.create(v.Kind, v.Root, v.PresetID, v.Reasoning)
+		s, e := m.createConfigured(v.Kind, v.Root, v.PresetID, v.Reasoning, v.ConversationID, v.WorkspaceProtectionOptions)
 		if e != nil {
 			jsonReply(w, 400, map[string]string{"error": e.Error()})
 			return
@@ -349,11 +376,12 @@ func (a *App) registerWorkspaceRoutes(mux *http.ServeMux) {
 			return
 		}
 		var v struct {
-			Confirm   bool   `json:"confirm"`
-			Password  string `json:"password"`
-			Message   string `json:"message"`
-			CommandID string `json:"command_id"`
-			Command   string `json:"command"`
+			Confirm          bool   `json:"confirm"`
+			AllowTestChanges bool   `json:"allow_test_changes"`
+			Password         string `json:"password"`
+			Message          string `json:"message"`
+			CommandID        string `json:"command_id"`
+			Command          string `json:"command"`
 		}
 		if e := workspaceBody(w, r, &v); e != nil || !v.Confirm {
 			jsonReply(w, 400, map[string]string{"error": "valid action and confirm:true required"})
@@ -366,6 +394,10 @@ func (a *App) registerWorkspaceRoutes(mux *http.ServeMux) {
 		}
 		var e error
 		switch action {
+		case "verify":
+			e = s.beginVerification("manual")
+		case "apply":
+			e = s.applyProtection(v.AllowTestChanges)
 		case "connect":
 			e = s.connect(r.Context(), v.Password)
 		case "start":
@@ -484,12 +516,25 @@ func validateLocalWorkspace(c Config, root string) (string, error) {
 	}
 	return p, nil
 }
-func (m *workspaceManager) create(kind, root, presetID, reason string) (*PiWorkspaceSession, error) {
+func (m *workspaceManager) create(kind, root, presetID, reason string, conversationIDs ...string) (*PiWorkspaceSession, error) {
 	if reason == "" {
 		reason = "low"
 	}
 	if reason != "low" && reason != "high" && reason != "max" {
 		return nil, errors.New("reasoning_effort must be low, high or max")
+	}
+	cs := conversationsFor(m.app)
+	cs.mu.Lock()
+	defer cs.mu.Unlock()
+	var conversation Conversation
+	var ce error
+	if len(conversationIDs) > 0 && conversationIDs[0] != "" {
+		conversation, ce = cs.readLocked(conversationIDs[0])
+	} else {
+		conversation, ce = cs.createLocked("Coding conversation")
+	}
+	if ce != nil {
+		return nil, ce
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -500,6 +545,7 @@ func (m *workspaceManager) create(kind, root, presetID, reason string) (*PiWorks
 		return nil, errors.New("gateway shutting down")
 	}
 	s := &PiWorkspaceSession{ID: id(), Kind: kind, Root: root, State: "CREATED", Reasoning: reason, PresetID: presetID, Created: time.Now().UTC().Format(time.RFC3339Nano), manager: m, pending: map[string]chan map[string]any{}}
+	s.ConversationID = conversation.ID
 	switch kind {
 	case "local":
 		p, e := validateLocalWorkspace(m.app.cfg, root)
@@ -525,7 +571,13 @@ func (m *workspaceManager) create(kind, root, presetID, reason string) (*PiWorks
 	if e := os.MkdirAll(s.dir, 0700); e != nil {
 		return nil, e
 	}
+	if len(conversationIDs) > 1 && conversationIDs[1] == "protection-preparing" {
+		s.State = "PREPARING"
+	}
 	if e := s.persistLocked(); e != nil {
+		return nil, e
+	}
+	if e := cs.linkLocked(conversation, s.ID); e != nil {
 		return nil, e
 	}
 	m.sessions[s.ID] = s
@@ -567,7 +619,7 @@ func (s *PiWorkspaceSession) rpc(ctx context.Context, command map[string]any) (m
 		return nil, errors.New("Pi process exited")
 	}
 }
-func (s *PiWorkspaceSession) start() error {
+func (s *PiWorkspaceSession) start() (ret error) {
 	s.opMu.Lock()
 	defer s.opMu.Unlock()
 	s.mu.Lock()
@@ -576,6 +628,15 @@ func (s *PiWorkspaceSession) start() error {
 	if state != "CONNECTED" {
 		return errors.New("session must be connected and not already started")
 	}
+	if e := s.manager.reservePi(s.ID); e != nil {
+		return e
+	}
+	launched := false
+	defer func() {
+		if ret != nil && !launched {
+			s.manager.releasePi(s.ID)
+		}
+	}()
 	cmd, e := s.piCommand()
 	if e != nil {
 		return e
@@ -595,6 +656,7 @@ func (s *PiWorkspaceSession) start() error {
 	if e = cmd.Start(); e != nil {
 		return e
 	}
+	launched = true
 	s.mu.Lock()
 	s.cmd = cmd
 	s.stdin = stdin
@@ -648,6 +710,7 @@ func (s *PiWorkspaceSession) scanPi(reader io.Reader, protocol bool) {
 		if json.Unmarshal(b, &v) != nil {
 			continue
 		}
+		s.recordPiMessage(v)
 		s.mu.Lock()
 		switch v["type"] {
 		case "response":
@@ -664,10 +727,16 @@ func (s *PiWorkspaceSession) scanPi(reader io.Reader, protocol bool) {
 		case "agent_end":
 			if s.State != "CLOSED" {
 				s.State = "READY"
+				if s.Mode != "" {
+					s.State = "VERIFYING"
+				}
 				_ = s.persistLocked()
 			}
 		}
 		s.mu.Unlock()
+		if v["type"] == "agent_end" {
+			s.onProtectionAgentEnd(v)
+		}
 	}
 	if e := scan.Err(); e != nil {
 		s.emit([]byte("RPC stream failed: " + e.Error()))
@@ -694,11 +763,20 @@ func (s *PiWorkspaceSession) prompt(message string) error {
 		return errors.New("Pi is not idle/ready; queued prompts are disabled")
 	}
 	s.State = "RUNNING"
+	if s.Mode != "" {
+		s.lastCompletion = "RUNNING"
+		s.Verification = &WorkspaceVerification{Status: "UNVERIFIED", Origin: "prompt", Completion: "RUNNING", Error: "New agent turn invalidates previous candidate verification"}
+	}
 	_ = s.persistLocked()
 	s.mu.Unlock()
+	actualMessage, pe := s.prepareConversationPrompt(message)
+	if pe != nil {
+		s.setState("READY", conversationPersistenceError(pe))
+		return pe
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	_, e := s.rpc(ctx, map[string]any{"type": "prompt", "message": message})
+	_, e := s.rpc(ctx, map[string]any{"type": "prompt", "message": actualMessage})
 	if e != nil {
 		s.setState("FAILED", "prompt admission uncertain: "+e.Error())
 	}
@@ -712,6 +790,11 @@ func (s *PiWorkspaceSession) abort(ctx context.Context) error {
 func (s *PiWorkspaceSession) abortLocked(ctx context.Context) error {
 	s.mu.Lock()
 	state := s.State
+	if s.Mode != "" && (state == "RUNNING" || state == "ABORTING") {
+		s.lastCompletion = "ABORTED"
+		s.Verification = &WorkspaceVerification{Status: "INCOMPLETE", Origin: "abort", Completion: "ABORTED", Error: "Explicitly aborted agent turn is not a completed solution"}
+		_ = s.persistLocked()
+	}
 	s.mu.Unlock()
 	if state == "CONNECTED" || state == "CREATED" || state == "CLOSED" {
 		return nil
@@ -771,8 +854,18 @@ func (s *PiWorkspaceSession) close(ctx context.Context) error {
 			return ctx.Err()
 		case <-time.After(3 * time.Second):
 			_ = syscall.Kill(-p.cmd.Process.Pid, syscall.SIGKILL)
+			select {
+			case <-p.done:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 	}
+	s.mu.Lock()
+	s.ClosedCleanly = true
+	_ = s.persistLocked()
+	s.mu.Unlock()
+	s.manager.releasePi(s.ID)
 	return nil
 }
 func (a *App) shutdownWorkspaces(ctx context.Context) error {

@@ -16,6 +16,20 @@ await mkdir(output, { recursive: true });
 const importPath = fileURLToPath(new URL('./fixtures/import-task.json', import.meta.url));
 let apiToken = 'fixture-token-not-a-real-secret';
 const calls = { chat: [], coding: [], apply: 0, cancel: 0, interrupted_status: 0, operation: [], attachments: 0, workspace: [], terminal: 0, shell: [], settings: [], rotations: 0 };
+const conversations = new Map();
+let conversationCounter = 0;
+let handoffs = 0;
+let piPrompts = 0;
+let conversationDeletes = 0;
+let workspaceEvents = [];
+let deferConversationRead = false;
+let releaseConversationRead = null;
+function newConversation(title = 'Fixture conversation') {
+  const id = (++conversationCounter).toString(16).padStart(32, '0');
+  const c = { id, title, revision: 1, created: new Date().toISOString(), updated: new Date().toISOString(), messages: [], workspace_ids: [] };
+  conversations.set(id, c); return c;
+}
+function conversationResponse(c) { return { ...c, replay_messages: c.messages.filter(m => m.role === 'user' || (m.role === 'assistant' && m.status === 'complete')).map(m => ({ role: m.role, content: m.content, ...(m.attachment_ids?.length ? { attachment_ids: m.attachment_ids } : {}) })) }; }
 let api = { chat: true, workspaces: true, legacy_coding: true, operations: true };
 let deferStatusFailure = false;
 let releaseStatusFailure = null;
@@ -51,14 +65,29 @@ const server = createServer(async (request, response) => {
       return json({ api, listen: '127.0.0.1:18093', backend: 'http://127.0.0.1:18091', model: 'fixture-glm-not-a-live-model', token_rotation_supported: true, api_note: 'Controls new requests only. Status, read, cancel and close remain available.', network_note: 'Managed by config; gateway restart required for network changes.' });
     }
     if (url.pathname === '/v1/models') return json({ data: [{ id: 'fixture-glm-not-a-live-model' }] });
+    if (url.pathname === '/v1/conversations' && request.method === 'POST') return json(newConversation(payload.title), 201);
+    if (url.pathname === '/v1/conversations') return json({ conversations: [...conversations.values()].map(c => ({ ...c, messages: undefined, message_count: c.messages.length })) });
+    if (url.pathname.startsWith('/v1/conversations/')) {
+      const [, , , id, action] = url.pathname.split('/');
+      const c = conversations.get(id); if (!c) return json({ error: 'Unknown conversation' }, 404);
+      if (request.method === 'GET') { if (deferConversationRead) { deferConversationRead = false; releaseConversationRead = () => json(conversationResponse(c)); return; } return json(conversationResponse(c)); }
+      if (payload.revision !== c.revision) return json({ error: 'Revision conflict' }, 409);
+      if (action === 'handoff') { assert.equal(payload.confirm, true); assert.equal(payload.workspace_id, workspace.id); handoffs++; return json({ executed: false, mode: 'transcript_context', bytes: 128 }); }
+      if (request.method === 'PUT') { c.title = payload.title; c.messages = payload.messages; c.revision++; return json(conversationResponse(c)); }
+      if (request.method === 'DELETE') { assert.equal(payload.confirm, true); if (workspace?.conversation_id === id && workspace.state !== 'CLOSED') return json({ error: 'Close linked workspace first', needs_close: true }, 409); if (workspace?.conversation_id === id) workspace = null; conversations.delete(id); conversationDeletes++; return json({ deleted: id }); }
+    }
+    if (url.pathname === '/v1/downloads/options') return json({ sources: ['huggingface', 'modelscope'], destination_root: '/fixture/downloads', concurrency: 1, disk_reserve_bytes: 17179869184 });
+    if (url.pathname === '/v1/downloads/jobs') return json({ jobs: [] });
     if (url.pathname === '/v1/attachments' && request.method === 'POST') { assert.equal(multipart, true); calls.attachments++; return json({ id: 'attachment-fixture', name: 'fixture.json', kind: 'text', size_bytes: 128, sha256: 'fixture-hash-not-real', text: forbidden, extracted_bytes: 128, truncated: true, warning: 'Fixture extraction limit', created_utc: new Date().toISOString() }, 201); }
     if (url.pathname === '/v1/workspaces/options') return json({ local_roots: ['/fixture/repo'], pi: { installed: true, version: 'fixture', tools_available: true }, auth_methods: [{ id: 'key', available: true }], terminal: { commands: [{ id: 'pwd', label: 'Working directory' }] } });
     if (url.pathname === '/v1/workspaces/presets') return json({ presets: [] });
-    if (url.pathname === '/v1/workspaces/sessions' && request.method === 'POST') { calls.workspace.push(payload); workspace = { id: 'ws-fixture', kind: 'local', root: '/fixture/repo', state: 'CONNECTED', capabilities: { files: true, terminal: true, pi: true, prompt: false } }; return json(workspace, 201); }
+    if (url.pathname === '/v1/workspaces/sessions' && request.method === 'POST') { calls.workspace.push(payload); const c = conversations.get(payload.conversation_id) || newConversation(); c.workspace_ids.push('ws-fixture'); c.revision++; workspace = { id: 'ws-fixture', conversation_id: c.id, kind: 'local', root: '/fixture/protected-copy', original_root: '/fixture/repo', working_root: '/fixture/protected-copy', mode: payload.mode, reasoning_effort: payload.reasoning_effort, verification: { status: 'UNVERIFIED' }, state: 'CONNECTED', capabilities: { files: true, terminal: true, pi: true, prompt: false } }; return json(workspace, 201); }
     if (url.pathname === '/v1/workspaces/sessions') return json({ sessions: workspace ? [workspace] : [] });
     if (url.pathname === '/v1/workspaces/sessions/ws-fixture') return json(workspace);
-    if (url.pathname.endsWith('/ws-fixture/start')) { workspace.state = 'READY'; workspace.capabilities.shell = true; return json(workspace); }
-    if (url.pathname.endsWith('/ws-fixture/events')) return json({ events: [], next_seq: 0 });
+    if (url.pathname.endsWith('/ws-fixture/start')) { workspace.state = 'READY'; workspace.capabilities.shell = true; workspace.capabilities.prompt = true; return json(workspace); }
+    if (url.pathname.endsWith('/ws-fixture/close')) { workspace.state = 'CLOSED'; workspace.closed_cleanly = true; workspace.capabilities = {}; return json(workspace); }
+    if (url.pathname.endsWith('/ws-fixture/events')) return json({ events: workspaceEvents.filter(event => event.seq > Number(url.searchParams.get('after') || 0)), next_seq: workspaceEvents.at(-1)?.seq || 0 });
+    if (url.pathname.endsWith('/ws-fixture/prompt')) { assert.equal(payload.confirm, true); piPrompts++; const c = conversations.get(workspace.conversation_id); c.messages.push({ id: 'pi-user-fixture', role: 'user', origin: 'pi', content: payload.message, status: 'submitted', workspace_id: workspace.id }, { id: 'pi-assistant-fixture', role: 'assistant', origin: 'pi', content: 'Pi fixture parser review complete.', status: 'complete', workspace_id: workspace.id }); c.revision++; workspaceEvents = [{ seq: 1, event: { type: 'message_end', message: { role: 'assistant', content: [{ type: 'text', text: 'Pi fixture parser review complete.' }] } } }, { seq: 2, event: { type: 'agent_end' } }]; return json(workspace); }
     if (url.pathname.endsWith('/ws-fixture/files')) return json({ path: '', entries: [{ name: 'main.c', path: 'main.c', type: 'file', size: 31 }] });
     if (url.pathname.endsWith('/ws-fixture/file')) return json({ path: 'main.c', content: forbidden, truncated: false });
     if (url.pathname.endsWith('/ws-fixture/terminal')) {
@@ -81,6 +110,9 @@ const server = createServer(async (request, response) => {
     });
     if (url.pathname === '/v1/chat/completions') {
       calls.chat.push(payload);
+      const c = conversations.get(payload.conversation_id); assert.ok(c, 'Chat must use a server-generated conversation ID.');
+      c.messages.push({ ...payload.messages.at(-1), id: `user-${calls.chat.length}`, origin: 'chat', status: 'submitted', settings: { reasoning_effort: payload.reasoning_effort } });
+      c.messages.push({ id: `assistant-${calls.chat.length}`, origin: 'chat', role: 'assistant', content: calls.chat.length === 2 ? 'Truncated transport output' : `Working code 🌱 ${forbidden}\n\n\`\`\`html\n${forbidden}\n\`\`\`\n`, reasoning: 'brief reasoning', status: calls.chat.length === 2 ? 'error' : 'complete', settings: { reasoning_effort: payload.reasoning_effort, metrics: { prompt_tokens: 99, completion_tokens: 17, http_seconds: .8, ttft_ms: 30, decode_tps: null } } }); c.revision++;
       response.writeHead(200, { 'Content-Type': 'text/event-stream', 'X-StrixGLM-Context-Tokens': '65536', 'X-StrixGLM-Prompt-Tokens': '99', 'X-StrixGLM-Max-Tokens': '16384' });
       if (calls.chat.length === 2) return response.end(`data: ${JSON.stringify({ choices: [{ delta: { content: 'Truncated transport output' }, finish_reason: 'stop' }] })}\n\n`);
       const stream = `data: ${JSON.stringify({ choices: [{ delta: { reasoning_content: 'brief reasoning' } }], usage: { prompt_tokens: 99, completion_tokens: 2 } })}\r\n\r\ndata: ${JSON.stringify({ choices: [{ delta: { content: `Working code 🌱 ${forbidden}\n\n\`\`\`html\n${forbidden}\n\`\`\`\n` } }], usage: { prompt_tokens: 99, completion_tokens: 15 } })}\n\ndata: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }], usage: { prompt_tokens: 99, completion_tokens: 17 } })}\n\ndata: [DONE]\n\n`;
@@ -121,7 +153,7 @@ const server = createServer(async (request, response) => {
       });
     }
     const name = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
-    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
+    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'downloads.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
     response.writeHead(200, { 'Content-Type': name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript' });
     response.end(await readFile(join(web, name)));
   } catch (error) { response.writeHead(500); response.end(error.message); }
@@ -195,7 +227,7 @@ try {
   assert.equal(await execute('return document.getElementById("attachment-list").textContent.includes("Extraction truncated")'), true);
   assert.equal(await execute('return !!document.querySelector(".attachment img")'), false);
   tests++;
-  await execute("document.getElementById('chat-input').value='Smoke test';document.getElementById('chat-form').requestSubmit();");
+  await execute("document.getElementById('chat-input').value='Smoke test';document.getElementById('chat-form').requestSubmit();document.getElementById('chat-form').requestSubmit();");
   await until('document.querySelector(".message.assistant .message-meta")?.textContent.includes("complete")');
   assert.equal(calls.chat.length, 1);
   assert.equal(calls.chat[0].stream, true);
@@ -209,8 +241,9 @@ try {
   assert.equal(calls.chat[0].messages[0].content, 'Smoke test', 'Extracted attachment text must not be duplicated client-side.');
   assert.equal(await execute('return document.querySelector(".message.assistant .message-content").textContent.includes("Working code 🌱")'), true);
   assert.equal(await execute('return !!window.__xss || !!document.querySelector(".conversation img")'), false);
-  assert.equal(await execute('return document.getElementById("chat-context").textContent'), '99 / 65,536');
-  assert.match(await execute('return document.getElementById("chat-live-tps").textContent'), /tok\/s$/);
+  assert.equal(await execute('return document.getElementById("chat-context").textContent'), '99');
+  assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '—', 'Saved history must not pretend to be a live stream.');
+  assert.equal(await execute('return document.getElementById("chat-ttft").title.includes("Saved gateway-observed")'), true);
   assert.equal(await execute('return document.getElementById("chat-tps").textContent'), '—');
   assert.equal(await execute('return document.querySelectorAll(".message .code-block").length'), 1);
   assert.equal(await execute('return document.querySelector(".message .code-block").textContent.includes("```")'), false);
@@ -225,8 +258,8 @@ try {
   await execute("document.getElementById('reasoning-mode').value='high';document.getElementById('thinking-budget').value='128';document.getElementById('context-select').value='8192';document.getElementById('chat-cap').value='4096';");
   await execute("document.getElementById('chat-input').value='Check truncated stream';document.getElementById('chat-form').requestSubmit();");
   await until('document.querySelectorAll(".message.assistant").length === 2 && !document.getElementById("send-chat").disabled');
-  assert.equal(await execute('return [...document.querySelectorAll(".message.assistant .message-meta")].at(-1).textContent.endsWith("· error")'), true);
-  assert.equal(await execute('return [...document.querySelectorAll(".message.assistant .message-error")].at(-1).textContent.includes("[DONE]")'), true);
+  assert.equal(await execute('return [...document.querySelectorAll(".message.assistant .message-meta")].at(-1).textContent.includes("· error")'), true);
+  assert.equal(await execute('return [...document.querySelectorAll(".message.assistant .message-error")].at(-1).textContent.includes("not replayed")'), true);
   assert.equal(calls.chat[1].reasoning_effort, 'high');
   assert.equal(calls.chat[1].thinking_token_budget, 128);
   assert.equal(calls.chat[1].max_tokens, 4096);
@@ -329,6 +362,33 @@ try {
   await until('document.getElementById("workspace-terminal-output").textContent.includes("custom fixture output")');
   assert.deepEqual(calls.shell, [{ command: 'printf shell-test', confirm: true }]);
   tests++;
+  assert.equal(calls.workspace[0].mode, 'protected');
+  assert.equal(calls.workspace[0].allow_direct, undefined);
+  assert.equal(calls.workspace[0].conversation_id, calls.chat[0].conversation_id);
+  assert.equal(await execute(`return document.getElementById("workspace-effective").textContent.includes(${JSON.stringify(`actual reasoning: ${calls.workspace[0].reasoning_effort}`)})`), true);
+  await execute("document.getElementById('reasoning-mode').value='max';document.getElementById('reasoning-mode').dispatchEvent(new Event('change'));");
+  assert.equal(await execute(`return document.getElementById("workspace-effective").textContent.includes(${JSON.stringify(`actual reasoning: ${calls.workspace[0].reasoning_effort}`)})`), true, 'Changing the chat/new-session selector must not relabel an existing Pi process.');
+  assert.equal(await execute('return document.getElementById("workspace-verdict").textContent'), 'UNVERIFIED');
+  assert.equal(await execute('return document.getElementById("workspace-apply").disabled'), true);
+  await execute("setTimeout(()=>document.getElementById('pi-handoff').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  for (let wait = 0; handoffs < 1 && wait < 50; wait++) await delay(100);
+  assert.equal(handoffs, 1); assert.equal(calls.chat.length, 2); assert.equal(piPrompts, 0, 'Staging history must not execute Pi.');
+  tests++;
+  await execute("document.getElementById('workspace-prompt').value='Review the parser fixture';setTimeout(()=>document.getElementById('workspace-prompt-form').requestSubmit(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("workspace-messages").textContent.includes("Pi fixture parser review complete.")');
+  assert.equal(piPrompts, 1);
+  await execute("document.getElementById('pi-to-chat').click();");
+  await until('document.getElementById("conversation").textContent.includes("Pi fixture parser review complete.")');
+  assert.equal(await execute('return document.getElementById("conversation").textContent.includes("Working code")'), true);
+  assert.equal(calls.chat.length, 2, 'Opening Pi history in Chat must not run inference.');
+  await execute("setTimeout(()=>document.getElementById('delete-conversation').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("global-notice").textContent.includes("Close linked workspace first")');
+  assert.equal(conversationDeletes, 0, 'An active linked workspace prevents deletion.');
+  tests++;
+  await execute("document.getElementById('tab-workspace').click();");
   await writeFile(join(output, 'workspace-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   tests++;
   await execute("document.getElementById('tab-options').click();");
@@ -410,6 +470,37 @@ try {
   assert.equal(await execute('return document.getElementById("show-thinking").checked'), true);
   assert.equal(await execute('return document.getElementById("ui-show-advanced").checked'), true);
   assert.equal(await execute('return document.getElementById("generation-settings").hidden'), true, 'Options never shows Generation after reload.');
+  tests++;
+  await execute(`document.getElementById('api-token').value=${JSON.stringify(apiToken)};document.getElementById('connection-form').requestSubmit();`);
+  await until('document.getElementById("connection-label").textContent === "Local API connected" && document.querySelectorAll(".conversation-item").length === 1');
+  await execute("document.querySelector('.conversation-item').click();");
+  await until('document.getElementById("conversation").textContent.includes("Pi fixture parser review complete.")');
+  assert.equal(await execute('return document.getElementById("conversation").textContent.includes("Working code")'), true);
+  assert.equal(calls.chat.length, 2); assert.equal(piPrompts, 1, 'Reload recovers both histories without model/agent replay.');
+  tests++;
+  deferConversationRead = true;
+  await execute("document.querySelector('.conversation-item').click();");
+  for (let wait = 0; !releaseConversationRead && wait < 50; wait++) await delay(100);
+  assert.equal(typeof releaseConversationRead, 'function');
+  await execute("document.getElementById('clear-chat').click();");
+  releaseConversationRead(); releaseConversationRead = null;
+  await delay(200);
+  assert.equal(await execute('return document.querySelectorAll("#conversation .message").length'), 0, 'A stale history response must not reopen a conversation after New.');
+  await execute("document.querySelector('.conversation-item').click();");
+  await until('document.getElementById("conversation").textContent.includes("Pi fixture parser review complete.")');
+  tests++;
+  await execute("document.getElementById('tab-workspace').click();");
+  await until('document.querySelector("#workspace-session option[value=ws-fixture]") !== null');
+  await execute("document.getElementById('workspace-session').value='ws-fixture';document.getElementById('workspace-session').dispatchEvent(new Event('change'));");
+  await until('document.getElementById("workspace-status").textContent.includes("READY")');
+  await execute("setTimeout(()=>document.getElementById('workspace-close').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.getElementById("workspace-status").textContent.includes("CLOSED")');
+  await execute("setTimeout(()=>document.getElementById('delete-conversation').click(),0);");
+  await delay(200); await command(`/session/${session}/alert/accept`, {});
+  await until('document.querySelectorAll(".conversation-item").length === 0 && document.getElementById("workspace-messages").textContent === ""');
+  assert.equal(conversationDeletes, 1); assert.equal(conversations.size, 0); assert.equal(workspace, null);
+  assert.equal(calls.chat.length, 2); assert.equal(piPrompts, 1);
   tests++;
   const summary = { result: 'PASS', browser: 'installed Firefox via WebDriver', checks: tests, backend: 'deterministic fixture, not live GLM', real_model_calls: 0, fixture_calls: { chat: calls.chat.length, coding: calls.coding.length, apply: calls.apply, cancel: calls.cancel, operation: calls.operation.length, settings: calls.settings.length, rotations: calls.rotations }, output };
   await writeFile(join(output, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');

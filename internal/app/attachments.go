@@ -146,6 +146,18 @@ func (a *App) registerAttachmentRoutes(mux *http.ServeMux) {
 		if !a.authorized(w, r) {
 			return
 		}
+		cs := conversationsFor(a)
+		cs.mu.Lock()
+		defer cs.mu.Unlock()
+		referenced, err := cs.attachmentReferencedLocked(r.PathValue("id"))
+		if err != nil {
+			jsonReply(w, 500, map[string]string{"error": "cannot verify conversation attachment ownership"})
+			return
+		}
+		if referenced {
+			jsonReply(w, 409, map[string]string{"error": "attachment is referenced by a persistent conversation; delete the owning conversation explicitly"})
+			return
+		}
 		a.attachmentMu.Lock()
 		defer a.attachmentMu.Unlock()
 		item, e := a.readAttachment(r.PathValue("id"))

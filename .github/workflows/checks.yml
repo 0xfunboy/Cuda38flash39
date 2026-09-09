@@ -35,7 +35,7 @@ jobs:
       - name: CPU-only protocol fixtures (not hardware qualification)
         run: >-
           go test -race -count=1
-          -run '^(TestSettings.*|TestToolEnvelopeAdmission|TestToolPlainTextParts|TestToolNumbersNotRounded|TestGLMToolsParsedOnlyAfterNaturalEnd|TestToolAdapterUsesPairedRawTokens|TestExplicitChatSettings|TestRuntimeTokenAdmission|TestTokenizerFailureNeverDispatches)$'
+          -run '^(TestSettings.*|TestConversation.*|TestChatConversation.*|TestDownload.*|TestProtected(DefaultPreservesDirtyAndUntracked|ExplicitDirectAndRemoteBlock|SnapshotBoundaries|ApplyExactVerifiedCandidate|ApplyFailsClosed|AgentClaimIsNotVerification|SinglePiScopeReservation|ChangedTestsRequireAcknowledgement|ManualVerifyAndReviewAPI|ReviewAfterRestartNeverAdoptsRoot)|TestToolEnvelopeAdmission|TestToolPlainTextParts|TestToolNumbersNotRounded|TestGLMToolsParsedOnlyAfterNaturalEnd|TestToolAdapterUsesPairedRawTokens|TestExplicitChatSettings|TestRuntimeTokenAdmission|TestTokenizerFailureNeverDispatches)$'
           ./...
       - name: Browser logic and mock harness tests (no inference)
         run: |

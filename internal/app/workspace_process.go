@@ -64,7 +64,7 @@ func (s *PiWorkspaceSession) piCommand() (*exec.Cmd, error) {
 	// inherited as an environment variable, never as a visible process argument.
 	tools := "read,bash,edit,write,grep,find,ls"
 	if s.Kind == "local" {
-		if _, e := validateLocalWorkspace(s.manager.app.cfg, s.Root); e != nil {
+		if e := s.validateWorkingRoot(); e != nil {
 			return nil, e
 		}
 		bargs = append(bargs, "--bind", s.Root, "/workspace")

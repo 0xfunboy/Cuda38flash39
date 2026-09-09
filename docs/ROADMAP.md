@@ -9,9 +9,14 @@ and evidence remain in [qualification](../QUALIFICATION.md) and
 
 ## Priorities
 
+PRODUCT-007 delivers local persistent Chat/Pi history, explicit handoff/import/
+deletion, protected local Pi copies with independent command receipts, and native
+Go public-source downloads. These are product features, not new model-quality
+claims. Portable CI now also covers their CPU-only protocol and safety fixtures;
+full bootstrap and real remote-host qualification remain separate work.
+
 | Priority | Improvement | Completion criterion |
 |---|---|---|
-| 1 | Durable chat history and validated import | Explicit local storage controls, reload recovery, export/import round trip, retention/deletion controls, and clear separation from credentials |
 | 1 | Reproducible bootstrap on another supported host | Pinned dependency installation, preflight for required tools and user scopes, actionable missing-dependency errors, and no implicit driver or model installation |
 | 1 | Broaden portable CI coverage | Initial hosted compilation/protocol/Node checks are included; extend CPU-only coverage while keeping Pi/systemd/hardware qualification explicit and opt-in |
 | 2 | Broader tool-protocol regression fixtures | Missing/duplicate arguments, numeric boundaries, malformed or incomplete calls, multiple calls and tool-result association fail safely without executing invalid tools |
