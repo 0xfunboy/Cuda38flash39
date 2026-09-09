@@ -1,107 +1,115 @@
 # Embedded local frontend
 
-Vanilla HTML/CSS/JavaScript. No build step, third-party assets, external fonts,
-CDN, package manager or client telemetry. Serve `index.html`, `styles.css`,
-`app.js` and `ui-core.mjs` from the same origin as the Go API. Serve `.mjs` with
-a JavaScript MIME type. The browser stores its API bearer token only in the
-current tab's memory; reconnect after reload.
+Dependency-free HTML/CSS/JavaScript with a compact grayscale layout. Go embeds
+only `index.html`, `styles.css`, `app.js`, and `ui-core.mjs`. Rebuild the gateway
+after changing these assets; serve `.mjs` with a JavaScript MIME type.
 
-## Current profile meaning
+English is the default; Italian is selectable. Only the non-secret language
+preference is saved as `strixglm.language`. API tokens, SSH passwords and
+conversations remain in tab memory. Reloading requires authentication again.
+All API requests stay on the gateway's origin.
 
-The production configuration currently maps **Fast, Balanced and Quality to
-the same operational preset**: reasoning `low`, output cap 4096 and 2 repairs.
-These three names are compatibility aliases, not three measured quality tiers;
-choosing Quality does not enable more reasoning or establish better answers.
+## Chat, Markdown and attachments
 
-The configured context budget 4096 is an **input-selection estimate**, not a
-qualification at 4096 actual tokenizer tokens. Actual prompt-token counts come
-from the engine after a request. Neither this setting nor the cluster's larger
-configured context limit constitutes a long-context reliability claim. The
-profile note displays the server's current configuration/qualification status;
-use the main product report for measured workload coverage.
+Markdown supports headings, paragraphs, fenced code with language labels and
+copy buttons, ordered/unordered lists, quotes, tables, inline code, emphasis
+and safe HTTP(S) links. Code fences are not displayed as code. Raw HTML is
+literal text, never interpreted; no image tags or model-supplied event handlers
+are created. Parsing also works incrementally during streaming.
 
-The UI connects to its own origin. The same assets work with the compatibility
-gateway or the native gateway; select the corresponding local token file. No
-endpoint or secret is embedded into the production JavaScript.
+Attach text, Markdown, source code, PDF or other supported files through
+authenticated multipart `POST /v1/attachments`. Maximum: eight pending files,
+32 MiB each. Preview displays the server's extraction kind, truncation and
+warnings. This is bounded text extraction/inspection, not image/audio
+understanding, OCR, execution or binary decompilation. Uploading never invokes
+the model. The user message carries `attachment_ids`; extracted text is not
+duplicated in the browser prompt. Server retention governs attachment IDs.
 
-The UI uses the real backend routes:
+Export JSON saves the current conversation's raw messages, reasoning, statuses,
+settings, attachment metadata, metrics and the actual replay history. Partial
+or failed replies are retained for auditing but excluded from replay history.
+Export does not contain the tab's bearer credential. Attachment IDs are not
+portable without the original server; extracted payloads are not re-embedded.
 
-- Chat: `POST /v1/chat/completions`, streamed OpenAI-compatible SSE, with
-  `profile`, `messages`, `max_tokens`, and usage requested. Only natural
-  `finish_reason=stop` answers with final text **and the SSE `[DONE]` marker**
-  enter subsequent chat context. A truncated stream is never treated as success.
-- Coding: `POST /v1/coding/tasks`, then `GET /v1/coding/tasks/{id}` while active.
-  Build/test commands are user-supplied strings; the backend validates/parses
-  them. The request always sets `sandbox_policy=isolated` and `apply=false`.
-- Cancellation: `POST /v1/coding/tasks/{id}/cancel`; draining is not represented
-  as completed cancellation. Failed polling stops and allows explicit resume.
-  `INTERRUPTED` after a gateway restart is terminal, not automatically replayed.
-- Apply: `POST /v1/coding/tasks/{id}/apply` with `{"confirm":true}`, only after
-  a passing result and an explicit browser confirmation. Backend source-state
-  checks remain mandatory; UI gating is not a security boundary.
-- State: public `GET /health`, authenticated `/v1/status` and `/v1/models`.
+## Coding workspace and advanced fallback
 
-Coding can import a local task JSON specification to reuse CLI/API commands,
-explicit context files and isolated independent test fixtures. Import only
-fills the form; it never submits, applies changes, imports credentials or
-weakens sandbox policy. Clear extra options to remove imported context/test
-settings while retaining the visible form fields.
+The main Coding panel is a Pi workspace client, using `/v1/workspaces/*`:
 
-Model output, source paths, errors and diffs are rendered with `textContent`,
-never HTML. Missing metrics display an em dash. Chat TTFT and HTTP time are
-explicit browser measurements; decode TPS and token usage require server data.
-The UI does not claim historical benchmark numbers as current telemetry.
-Task TPS is explicitly the last attempt's decode measurement; task wall time
-includes all attempts. Optional repairs are limited to the backend's range 0..6.
-The chat's context denominator is the server-configured ceiling, not a measured
-usable-context result. No speed, success-rate or intelligence scores are
-hard-coded into the UI.
+1. Inspect capabilities and allowed local roots.
+2. Create a local or Remote SSH session. Saved SSH presets contain connection
+   metadata, not passwords. SSH host keys must already be trusted by the server.
+3. Connect explicitly when needed. Passwords are sent only to Connect.
+4. Start Pi explicitly, then submit a prompt only when the backend advertises
+   both tool support and the session's prompt capability.
+5. Inspect agent events, files, diagnostic presets and custom shell commands.
+   File browsing is read-only. Custom shell requires an idle READY Pi session
+   and the server's explicit shell capability; each command needs confirmation.
+   It uses the existing Pi RPC/SSH executor, not a new agent loop or interactive
+   PTY. Local commands can write/delete workspace files immediately in the
+   sandbox, without a deferred Apply step. SSH commands use the remote account's
+   privileges. Review the exact command and target before confirming.
 
-## Regression tests
+Mutating workspace actions require confirmation. Capability failures are shown
+as unavailable, not simulated success. Failed requests are not automatically
+replayed. Session close, abort and refresh are separate controls. Polling
+retrieves real recorded Pi events; a disconnected transport does not imply
+the agent was cancelled.
+
+Advanced / legacy preserves the previously tested isolated coding workflow:
+`sandbox_policy: isolated`, `apply: false`, build/test/repair attempts, task
+resume, cancel/drain, and explicit apply confirmation. Imported task JSON
+cannot weaken isolation or auto-apply. This fallback is not represented as Pi.
+
+## Settings and measured statistics
+
+`/v1/options` supplies explicit low/high/max reasoning, context/output limits
+and timeout. Low is not thinking OFF. A supported thinking budget of zero
+forces reasoning closure; it does not imply architectural OFF or equivalent
+quality. Expanding the reasoning display does not change computation.
+
+Chat context is the total input + output admission window, not KV resizing.
+Auto omits `max_tokens`; the server fits its default to the remaining exact
+token budget. Legacy coding context remains source-selection budget plus the
+runtime's hard admission guard. Pi session reasoning is chosen at creation.
+Context/output settings in the plain-chat sidebar do not silently reconfigure
+an existing Pi process. A selectable 32K output cap does not promise completion
+within the displayed backend deadline.
+
+Observed TPS uses cumulative real completion tokens / observed HTTP time.
+Never characters, words or SSE chunks. Final decode comes from the engine;
+chat TTFT is browser-observed. Missing metrics remain unavailable. Legacy task
+TPS distinguishes last-attempt decode from observed HTTP rate. Natural stop,
+final text and SSE `[DONE]` are required before a reply enters replay history.
+
+Catalog and operations keep source-backed availability and historical evidence
+distinct from live measurements. Benchmarks/downloads require confirmation.
+The UI never restarts one rank independently.
+
+## Regression checks
 
 ```sh
 node --test web/tests/*.test.mjs
 node --check web/app.js
-```
-
-The unit-test glob is `web/tests/*.test.mjs`, **not** `web/*.test.mjs`.
-At the current revision it contains 17 tests. The browser scripts are separate
-explicit checks and are not implicitly launched by that unit-test glob.
-
-Optional actual-browser test with installed Firefox and geckodriver:
-
-```sh
 node web/tests/browser-smoke.mjs /tmp/strixglm-browser-smoke
 ```
 
-That smoke test starts an ephemeral, deterministic **fake API**, not GLM.
-It checks authentication, SSE/UTF-8, XSS-safe rendering, coding results and
-repair attempts, apply confirmation, cancellation, live-state rendering,
-mobile overflow and memory-only credentials. It records screenshots and
-cleans up its own server and browser. It downloads nothing and sends zero
-real model requests. A separate live product test is still required.
+Current coverage: 25 unit tests and 16 browser checks using installed Firefox
+with a deterministic fake backend. No package/browser downloads or GLM calls.
+The browser check covers Markdown/XSS, attachment extraction and IDs, JSON
+export, language selection, workspace capability gating/files/terminal, confirmed custom shell,
+legacy coding/apply/cancel, catalog/jobs and six-section mobile layout.
 
-Read-only live browser check (token is read into memory, never printed or
-captured in screenshots; no chat/coding requests are submitted):
+Explicit read-only live audit (real token read into memory, no inference):
 
 ```sh
 node web/tests/browser-live-readonly.mjs http://127.0.0.1:18093/ state/api-token /tmp/strixglm-browser-live
 ```
 
-It verifies actual health for both ranks, model identity, memory/GPU telemetry,
-JavaScript MIME type, API authentication, mobile layout and missing/structured
-status handling. Runtime profile qualification status is shown as reported;
-an unqualified configuration is never presented as an established winner.
-
-An explicitly opt-in live action test sends **one real short chat and one real
-coding task**, with up to the task's configured repairs. Run it only when GLM
-is idle; it refuses a busy preflight and never applies a patch:
+Use a new evidence directory. Screenshots require hidden credential controls.
+The separate `browser-live-actions.mjs` is opt-in and performs one real short
+chat plus one legacy isolated task, never apply; run only on an idle engine.
+It is not Pi qualification. A chat capped before EOS fails the check.
 
 ```sh
-node web/tests/browser-live-actions.mjs http://127.0.0.1:18093/ state/api-token /absolute/frozen/task.json /tmp/strixglm-frontend-e2e --run-live
+node web/tests/browser-live-actions.mjs http://127.0.0.1:18093/ state/api-token /absolute/task.json /new/report --run-live
 ```
-
-This test exercises the real UI's file import, submit and streaming handlers,
-checks natural chat completion and measured metrics, verifies the final build
-and tests pass, and checks original editable files remain byte-for-byte intact.
-It records the task ID and raw evidence; a failure is not automatically retried.

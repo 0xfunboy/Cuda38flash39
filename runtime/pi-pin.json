@@ -1,0 +1,22 @@
+{
+  "package": "@earendil-works/pi-coding-agent",
+  "version": "0.85.1",
+  "source": "https://github.com/earendil-works/pi",
+  "commit": "d981de1229ef899957bbe968bc8dcda02a21f477",
+  "tarball": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-0.85.1.tgz",
+  "integrity": "sha512-FGRN+OHbWaefBPGaTggAdLjrIHW+s2PzLyglz/5dfLzb9of7uuXMXYC0fJIeZTw+shS32o2cuQ9jF7YSDuL/oQ==",
+  "node_required": ">=22.19.0",
+  "node_observed": "22.22.1",
+  "installed_lock_sha256": "02855bd0ed71cad4f03fb094b82bd9d2dd6acafdb2cafd076818711eea351933",
+  "adapter_sha256": {
+    "runtime/pi-ssh.ts": "a216bf62455eee4e0296ba63b20f6ee3b15f13dc4528d476ef30c32658177179",
+    "runtime/pi-launch.mjs": "24d7cd24a0f9d41790ec9a70a8abd6bfc0fefa193e82dd3cb0ecba29ace60285",
+    "runtime/ssh-askpass": "fd13d5c271620116e2aba6d78462cda7c18e60bccfdfbc86535a7c4b0fb4db8e"
+  },
+  "protocol": "pi --mode rpc; strict LF-delimited JSON stdin/stdout",
+  "install_policy": "isolated .tools/pi; npm install --ignore-scripts --no-audit --no-fund; no global installation",
+  "upstream_docs": [
+    "https://github.com/earendil-works/pi/blob/d981de1229ef899957bbe968bc8dcda02a21f477/packages/coding-agent/docs/rpc.md",
+    "https://github.com/earendil-works/pi/blob/d981de1229ef899957bbe968bc8dcda02a21f477/packages/coding-agent/docs/models.md"
+  ]
+}

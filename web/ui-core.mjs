@@ -1,4 +1,126 @@
 // Pure, dependency-free presentation helpers. Keep this module DOM-independent.
+export const IT_LABELS = {
+  "Skip to conversation": "Vai alla conversazione",
+  "Navigation and settings": "Navigazione e impostazioni",
+  "Collapse sidebar": "Comprimi sidebar",
+  "Sections": "Sezioni",
+  "Models": "Modelli",
+  "Request settings": "Parametri richiesta",
+  "Settings": "Impostazioni",
+  "Low does not disable thinking.": "Low non disabilita il thinking.",
+  "Thinking budget": "Budget thinking",
+  "Natural · no added cap": "Naturale · nessun cap aggiunto",
+  "0 · force reasoning closure": "0 · chiusura forzata del ragionamento",
+  "A cap changes generation; equivalent quality is not guaranteed.": "Un cap cambia la generazione; qualità equivalente non garantita.",
+  "Context window": "Finestra contesto",
+  "Chat: input + output. Legacy coding: source-selection budget. Does not resize KV.": "Chat: input + output. Coding: budget selezione sorgenti. Non ridimensiona la KV.",
+  "Response limit (includes thinking)": "Limite risposta (include thinking)",
+  "Waiting for server settings.": "Parametri in attesa del server.",
+  "Expand thinking while responding": "Espandi thinking durante la risposta",
+  "Settings take effect when you submit a request.": "Nessuna modifica al modello finché non invii una richiesta.",
+  "Local conversations": "Conversazioni locali",
+  "Conversations": "Conversazioni",
+  "New conversation": "Nuova conversazione",
+  "Only in this tab. Export to keep a copy.": "Solo in questa scheda. Nessun salvataggio automatico su disco.",
+  "Not connected": "Non connesso",
+  "Toggle sidebar": "Mostra o nascondi sidebar",
+  "Waiting for connection": "Connessione in attesa",
+  "Token and connection": "Token e connessione",
+  "Refresh status": "Aggiorna stato",
+  "API authentication": "Autenticazione API",
+  "Local API token": "Token API locale",
+  "Kept only in this tab's memory.": "Resta soltanto nella memoria di questa scheda.",
+  "Local token": "Token locale",
+  "Connect": "Connetti",
+  "Forget": "Dimentica",
+  "No external services.": "Nessun servizio esterno.",
+  "Conversation": "Conversazione",
+  "Send a message. For repository work, open": "Scrivi un messaggio. Per modifiche al repository con build e test, usa",
+  "Response metrics": "Metriche risposta",
+  "Observed TPS": "TPS osservati",
+  "Final decode": "Decode finale",
+  "Context": "Contesto",
+  "Message": "Messaggio",
+  "Write a message…": "Scrivi un messaggio…",
+  "Stop stream": "Interrompi stream",
+  "Send": "Invia",
+  "Observed TPS: cumulative real tokens / HTTP time, thinking included. Final decode: engine metric. A cap or timeout is not a completed answer.": "TPS osservati: token reali cumulativi / tempo HTTP, incluso thinking. Decode finale: metrica del motore. Un cap o timeout non è una risposta conclusa.",
+  "Advanced fallback: isolated snapshot → build → test → repair. Apply to the original only after confirmation.": "Snapshot isolato → build → test → correzione. Applicazione all'originale soltanto su conferma.",
+  "Import task JSON": "Importa task JSON",
+  "Clear imported options": "Rimuovi opzioni importate",
+  "Importing does not submit a task or apply changes.": "Importare non avvia il task e non applica modifiche.",
+  "Instruction": "Istruzione",
+  "Describe the problem and expected outcome.": "Descrivi il problema e il risultato atteso.",
+  "/absolute/path/project": "/percorso/assoluto/progetto",
+  "Editable files": "File modificabili",
+  "relative paths, one per line": "percorsi relativi, uno per riga",
+  "Build command": "Comando build",
+  "optional": "opzionale",
+  "Test command": "Comando test",
+  "Request timeout (s)": "Timeout richiesta (s)",
+  "Maximum repairs": "Massimo repair",
+  "Reasoning and output limits follow the sidebar; legacy context is a source-selection budget. The runtime also enforces the total limit. Commands run only in the sandbox.": "Reasoning e limite risposta seguono la sidebar; nel coding il contesto è il budget di selezione sorgenti. Il runtime applica anche il limite totale. Comandi solo nella sandbox.",
+  "Start isolated task": "Avvia task isolato",
+  "Execution": "Esecuzione",
+  "Existing task ID": "ID task esistente",
+  "Open": "Apri",
+  "No task submitted": "Nessun task inviato",
+  "Total time": "Tempo totale",
+  "Model calls": "Chiamate modello",
+  "Last attempt TPS": "TPS ultimo tentativo",
+  "No results.": "Nessun risultato.",
+  "Cancel task": "Annulla task",
+  "Refresh": "Aggiorna",
+  "Apply passing patch": "Applica patch PASS",
+  "Copy": "Copia",
+  "Save": "Salva",
+  "No changes.": "Nessuna modifica.",
+  "The diff will appear here. Generation does not modify the original repository.": "Il diff comparirà qui. Il repository originale non viene modificato dalla generazione.",
+  "Task details and metrics": "Dettagli task e metriche",
+  "Refresh catalog": "Aggiorna catalogo",
+  "Local availability, runtime, distribution and limits come from the server catalog. Models never load automatically.": "Disponibilità locale, runtime, distribuzione e limiti provengono dal catalogo del server. Nessun modello viene caricato automaticamente.",
+  "Open the catalog to inspect local availability.": "Apri il catalogo per leggere lo stato locale.",
+  "Benchmarks and operations": "Benchmark e operazioni",
+  "Every run or download requires confirmation. Historical results are not measurements from this session.": "Ogni esecuzione o download richiede una conferma. I risultati storici non rappresentano misure della sessione corrente.",
+  "Available actions": "Azioni disponibili",
+  "Options not loaded.": "Opzioni non ancora caricate.",
+  "No data.": "Nessun dato.",
+  "Recorded evidence": "Evidenze registrate",
+  "Catalog not loaded.": "Catalogo non ancora caricato.",
+  "Model not detected": "Modello non ancora rilevato",
+  "Runtime details unavailable.": "Dettagli runtime non disponibili.",
+  "Node telemetry not received.": "Telemetria dei nodi non ancora ricevuta.",
+  "Last available measurement": "Ultima misura disponibile",
+  "Active request": "Richiesta attiva",
+  "Server-reported state": "Stato riportato dal server",
+  "Runtime limit": "Limite runtime",
+  "Not a quality qualification at this context length": "Non è una qualifica di qualità al contesto indicato",
+  "Last update": "Ultimo aggiornamento",
+  "No response received": "Nessuna risposta ricevuta",
+  "Pair lifecycle remains under the ownership-aware controller. The UI never restarts one rank alone.": "Il lifecycle della coppia resta nel controller ownership-aware. Nessun riavvio isolato di un rank dalla UI.",
+  "Raw health and status": "Health e stato grezzo"
+};
+Object.assign(IT_LABELS, {
+  'Language': 'Lingua', 'Coding workspace': 'Workspace di coding', 'Advanced / legacy': 'Avanzato / legacy', 'Advanced legacy coding': 'Coding avanzato legacy',
+  'Export JSON': 'Esporta JSON', 'Attach files': 'Allega file', 'Ctrl / ⌘ + Enter': 'Ctrl / ⌘ + Invio',
+  'Text, code, PDF or binary inspection · up to 8 files / 32 MiB each': 'Testo, codice, PDF o ispezione binaria · fino a 8 file / 32 MiB ciascuno',
+  'Checking workspace capabilities requires an authenticated connection.': 'Per verificare il workspace serve una connessione autenticata.',
+  'Connection': 'Connessione', 'Location': 'Posizione', 'Local': 'Locale', 'Remote SSH': 'Remoto SSH', 'Workspace root': 'Radice workspace',
+  'SSH preset': 'Preset SSH', 'Choose a preset': 'Scegli un preset', 'Password (optional, this request only)': 'Password (opzionale, solo questa richiesta)',
+  'Existing session': 'Sessione esistente', 'No session selected': 'Nessuna sessione selezionata', 'Create session': 'Crea sessione', 'Start Pi': 'Avvia Pi',
+  'New SSH preset': 'Nuovo preset SSH', 'Name': 'Nome', 'Port': 'Porta', 'User': 'Utente', 'Private key path (optional)': 'Percorso chiave privata (opzionale)',
+  'Remote root': 'Radice remota', 'Save preset': 'Salva preset', 'Host identity must already be trusted by the server. Passwords are not saved in presets.': 'Identità host già fidata dal server. Le password non vengono salvate nei preset.',
+  'Abort Pi': 'Interrompi Pi', 'Close session': 'Chiudi sessione', 'No active workspace.': 'Nessun workspace attivo.', 'Pi conversation': 'Conversazione Pi',
+  'Agent tools act inside the connected workspace. Review the workspace and capability status before submitting. This is separate from plain chat.': 'Gli strumenti agentici agiscono nel workspace connesso. Verifica destinazione e capacità prima di inviare. È separato dalla chat semplice.',
+  'Describe the repository task…': 'Descrivi il task sul repository…', 'Send to Pi': 'Invia a Pi', 'Agent events / tools': 'Eventi agente / strumenti',
+  'No events.': 'Nessun evento.', 'Files': 'File', 'Relative directory': 'Cartella relativa', 'List': 'Elenca', 'Choose a file to inspect.': 'Scegli un file da ispezionare.',
+  'Terminal diagnostics': 'Diagnostica terminale', 'Terminal': 'Terminale', 'Diagnostic preset': 'Preset diagnostico', 'Allowed command': 'Comando consentito', 'Run': 'Esegui', 'No command executed.': 'Nessun comando eseguito.',
+  'Custom shell command': 'Comando shell personalizzato', 'Enter a command for the connected workspace…': 'Inserisci un comando per il workspace connesso…', 'Run command…': 'Esegui comando…',
+  'Custom commands require an idle Pi session and explicit confirmation. Local: direct writes inside the workspace sandbox, no deferred Apply. SSH: commands use the remote account privileges.': 'I comandi richiedono una sessione Pi inattiva e conferma esplicita. Locale: scritture dirette nella sandbox workspace, senza Applica differito. SSH: privilegi dell’account remoto.',
+  'Execution and output are recorded in Pi events; this is not an interactive PTY.': 'Esecuzione e output sono registrati negli eventi Pi; non è una PTY interattiva.',
+  'Only server-listed diagnostic commands. Agent tool execution is recorded in Pi events.': 'Solo comandi diagnostici dichiarati dal server. Gli strumenti dell’agente sono registrati negli eventi Pi.'
+});
+
 export const TERMINAL_STATES = new Set([
   'passed', 'pass', 'success', 'succeeded', 'completed', 'failed', 'fail', 'error',
   'cancelled', 'canceled', 'incomplete', 'timeout', 'applied', 'blocked', 'interrupted',
@@ -14,6 +136,10 @@ export function isSuccess(status) {
 
 export function canCancelTask(status) {
   return ['queued', 'running'].includes(String(status || '').toLowerCase());
+}
+
+export function canRunWorkspaceShell(session) {
+  return String(session?.state || session?.status || '').toUpperCase() === 'READY' && session?.capabilities?.shell === true;
 }
 
 export function classifyStatus(status) {
@@ -98,20 +224,31 @@ export function importedTaskSpec(value) {
     if (!Array.isArray(input) || input.some(part => typeof part !== 'string' || !part.trim())) throw new Error(`${label} must be an array of nonempty strings.`);
     return input;
   };
+  const modes = ['low', 'high', 'max'];
+  const legacy = ['fast', 'balanced', 'quality'];
+  if (value.reasoning_effort !== undefined && !modes.includes(value.reasoning_effort)) throw new Error('Invalid reasoning_effort: use low, high or max.');
+  if (value.profile !== undefined && ![...modes, ...legacy].includes(value.profile)) throw new Error('Invalid profile in task JSON.');
+  if (value.reasoning_effort !== undefined && modes.includes(value.profile) && value.reasoning_effort !== value.profile) throw new Error('Conflicting explicit reasoning_effort and profile.');
   const result = {
     task: value.task, repo: value.repo,
     allowed_paths: stringList(value.allowed_paths, 'allowed_paths'),
     test_command: commandText(value.test_command),
     build_command: value.build_command ? commandText(value.build_command) : '',
-    profile: ['fast', 'balanced', 'quality'].includes(value.profile) ? value.profile : 'fast',
+    reasoning_effort: value.reasoning_effort ?? (modes.includes(value.profile) ? value.profile : 'low'),
     timeout: value.timeout ?? 300, max_repairs: value.max_repairs ?? 2,
   };
+  if (legacy.includes(value.profile)) result.legacy_profile = value.profile;
   if (!result.allowed_paths.length || !result.test_command) throw new Error('Allowed source paths and a test command are required.');
-  for (const [field, minimum, maximum] of [['timeout', 10, 1800], ['max_repairs', 0, 6], ['context_tokens', 256, 100000], ['max_tokens', 64, 16384]]) {
+  for (const [field, minimum, maximum] of [['timeout', 10, 1800], ['max_repairs', 0, 6], ['context_tokens', 256, 65536], ['max_tokens', 64, 32768]]) {
     const item = value[field] ?? result[field];
     if (item === undefined) continue;
     if (!Number.isSafeInteger(item) || item < minimum || item > maximum) throw new Error(`Invalid ${field} in task JSON.`);
     result[field] = item;
+  }
+  if (value.thinking_token_budget !== undefined) {
+    const budget = value.thinking_token_budget;
+    if (!Number.isSafeInteger(budget) || budget < 0 || budget >= (result.max_tokens ?? 32768)) throw new Error('Invalid thinking_token_budget: must be nonnegative and smaller than the output cap.');
+    result.thinking_token_budget = budget;
   }
   if (value.files !== undefined) result.files = stringList(value.files, 'files');
   if (value.test_files !== undefined) {
@@ -210,6 +347,119 @@ export function decodeRate(timings, usage) {
   const generationMS = finite(timings?.generation_time_ms);
   const tokens = finite(usage?.completion_tokens);
   return generationMS > 0 && tokens > 1 ? (tokens - 1) * 1000 / generationMS : null;
+}
+
+// Only cumulative server token counts are measurements. A chunk is not a token.
+export function observedRate(usage, elapsedSeconds) {
+  const tokens = usage?.completion_tokens;
+  return Number.isSafeInteger(tokens) && tokens >= 0 && elapsedSeconds > 0 ? tokens / elapsedSeconds : null;
+}
+
+export function generationSettings(reasoning, context, output, options) {
+  if (!options?.reasoning_modes?.includes(reasoning)) throw new Error('Reasoning mode is not supported by this server.');
+  const contextTokens = Number(context);
+  if (!options.context_options?.includes(contextTokens)) throw new Error('Select a supported total context window.');
+  const settings = { reasoning_effort: reasoning, context_tokens: contextTokens };
+  if (output !== '') {
+    const maximum = Number(output);
+    if (!Number.isSafeInteger(maximum) || maximum < 32 || maximum > options.max_output_tokens) throw new Error('Response limit exceeds the server-supported range.');
+    settings.max_tokens = maximum;
+  }
+  return settings;
+}
+
+export function safeSourceURL(value) {
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password ? url.href : null;
+  } catch { return null; }
+}
+
+// Preserve every character while marking fenced code. Rendering uses textContent.
+export function textBlocks(value) {
+  const text = String(value);
+  const pattern = /(^|\n)(```[^\n]*\n[\s\S]*?\n```(?=\n|$))/g;
+  const blocks = [];
+  let cursor = 0;
+  for (const match of text.matchAll(pattern)) {
+    const start = match.index + match[1].length;
+    if (start > cursor) blocks.push({ code: false, text: text.slice(cursor, start) });
+    blocks.push({ code: true, text: match[2] });
+    cursor = start + match[2].length;
+  }
+  if (cursor < text.length || !blocks.length) blocks.push({ code: false, text: text.slice(cursor) });
+  return blocks;
+}
+
+// Small, dependency-free Markdown AST. Raw HTML stays literal text. Parsing is
+// bounded and never evaluates model output, URLs, attributes or language names.
+export function markdownBlocks(value) {
+  const lines = String(value).replace(/\r\n?/g, '\n').split('\n');
+  const blocks = [];
+  const tableCells = line => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map(cell => cell.trim().replace(/\\\|/g, '|'));
+  const special = line => /^\s*$|^ {0,3}(?:`{3,}|~{3,}|#{1,6}\s|>\s?|[-*+]\s|\d+[.)]\s|(?:[-*_]\s*){3,}$)/.test(line);
+  for (let i = 0; i < lines.length;) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    const fence = line.match(/^ {0,3}(`{3,}|~{3,})([^`]*)$/);
+    if (fence) {
+      const marker = fence[1][0], length = fence[1].length, body = [];
+      i++;
+      while (i < lines.length && !(new RegExp(`^ {0,3}${marker === '`' ? '`' : '~'}{${length},}\\s*$`)).test(lines[i])) body.push(lines[i++]);
+      if (i < lines.length) i++;
+      blocks.push({ type: 'code', language: fence[2].trim().split(/\s+/)[0].slice(0, 40), text: body.join('\n') });
+      continue;
+    }
+    const heading = line.match(/^ {0,3}(#{1,6})\s+(.+?)\s*#*$/);
+    if (heading) { blocks.push({ type: 'heading', level: heading[1].length, text: heading[2] }); i++; continue; }
+    if (/^ {0,3}(?:[-*_]\s*){3,}$/.test(line)) { blocks.push({ type: 'rule' }); i++; continue; }
+    if (/^ {0,3}>/.test(line)) {
+      const quoted = [];
+      while (i < lines.length && /^ {0,3}>/.test(lines[i])) quoted.push(lines[i++].replace(/^ {0,3}>\s?/, ''));
+      blocks.push({ type: 'quote', text: quoted.join('\n') }); continue;
+    }
+    if (line.includes('|') && i + 1 < lines.length && tableCells(lines[i + 1]).every(cell => /^:?-{3,}:?$/.test(cell))) {
+      const header = tableCells(line), rows = [];
+      i += 2;
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim()) rows.push(tableCells(lines[i++]));
+      blocks.push({ type: 'table', header, rows }); continue;
+    }
+    const list = line.match(/^ {0,3}([-*+]|\d+[.)])\s+(.+)$/);
+    if (list) {
+      const ordered = /^\d/.test(list[1]), items = [];
+      while (i < lines.length) {
+        const item = lines[i].match(/^ {0,3}([-*+]|\d+[.)])\s+(.+)$/);
+        if (!item || /^\d/.test(item[1]) !== ordered) break;
+        let text = item[2]; i++;
+        while (i < lines.length && /^ {2,}\S/.test(lines[i]) && !/^\s*([-*+]|\d+[.)])\s/.test(lines[i])) text += '\n' + lines[i++].trim();
+        items.push(text);
+      }
+      blocks.push({ type: 'list', ordered, start: ordered ? parseInt(list[1], 10) : 1, items }); continue;
+    }
+    const paragraph = [line]; i++;
+    while (i < lines.length && !special(lines[i]) && !(lines[i].includes('|') && i + 1 < lines.length && tableCells(lines[i + 1]).every(cell => /^:?-{3,}:?$/.test(cell)))) paragraph.push(lines[i++]);
+    blocks.push({ type: 'paragraph', text: paragraph.join('\n') });
+  }
+  return blocks;
+}
+
+export function markdownInline(value) {
+  const text = String(value), result = [];
+  const pattern = /(`+)([^`]+?)\1|\*\*([^*]+)\*\*|__([^_]+)__|(?<!\*)\*([^*\n]+)\*(?!\*)|\[([^\]\n]+)\]\(([^\s)]+)\)/g;
+  let cursor = 0;
+  for (const match of text.matchAll(pattern)) {
+    if (match.index > cursor) result.push({ type: 'text', text: text.slice(cursor, match.index) });
+    if (match[1]) result.push({ type: 'code', text: match[2] });
+    else if (match[3] || match[4]) result.push({ type: 'strong', text: match[3] || match[4] });
+    else if (match[5]) result.push({ type: 'em', text: match[5] });
+    else {
+      const href = safeSourceURL(match[7]);
+      result.push(href ? { type: 'link', text: match[6], href } : { type: 'text', text: match[0] });
+    }
+    cursor = match.index + match[0].length;
+  }
+  if (cursor < text.length) result.push({ type: 'text', text: text.slice(cursor) });
+  return result;
 }
 
 export function completionState(done, finish, content) {

@@ -39,6 +39,12 @@ type Config struct {
 	SandboxMemoryBytes int64              `json:"sandbox_memory_bytes"`
 	SandboxTasks       int                `json:"sandbox_tasks"`
 	RemoteSSH          string             `json:"remote_ssh"`
+	TokenizerEndpoint  string             `json:"tokenizer_endpoint,omitempty"`
+	ChatContextTokens  int                `json:"chat_context_tokens,omitempty"`
+	ChatDefaultOutput  int                `json:"chat_default_output_tokens,omitempty"`
+	ChatMaxOutput      int                `json:"chat_max_output_tokens,omitempty"`
+	ThinkingBudget     bool               `json:"thinking_budget_supported,omitempty"`
+	ToolCalls          bool               `json:"tool_calls_supported,omitempty"`
 }
 
 func loadConfig(path string) (Config, error) {
@@ -59,6 +65,12 @@ func loadConfig(path string) (Config, error) {
 	}
 	if c.ContextFormat != "" && c.ContextFormat != "json" {
 		return c, errors.New("context_format must be json or blank")
+	}
+	if c.ChatContextTokens < 0 || c.ChatContextTokens > safeEngineContext || c.ChatMaxOutput < 0 || c.ChatMaxOutput > maxChatOutput || c.ChatDefaultOutput < 0 || c.ChatDefaultOutput > maxChatOutput {
+		return c, errors.New("invalid chat context/output limits")
+	}
+	if c.ChatDefaultOutput > 0 && c.ChatMaxOutput > 0 && c.ChatDefaultOutput > c.ChatMaxOutput {
+		return c, errors.New("default output exceeds max output")
 	}
 	return c, nil
 }

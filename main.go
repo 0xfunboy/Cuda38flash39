@@ -30,15 +30,17 @@ import (
 var webAssets embed.FS
 
 type App struct {
-	cfg         Config
-	client      *http.Client
-	mu          sync.Mutex
-	tasks       map[string]*Task
-	admission   chan struct{}
-	journal     Journal
-	token       string
-	lastMetrics Metrics
-	preferred   atomic.Value
+	cfg          Config
+	client       *http.Client
+	mu           sync.Mutex
+	tasks        map[string]*Task
+	admission    chan struct{}
+	journal      Journal
+	token        string
+	lastMetrics  Metrics
+	preferred    atomic.Value
+	closing      atomic.Bool
+	attachmentMu sync.Mutex
 }
 
 func newApp(c Config) (*App, error) {
@@ -116,6 +118,16 @@ func (a *App) health(ctx context.Context) map[string]any {
 }
 func (a *App) routes() http.Handler {
 	mux := http.NewServeMux()
+	a.registerWorkspaceRoutes(mux)
+	reason := ""
+	if !a.cfg.ToolCalls {
+		reason = "Function tools disabled until paired protocol qualification"
+	}
+	a.setWorkspaceToolCapability(a.cfg.ToolCalls, reason)
+	a.registerOptionsRoutes(mux)
+	a.registerAttachmentRoutes(mux)
+	registerCatalogRoutes(a, mux)
+	a.registerOperationRoutes(mux)
 	assets, _ := fs.Sub(webAssets, "web")
 	mux.Handle("/", http.FileServer(http.FS(assets)))
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
@@ -278,12 +290,17 @@ func (a *App) routes() http.Handler {
 		jsonReply(w, 200, t.snapshot())
 	})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if a.closing.Load() && r.Method == "POST" {
+			jsonReply(w, 503, map[string]string{"error": "gateway draining for shutdown; no new request accepted"})
+			return
+		}
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'")
 		mux.ServeHTTP(w, r)
 	})
 }
 func (a *App) proxyChat(w http.ResponseWriter, r *http.Request) {
+	started := time.Now()
 	if !a.authorized(w, r) {
 		return
 	}
@@ -292,45 +309,23 @@ func (a *App) proxyChat(w http.ResponseWriter, r *http.Request) {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
 	}
-	if e := validateChat(p); e != nil {
+	if e := a.expandChatAttachments(p); e != nil {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
 	}
-	name := stringValue(p["profile"])
-	if name == "" {
-		name = a.preferred.Load().(string)
+	if a.cfg.ToolCalls {
+		if e := normalizeToolText(p); e != nil {
+			jsonReply(w, 400, map[string]string{"error": e.Error()})
+			return
+		}
 	}
-	profile, e := a.resolveProfile(TaskSpec{Profile: name})
+	if e := validateChatWithTools(p, a.cfg.ToolCalls); e != nil {
+		jsonReply(w, 400, map[string]string{"error": e.Error()})
+		return
+	}
+	settings, e := a.prepareChat(p)
 	if e != nil {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
-		return
-	}
-	delete(p, "profile")
-	if m := stringValue(p["model"]); m != "" && m != a.cfg.Model {
-		jsonReply(w, 400, map[string]string{"error": "unknown model"})
-		return
-	}
-	p["model"] = a.cfg.Model
-	if p["seed"] == nil {
-		p["seed"] = 1
-	}
-	if p["temperature"] == nil {
-		p["temperature"] = 0
-	}
-	if p["max_tokens"] == nil {
-		p["max_tokens"] = profile.MaxTokens
-	}
-	kwargs := object(p["chat_template_kwargs"])
-	if kwargs == nil {
-		kwargs = map[string]any{}
-	}
-	if kwargs["reasoning_effort"] == nil {
-		kwargs["reasoning_effort"] = profile.Reasoning
-	}
-	p["chat_template_kwargs"] = kwargs
-	body, _ := json.Marshal(p)
-	if len(body) > profile.ContextTokens*4 {
-		jsonReply(w, 413, map[string]string{"error": "chat history exceeds estimated profile budget; compact it or choose a larger qualified profile"})
 		return
 	}
 	release, e := a.modelLock(r.Context())
@@ -339,11 +334,23 @@ func (a *App) proxyChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer release()
+	if e := a.admitChat(r.Context(), p, &settings); e != nil {
+		status := 413
+		if errors.Is(e, errTokenizerPreflight) {
+			status = 502
+		}
+		jsonReply(w, status, map[string]string{"error": e.Error()})
+		return
+	}
+	if needsToolAdapter(p) {
+		a.proxyToolChat(w, r, p, settings, started)
+		return
+	}
+	body, _ := json.Marshal(p)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(a.cfg.ModelTimeout)*time.Second)
 	defer cancel()
 	req, _ := http.NewRequestWithContext(ctx, "POST", a.cfg.Backend+"/v1/chat/completions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	started := time.Now()
 	resp, e := a.client.Do(req)
 	if e != nil {
 		jsonReply(w, 502, map[string]string{"error": e.Error()})
@@ -352,7 +359,7 @@ func (a *App) proxyChat(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
 	w.Header().Set("Cache-Control", "no-store")
-	w.Header().Set("X-StrixGLM-Profile", name)
+	setChatHeaders(w, settings)
 	w.WriteHeader(resp.StatusCode)
 	if strings.Contains(resp.Header.Get("Content-Type"), "text/event-stream") && resp.StatusCode == 200 {
 		var result ModelResult
@@ -450,7 +457,7 @@ func entry(args []string) error {
 	cmd := args[0]
 	f := flag.NewFlagSet(cmd, flag.ContinueOnError)
 	configPath := f.String("config", "config.json", "configuration file")
-	profile := f.String("profile", "", "fast/balanced/quality")
+	profile := f.String("profile", "", "low/high/max (legacy aliases retained for frozen benchmark protocols)")
 	repo := f.String("repo", "", "repository path")
 	taskText := f.String("task", "", "coding instruction")
 	taskFile := f.String("task-file", "", "instruction file")
@@ -462,7 +469,7 @@ func entry(args []string) error {
 	apply := f.Bool("apply", false, "explicitly apply verified patch")
 	repairs := f.Int("max-repairs", -1, "repair limit")
 	ctxTokens := f.Int("context-tokens", 0, "estimated context budget")
-	maxTokens := f.Int("max-tokens", 0, "output cap for code/chat; omitted uses the selected profile")
+	maxTokens := f.Int("max-tokens", 0, "output cap including reasoning; omitted chat uses auto, coding uses the profile")
 	timeout := f.Int("timeout", 0, "code-only model timeout seconds; chat uses configured model_timeout")
 	if e := f.Parse(args[1:]); e != nil {
 		return e
@@ -489,6 +496,11 @@ func entry(args []string) error {
 		go func() {
 			defer close(shutdownDone)
 			<-ctx.Done()
+			a.closing.Store(true)
+			shutdown, cancel := context.WithTimeout(context.Background(), time.Duration(max(cfg.ModelTimeout, 1800)+10)*time.Second)
+			defer cancel()
+			_ = a.shutdownOperations(shutdown)
+			_ = a.shutdownWorkspaces(shutdown)
 			a.mu.Lock()
 			pending := []*Task{}
 			for _, t := range a.tasks {
@@ -498,8 +510,6 @@ func entry(args []string) error {
 			a.mu.Unlock()
 			// Per-task overrides may be longer than the default model timeout.
 			// Keep draining up to the maximum accepted override, not just default.
-			shutdown, cancel := context.WithTimeout(context.Background(), time.Duration(max(cfg.ModelTimeout, 1800)+10)*time.Second)
-			defer cancel()
 			_ = srv.Shutdown(shutdown)
 			for _, t := range pending {
 				select {
@@ -562,7 +572,7 @@ func entry(args []string) error {
 		return e
 	case "profile":
 		if len(f.Args()) != 1 {
-			return errors.New("profile fast|balanced|quality")
+			return errors.New("profile low|high|max")
 		}
 		v, e := call("POST", "/v1/profile", map[string]string{"profile": f.Args()[0]})
 		if e == nil {
@@ -652,6 +662,9 @@ func entry(args []string) error {
 			p := map[string]any{"model": cfg.Model, "messages": messages, "stream": true, "stream_options": map[string]any{"include_usage": true}}
 			if *profile != "" {
 				p["profile"] = *profile
+			}
+			if *ctxTokens > 0 {
+				p["context_tokens"] = *ctxTokens
 			}
 			if maxTokensExplicit {
 				p["max_tokens"] = *maxTokens

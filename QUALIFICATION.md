@@ -1,5 +1,115 @@
 # GLM coding qualification — final product verdict
 
+## Workspace revision STRIX-PRODUCT-003 (2026-09-09)
+
+The user-supplied conversation was audited offline, preserving its actual final
+C blocks without repairs. Small-input LOW examples were correct, but integer
+overflow/input parsing were unsafe. The MAX sieve reproduced bounds/allocation
+errors. Its report prose included an unsupported budget-only conclusion and
+a wrong B cost/correct solution (238.153575s, not204s). This is not a new model
+ranking. Exact audit/raw are local-only at
+`/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-003/ANSWER-QUALITY-AUDIT.md`;
+private transcripts and deployment state are not included in this public source.
+
+Product changes: safe Markdown/code copy, conversation export, bounded text/PDF/
+DOCX/archive/binary attachments, English default with Italian selection, actual
+Pi0.85.1 RPC Local/SSH workspaces, persisted host metadata, file browsing and
+confirmed shell diagnostics. The original agent loop remains only in Advanced.
+
+Function tools use the same runtime tokenizer plus paired raw completions:
+generated text is compared before allocating one set of tool IDs. Two actual
+GLM requests passed: read-call envelope followed by tool-result interpretation,
+both naturally concluded. Their HTTP times1.304/1.634s are short protocol
+smokes, not decode TPS or model-quality benchmarks. Tool turns are buffered;
+ordinary chat remains streamed. No generated code is executed by the adapter.
+Pi performs its own schema validation before executing tools.
+
+Local Pi isolation was checked with actual RPC/bash: a listener on host TCP
+was unreachable; model discovery succeeded solely through a private Unix
+socket bridge. Effective scope:2GiB RAM, swap0,128 tasks,200% CPU. No root bearer
+credential is exposed to Pi. Remote execution instead has the connected SSH
+account's privileges and must not be represented as a remote sandbox.
+
+Evidence: `/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-003/`.
+Delivered on18093; source-reproducible binary SHA-256
+`31b6be8cb344d97edea19fce10965f03adbf894e4f14428a008513206897c6cc`.
+Only the gateway restarted. Both rank and original coordinator InvocationIDs
+are identical to the preserved snapshot; health is good, idle and unpoisoned.
+The preview and test Pi scope were closed. PRODUCT-002 rollback is retained.
+
+- 124 Go tests plus26 subcases PASS with race detector, no skips; `go vet` clean.
+- 40 Node tests PASS, including25 frontend tests.16 Firefox mock checks PASS.
+- 7 GET-only deployed Firefox checks PASS; no generation during that check.
+- Real Pi smoke:4 model turns,3 tool calls (read/write/bash), natural final
+  answer,49.387s. A separate independent oracle compiled the **unedited** C11
+  source with warnings-as-errors and ASan/UBSan:213 cases PASS. This is one
+  bounded task at low, not a general coding-quality qualification or proof
+  that low exceeds max. The richer task specification also differs from the
+  user's original short prompt.
+- Pi's own bash printed example results without assertions. Its final answer
+  additionally claimed a missing-argument test absent from that command. The
+  independent oracle did test missing arguments and passed. We do not silently
+  upgrade the accuracy of the agent's original test-reporting claim.
+- Real Firefox Pi/file/shell check PASS: selected actual recorded session,
+  rendered its answer, opened nth_prime.c, ran exactly `printf workspace-shell-ok`
+  with confirmation and exit0. No GLM request from that browser check.
+- Local RPC, Unix bridge, blocked host TCP, effective scopes and full owned-scope
+  cleanup were tested. Password broker and SSH extension startup were tested
+  without connecting to an actual host. **SSH login and a remote coding task
+  remain unqualified on the user's chosen hosts.** No remote install was made.
+
+Raw includes `go-tests.jsonl`, `node-tests.log`, `workspace-tests.log`,
+`attachment-tests.jsonl`, `pi-events.json`, `pi-independent-prime-check.json`,
+`browser-workspace-live/`, `browser-deployed-readonly/`, `SOURCE-PIN.json`,
+`deployment.json` and `rollback/`. A native18095 runtime cutover was not performed;
+its tools flag remains off until that transport is separately exercised.
+
+## Console revision STRIX-PRODUCT-002 (2026-09-08)
+
+Deployed on18093. Grayscale/collapsible UI, real cumulative streaming usage,
+explicit reasoning/context/output, source-pinned model inventory and confirmed
+asynchronous operations. The GLM engine, weights and both rank invocation IDs
+were preserved; only `strixglm.service` restarted. This section does not change
+the model-quality conclusions or historical measurements below.
+
+- 89 Go tests with race detector, `go vet`, 36 Node tests and 12 Firefox mock checks PASS.
+- Real Firefox preview: one naturally concluded RAII chat and one scheduling C++
+ task, PASS first attempt with independent fresh-snapshot compile/test. Original
+ files unchanged. Task16.955s,355 completion tokens,24.572 decodeTPS; this single
+ functional rerun is not a new speed qualification.
+- Runtime token admission matched engine prompt usage (38 tokens); 48 positive
+ streaming usage events in the explicit-high/budget0 RAII smoke. One confirmed
+ `api-smoke` operation completed PASS through the actual async job manager.
+- Native thinking budget 0 produced 202 completion / 0 reasoning tokens and natural
+ stop. Budget128 produced229/12 and natural stop, so that second case did **not**
+ exercise the128 boundary. Optional budget support is verified, not equal-quality
+ certification or proof of every budget value.
+- Real deployed Firefox GET-only check: 7 checks PASS, including options, catalog,
+ operations, live telemetry and desktop/mobile layout. No model generation in
+ this deployed read-only test. Preview18096 was stopped after deployment.
+- New negative tests reject unknown thinking controls, `medium`, conflicting caps,
+ invalid stop/top_p, non-stream stream_options, template overrides and total
+ context overflow before inference. Tokenizer failure never dispatches a rank.
+- Downloads were tested with local HTTP fixtures only: range resume, integrity,
+ symlink/hardlink, free space, no-overwrite and cancellation. No actual model
+ download was needed or started.19 catalog models /177 components; NODE01 stat
+ is not SHA verification, NODE02 files were not re-inspected. Other-model
+ runtime switching is blocked, not implemented by a decorative Load button.
+
+Raw: `/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-002/`;
+`FINAL.md`, `deployment.json`, `SOURCE-PIN.json`, `preview-smoke-summary.json`,
+`thinking-smoke-summary.json`, `browser-preview-actions/frontend-e2e.json`,
+`browser-mock-final/`, `browser-deployed-readonly/` and test logs.
+Rollback binary/config are in `rollback/`; the original paired snapshot remains
+`state/legacy-handoff-20260908.json`. No runtime cutover or new math qualification.
+
+PRODUCT-002 limits (historical): response cap includes thinking, Auto up to16,384, explicit up
+to32,768, total context65,536, backend deadline600seconds. A selectable context
+is not quality-qualified. At that revision Pi native tools/Responses were unsupported; the
+coding task API is a separate verified-diff workflow. No further automatic tests.
+
+## Preserved model qualification (STRIX-PRODUCT-001)
+
 Evidence snapshot: **2026-09-08**, native lifecycle and original rollback completed.
 **READY for the measured compact C++ workflow**, not universal programming
 reliability, near-SOTA parity, or long-context qualification.

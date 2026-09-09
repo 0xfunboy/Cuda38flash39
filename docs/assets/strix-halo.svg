@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-labelledby="title description">
+  <title id="title">StrixHaloClusterGLM</title>
+  <desc id="description">A local coding workspace with one GLM target distributed over two Strix Halo nodes.</desc>
+  <rect width="1280" height="300" rx="14" fill="#191919"/>
+  <rect x="1" y="1" width="1278" height="298" rx="13" fill="none" stroke="#3c3c3c"/>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace">
+    <text x="48" y="66" fill="#a5a5a5" font-size="13" letter-spacing="3">LOCAL CODING WORKSPACE</text>
+    <text x="46" y="138" fill="#f1f1f1" font-size="43" font-weight="600" letter-spacing="-1.5">StrixHaloClusterGLM</text>
+    <text x="48" y="185" fill="#b9b9b9" font-size="18">GLM + Pi · browser + API</text>
+    <path d="M48 225H754" stroke="#444"/>
+    <text x="48" y="260" fill="#919191" font-size="13">TWO STRIX HALO NODES / ONE TARGET MODEL</text>
+    <g fill="#222" stroke="#747474" stroke-width="1.5">
+      <rect x="845" y="89" width="142" height="116" rx="9"/>
+      <rect x="1076" y="89" width="142" height="116" rx="9"/>
+      <path d="M987 140H1076M987 154H1076" fill="none" stroke="#a7a7a7"/>
+      <rect x="891" y="113" width="50" height="44" rx="3" fill="#292929"/>
+      <rect x="1122" y="113" width="50" height="44" rx="3" fill="#292929"/>
+      <path d="M902 107V113M915 107V113M928 107V113M902 157V163M915 157V163M928 157V163M1116 126H1122M1116 140H1122M1172 126H1178M1172 140H1178"/>
+    </g>
+    <text x="916" y="187" text-anchor="middle" fill="#dedede" font-size="13">NODE 01</text>
+    <text x="1147" y="187" text-anchor="middle" fill="#dedede" font-size="13">NODE 02</text>
+    <text x="1032" y="125" text-anchor="middle" fill="#b0b0b0" font-size="12">TP2</text>
+    <text x="1032" y="244" text-anchor="middle" fill="#919191" font-size="12">128 GB UMA EACH · USB4</text>
+  </g>
+</svg>

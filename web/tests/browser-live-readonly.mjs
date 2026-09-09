@@ -20,7 +20,7 @@ const output = resolve(outputArg);
 await mkdir(output, { recursive: true });
 const redact = text => String(text).split(token).join('[REDACTED]');
 const observations = { time_utc: new Date().toISOString(), api: apiURL.origin, readonly: true, model_requests: 0, checks: [] };
-for (const endpoint of ['/health', '/v1/status', '/v1/models', '/ui-core.mjs']) {
+for (const endpoint of ['/health', '/v1/status', '/v1/models', '/v1/options', '/v1/catalog', '/v1/operations/options', '/v1/operations/jobs', '/ui-core.mjs']) {
   const response = await fetch(new URL(endpoint, apiURL), {
     headers: { Authorization: `Bearer ${token}` }, redirect: 'error', signal: AbortSignal.timeout(10000),
   });
@@ -88,6 +88,14 @@ try {
   assert.equal(await execute('return document.getElementById("connection-panel").hidden'), true, 'Never screenshot the token input.');
   assert.equal(await execute('return document.getElementById("model-pill").textContent'), observations['/v1/status'].model);
   observations.checks.push('real browser auth, live model identity, hidden token field');
+  const options = observations['/v1/options'];
+  assert.equal(await execute('return document.getElementById("reasoning-mode").value'), options.default_reasoning);
+  assert.equal(await execute('return Number(document.getElementById("context-select").value)'), options.default_context_tokens);
+  assert.equal(await execute('return document.getElementById("chat-cap").value'), '');
+  assert.equal(await execute('return Number(document.getElementById("code-timeout").max)'), options.generation_timeout_seconds);
+  assert.equal(await execute('return document.getElementById("thinking-budget").disabled'), options.thinking_budget_supported !== true);
+  assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '—', 'No fabricated TPS before a real request.');
+  observations.checks.push('explicit reasoning/context/output/thinking controls match live server options; no fabricated idle TPS');
   await writeFile(resolve(output, 'chat-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   await execute("document.getElementById('tab-cluster').click();");
   assert.equal(await execute('return document.getElementById("tab-cluster").getAttribute("aria-selected")'), 'true');
@@ -104,13 +112,21 @@ try {
   observations.checks.push('cluster nested health, active request array, context, both node memory/GPU render');
   observations.browser_displayed = { health: displayedHealth, active_request: activeLabel, node_values: nodeTexts };
   await writeFile(resolve(output, 'cluster-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await execute("document.getElementById('tab-models').click();");
+  await until('document.querySelectorAll(".catalog-card").length > 0');
+  assert.equal(await execute('return document.querySelectorAll(".catalog-card").length'), observations['/v1/catalog'].models.length);
+  await writeFile(resolve(output, 'models-live-desktop.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
+  await execute("document.getElementById('tab-benchmarks').click();");
+  await until('document.querySelectorAll(".operation-row").length > 0');
+  observations.checks.push('live catalog and operation availability rendered without starting jobs');
   await command(`/session/${session}/window/rect`, { width: 390, height: 844 });
-  for (const tab of ['chat', 'coding', 'cluster']) {
+  await execute("if(!document.body.classList.contains('sidebar-collapsed'))document.getElementById('sidebar-toggle').click();");
+  for (const tab of ['chat', 'workspace', 'coding', 'models', 'benchmarks', 'cluster']) {
     await execute(`document.getElementById('tab-${tab}').click();`);
     assert.equal(await execute('return document.documentElement.scrollWidth <= window.innerWidth'), true, `${tab} mobile overflow`);
   }
   await delay(220);
-  observations.checks.push('mobile chat, coding and cluster without horizontal overflow');
+  observations.checks.push('mobile five-section navigation with collapsed sidebar and no horizontal overflow');
   await writeFile(resolve(output, 'cluster-live-mobile.png'), Buffer.from(await command(`/session/${session}/screenshot`), 'base64'));
   const requests = await execute('return window.__readonlyRequests');
   assert.ok(requests.every(row => ['GET', 'HEAD'].includes(row.method)));

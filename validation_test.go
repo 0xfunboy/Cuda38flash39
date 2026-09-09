@@ -19,3 +19,13 @@ func TestClientValidationNoMalformedDispatch(t *testing.T) {
 		t.Fatal(e)
 	}
 }
+
+func TestNoIgnoredThinkingOrInvalidStops(t *testing.T) {
+	for _, extra := range []string{`"enable_thinking":false`, `"thinking":{"type":"disabled"}`, `"reasoning":{"effort":"none"}`, `"extra_body":{}`, `"stop":42`, `"stop":[""]`, `"stop":[1]`, `"stream_options":{"include_usage":"yes"}`, `"reasoning_effort":false`, `"model":42`, `"top_k":0`, `"top_p":0`, `"response_format":{"type":"json_object"}`} {
+		var p map[string]any
+		json.Unmarshal([]byte(`{"messages":[{"role":"user","content":"hi"}],`+extra+`}`), &p)
+		if validateChat(p) == nil {
+			t.Errorf("accepted ignored/invalid control %s", extra)
+		}
+	}
+}

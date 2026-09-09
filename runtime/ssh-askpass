@@ -1,0 +1,15 @@
+#!/usr/bin/node
+// One-use password delivery from the authenticated gateway's private Unix
+// socket. No secret is an argument, environment variable, file or log record.
+const net = require('node:net');
+const socket = process.env.STRIXGLM_ASKPASS_SOCKET;
+if (!socket) process.exit(1);
+const client = net.createConnection(socket);
+let count = 0;
+client.setTimeout(5000, () => { client.destroy(); process.exitCode = 1; });
+client.on('data', chunk => {
+  count += chunk.length;
+  if (count > 4097) { client.destroy(); process.exitCode = 1; return; }
+  process.stdout.write(chunk);
+});
+client.on('error', () => { process.exitCode = 1; });

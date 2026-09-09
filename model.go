@@ -70,6 +70,9 @@ func parseMetrics(m *Metrics, p map[string]any) {
 	}
 }
 func consumeSSE(r io.Reader, start time.Time, emit func([]byte), result *ModelResult) error {
+	return consumeSSEProgress(r, start, emit, result, nil)
+}
+func consumeSSEProgress(r io.Reader, start time.Time, emit func([]byte), result *ModelResult, progress func(Metrics)) error {
 	scanner := bufio.NewScanner(io.LimitReader(r, 64<<20))
 	scanner.Buffer(make([]byte, 65536), 2<<20)
 	var data []string
@@ -111,6 +114,10 @@ func consumeSSE(r io.Reader, start time.Time, emit func([]byte), result *ModelRe
 			if f := stringValue(c["finish_reason"]); f != "" {
 				result.FinishReason = f
 			}
+		}
+		result.Metrics.HTTPSeconds = time.Since(start).Seconds()
+		if progress != nil {
+			progress(result.Metrics)
 		}
 		return nil
 	}
@@ -157,6 +164,10 @@ func (a *App) modelLock(ctx context.Context) (func(), error) {
 	return func() { syscall.Flock(int(f.Fd()), syscall.LOCK_UN); f.Close(); <-a.admission }, nil
 }
 func (a *App) generate(ctx context.Context, payload map[string]any, rawPath string) (ModelResult, error) {
+	return a.generateProgress(ctx, payload, rawPath, nil)
+}
+func (a *App) generateProgress(ctx context.Context, payload map[string]any, rawPath string, progress func(Metrics)) (ModelResult, error) {
+	start := time.Now()
 	var r ModelResult
 	release, e := a.modelLock(ctx)
 	if e != nil {
@@ -171,8 +182,24 @@ func (a *App) generate(ctx context.Context, payload map[string]any, rawPath stri
 		timeout = n
 	}
 	delete(payload, "_timeout")
+	if a.cfg.TokenizerEndpoint != "" {
+		prompt, limit, err := a.countPrompt(ctx, payload)
+		if err != nil {
+			return r, fmt.Errorf("tokenizer preflight (no inference): %w", err)
+		}
+		if limit > safeEngineContext {
+			limit = safeEngineContext
+		}
+		out, err := wholeNumber(payload["max_tokens"], "max_tokens", 1, a.maxOutputTokens())
+		if err != nil {
+			return r, err
+		}
+		if prompt+out > limit {
+			return r, fmt.Errorf("actual prompt %d + output %d exceeds engine context %d; no inference dispatched", prompt, out, limit)
+		}
+	}
 	payload["stream"] = true
-	payload["stream_options"] = map[string]any{"include_usage": true}
+	payload["stream_options"] = map[string]any{"include_usage": true, "continuous_usage_stats": true}
 	b, e := json.Marshal(payload)
 	if e != nil {
 		return r, e
@@ -185,7 +212,6 @@ func (a *App) generate(ctx context.Context, payload map[string]any, rawPath stri
 	defer cancel()
 	req, _ := http.NewRequestWithContext(drainCtx, "POST", a.cfg.Backend+"/v1/chat/completions", bytes.NewReader(b))
 	req.Header.Set("Content-Type", "application/json")
-	start := time.Now()
 	r.Requested = true
 	resp, e := a.client.Do(req)
 	if e != nil {
@@ -201,7 +227,7 @@ func (a *App) generate(ctx context.Context, payload map[string]any, rawPath stri
 		return r, e
 	}
 	defer raw.Close()
-	e = consumeSSE(io.TeeReader(resp.Body, raw), start, nil, &r)
+	e = consumeSSEProgress(io.TeeReader(resp.Body, raw), start, nil, &r, progress)
 	r.Metrics.HTTPSeconds = time.Since(start).Seconds()
 	_ = writeJSON(rawPath+"-response.json", r)
 	a.journal.Log("model_end", map[string]any{"raw": rawPath, "metrics": r.Metrics, "error": fmt.Sprint(e)})

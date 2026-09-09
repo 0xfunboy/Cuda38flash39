@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
-  SSEParser, activeRequestLabel, bytes, canCancelTask, classifyStatus, commandText, completionDelta, completionState, decodeRate,
-  errorMessage, escapeHTML, finite, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask,
-  number, pathList, percent, seconds,
+  SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, commandText, completionDelta, completionState, decodeRate,
+  errorMessage, escapeHTML, finite, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask,
+  IT_LABELS, markdownBlocks, markdownInline, number, observedRate, pathList, percent, safeSourceURL, seconds, textBlocks,
 } from '../ui-core.mjs';
 
 function parseChunks(chunks) {
@@ -164,7 +164,10 @@ test('Task JSON import allows only task fields, never automatic apply or credent
   assert.equal(spec.build_command, "cc src/a.c -o 'file with space'");
   assert.equal(commandText(['echo', "it's", '']), "echo 'it'\\''s' ''");
   assert.throws(() => importedTaskSpec({ ...input, max_tokens: 0 }), /Invalid max_tokens/);
-  assert.throws(() => importedTaskSpec({ ...input, max_tokens: 16385 }), /Invalid max_tokens/);
+  assert.equal(importedTaskSpec({ ...input, max_tokens: 32768 }).max_tokens, 32768);
+  assert.throws(() => importedTaskSpec({ ...input, max_tokens: 32769 }), /Invalid max_tokens/);
+  assert.equal(spec.profile, undefined);
+  assert.equal(importedTaskSpec({ ...input, reasoning_effort: 'max' }).reasoning_effort, 'max');
   assert.throws(() => importedTaskSpec({ ...input, max_repairs: 7 }), /Invalid max_repairs/);
   assert.equal(importedTaskSpec({ ...input, max_repairs: 6 }).max_repairs, 6);
   assert.equal(importedTaskSpec({ ...input, timeout: 1800 }).timeout, 1800);
@@ -177,25 +180,89 @@ test('Task JSON import allows only task fields, never automatic apply or credent
 test('Frontend source has no dynamic HTML/eval, persisted token, CDN or external dependency', async () => {
   const script = await readFile(new URL('../app.js', import.meta.url), 'utf8');
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.doesNotMatch(script, /(?:innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(|new Function|localStorage|sessionStorage)/);
+  assert.doesNotMatch(script, /(?:innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(|new Function|sessionStorage)/);
+  const persistedKeys = [...script.matchAll(/localStorage\.(?:getItem|setItem)\('([^']+)'/g)].map(match => match[1]);
+  assert.deepEqual(persistedKeys, ['strixglm.language', 'strixglm.language']);
   assert.doesNotMatch(html, /(?:src|href)=["']https?:\/\//);
   assert.match(script, /textContent/);
   assert.match(script, /window\.confirm/);
   assert.match(script, /apply: false/);
   assert.match(script, /credentials: 'omit'/);
   assert.match(html, /id="code-repairs"[^>]*max="6"/);
-  assert.match(html, /id="code-timeout"[^>]*max="1800"/);
-  assert.match(html, /id="chat-cap"[^>]*max="16384"/);
-  assert.match(script, /cap > 16384/);
-  assert.doesNotMatch(script, /cap > 32768/);
-  assert.match(script, /estimated context-selection budget/);
-  assert.match(script, /not a qualified actual-token limit/);
-  assert.match(html, /LAST ATTEMPT TPS/);
+  assert.match(html, /id="code-timeout"[^>]*max="600"/);
+  assert.match(script, /options\.generation_timeout_seconds/);
+  assert.match(html, /<select id="chat-cap"/);
+  assert.match(html, /value="32768"/);
+  assert.match(script, /generationSettings/);
+  assert.doesNotMatch(html, /data-profile|code-profile|Fast|Balanced|Quality/);
+  assert.match(script, /continuous_usage_stats: true/);
+  assert.match(html, /Low does not disable thinking/);
+  assert.match(html, /force reasoning closure/);
+  assert.match(html, /Last attempt TPS/);
+  assert.match(html, /<html lang="en">/);
   assert.match(script, /completionState\(done, finish, text\)/);
   const referencedIDs = [...script.matchAll(/\$\('([^']+)'\)/g)].map(match => match[1]);
   for (const id of referencedIDs) assert.ok(html.includes(`id="${id}"`), `Missing HTML element: ${id}`);
   const definedIDs = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(definedIDs).size, definedIDs.length, 'Duplicate HTML IDs');
+});
+
+test('Markdown fences are removed and code is never parsed as HTML or inline markup', () => {
+  assert.deepEqual(markdownBlocks('```c\nint main() { return 0; }\n```'), [{ type: 'code', language: 'c', text: 'int main() { return 0; }' }]);
+  assert.equal(markdownBlocks('~~~~html\n<script>alert(1)</script>\n~~~~')[0].text, '<script>alert(1)</script>');
+  assert.equal(markdownBlocks('```cpp\npartial output')[0].text, 'partial output');
+  assert.equal(markdownBlocks('````js\n```nested\n````')[0].text, '```nested');
+});
+
+test('Markdown supports headings, list starts, quotes, tables and safe inline formatting', () => {
+  const blocks = markdownBlocks('# Heading\n\n3. first\n4. second\n\n> quote\n\n| name | value |\n|---|---:|\n| x | `1` |');
+  assert.deepEqual(blocks.map(block => block.type), ['heading', 'list', 'quote', 'table']);
+  assert.equal(blocks[1].start, 3);
+  assert.deepEqual(blocks[3].rows, [['x', '`1`']]);
+  assert.deepEqual(markdownInline('**bold** `code` *em*').filter(token => token.type !== 'text').map(token => token.type), ['strong', 'code', 'em']);
+  assert.equal(markdownInline('[safe](https://example.com)')[0].href, 'https://example.com/');
+  assert.equal(markdownInline('[bad](javascript:alert)')[0].type, 'text');
+});
+
+test('English is the default; Italian includes attachment and workspace controls', () => {
+  for (const label of ['Language', 'Coding workspace', 'Attach files', 'Export JSON', 'Create session', 'Terminal diagnostics']) assert.equal(typeof IT_LABELS[label], 'string');
+});
+
+test('Custom workspace shell requires explicit backend capability and idle READY state', () => {
+  assert.equal(canRunWorkspaceShell({ state: 'READY', capabilities: { shell: true } }), true);
+  for (const state of ['CONNECTED', 'RUNNING', 'STARTING', 'ABORTING', 'CLOSED']) assert.equal(canRunWorkspaceShell({ state, capabilities: { shell: true } }), false);
+  assert.equal(canRunWorkspaceShell({ state: 'READY', capabilities: { terminal: true } }), false);
+  assert.equal(canRunWorkspaceShell(null), false);
+});
+
+test('Observed TPS uses cumulative real token usage, never text or stream chunks', () => {
+  assert.equal(observedRate({ completion_tokens: 40 }, 2), 20);
+  assert.equal(observedRate({ completion_tokens: 0 }, 2), 0);
+  for (const value of [undefined, '40', 2.1, -1]) assert.equal(observedRate({ completion_tokens: value }, 2), null);
+  assert.equal(observedRate({ content: 'a'.repeat(1000), chunks: 50 }, 2), null);
+  assert.equal(observedRate({ completion_tokens: 40 }, 0), null);
+});
+
+test('Generation controls submit explicit reasoning and total window; auto omits output cap', () => {
+  const options = { reasoning_modes: ['low', 'high', 'max'], context_options: [4096, 8192, 65536], max_output_tokens: 32768 };
+  assert.deepEqual(generationSettings('max', '65536', '', options), { reasoning_effort: 'max', context_tokens: 65536 });
+  assert.equal(generationSettings('low', '8192', '32768', options).max_tokens, 32768); // Server rejects actual input + output overflow before GPU.
+  assert.throws(() => generationSettings('fast', '8192', '', options), /Reasoning/);
+  assert.throws(() => generationSettings('low', '9999', '', options), /context/);
+  assert.throws(() => generationSettings('low', '8192', '32769', options), /Response/);
+});
+
+test('Safe prose/code blocks preserve all text without interpreting markup', () => {
+  const original = 'Prosa <img src=x>\n```js\n<script>alert(1)</script>\n```\nFine.';
+  const blocks = textBlocks(original);
+  assert.equal(blocks.map(block => block.text).join(''), original);
+  assert.equal(blocks.filter(block => block.code).length, 1);
+  assert.equal(textBlocks('```incomplete')[0].code, false);
+});
+
+test('Catalog links reject executable protocols and credential-bearing URLs', () => {
+  assert.equal(safeSourceURL('https://example.com/revision'), 'https://example.com/revision');
+  for (const url of ['javascript:alert(1)', 'data:text/html,x', 'file:///etc/passwd', 'https://token@example.com', '/local/path']) assert.equal(safeSourceURL(url), null);
 });
 
 test('Go embeds only the four production frontend assets, not tests or documentation', async () => {

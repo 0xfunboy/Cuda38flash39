@@ -83,20 +83,22 @@ func (c *Command) UnmarshalJSON(b []byte) error {
 }
 
 type TaskSpec struct {
-	Task          string            `json:"task"`
-	Repo          string            `json:"repo"`
-	Files         []string          `json:"files"`
-	AllowedPaths  []string          `json:"allowed_paths"`
-	BuildCommand  Command           `json:"build_command"`
-	TestCommand   Command           `json:"test_command"`
-	TestFiles     map[string]string `json:"test_files"`
-	Profile       string            `json:"profile"`
-	MaxRepairs    *int              `json:"max_repairs,omitempty"`
-	Timeout       int               `json:"timeout"`
-	ContextTokens int               `json:"context_tokens"`
-	MaxTokens     int               `json:"max_tokens"`
-	SandboxPolicy string            `json:"sandbox_policy"`
-	Apply         bool              `json:"apply"`
+	Task                string            `json:"task"`
+	Repo                string            `json:"repo"`
+	Files               []string          `json:"files"`
+	AllowedPaths        []string          `json:"allowed_paths"`
+	BuildCommand        Command           `json:"build_command"`
+	TestCommand         Command           `json:"test_command"`
+	TestFiles           map[string]string `json:"test_files"`
+	Profile             string            `json:"profile"`
+	ReasoningEffort     string            `json:"reasoning_effort,omitempty"`
+	ThinkingTokenBudget *int              `json:"thinking_token_budget,omitempty"`
+	MaxRepairs          *int              `json:"max_repairs,omitempty"`
+	Timeout             int               `json:"timeout"`
+	ContextTokens       int               `json:"context_tokens"`
+	MaxTokens           int               `json:"max_tokens"`
+	SandboxPolicy       string            `json:"sandbox_policy"`
+	Apply               bool              `json:"apply"`
 }
 type Attempt struct {
 	Index                 int            `json:"index"`
@@ -116,6 +118,7 @@ type Task struct {
 	ID              string    `json:"id"`
 	Status          string    `json:"status"`
 	Profile         string    `json:"profile"`
+	ReasoningEffort string    `json:"reasoning_effort"`
 	FilesChanged    []string  `json:"files_changed"`
 	ContextFiles    []string  `json:"context_files"`
 	ContextEstimate int       `json:"context_estimate"`
@@ -159,7 +162,7 @@ func (a *App) resolveProfile(spec TaskSpec) (Profile, error) {
 	}
 	p, ok := a.cfg.Profiles[name]
 	if !ok {
-		if name == "low" || name == "high" || name == "max" || name == "medium" {
+		if supportedReasoning(name) {
 			p = a.cfg.Profiles[a.cfg.DefaultProfile]
 			p.Reasoning = name
 		} else {
@@ -175,8 +178,17 @@ func (a *App) resolveProfile(spec TaskSpec) (Profile, error) {
 	if spec.MaxRepairs != nil {
 		p.MaxRepairs = *spec.MaxRepairs
 	}
-	if p.ContextTokens < 256 || p.ContextTokens > a.cfg.MaxContextTokens || p.MaxTokens < 64 || p.MaxTokens > 16384 || p.MaxRepairs < 0 || p.MaxRepairs > 6 {
-		return p, errors.New("profile bounds: context256..configured max, max_tokens64..16384, repairs0..6")
+	if spec.ReasoningEffort != "" {
+		if !supportedReasoning(spec.ReasoningEffort) {
+			return p, errors.New("reasoning_effort must be low, high or max; low is not thinking off")
+		}
+		p.Reasoning = spec.ReasoningEffort
+	}
+	if spec.ThinkingTokenBudget != nil && (!a.cfg.ThinkingBudget || *spec.ThinkingTokenBudget < 0 || *spec.ThinkingTokenBudget >= p.MaxTokens) {
+		return p, errors.New("thinking_token_budget unsupported or outside 0..max_tokens-1")
+	}
+	if p.ContextTokens < 256 || p.ContextTokens > a.cfg.MaxContextTokens || p.MaxTokens < 64 || p.MaxTokens > a.maxOutputTokens() || p.MaxRepairs < 0 || p.MaxRepairs > 6 {
+		return p, errors.New("profile bounds: context256..configured max, output64..configured max, repairs0..6")
 	}
 	return p, nil
 }
@@ -190,8 +202,8 @@ func (a *App) submit(spec TaskSpec) (*Task, error) {
 	if spec.Timeout == 0 {
 		spec.Timeout = a.cfg.ModelTimeout
 	}
-	if spec.Timeout < 10 || spec.Timeout > 1800 {
-		return nil, errors.New("timeout10..1800 seconds per model call")
+	if spec.Timeout < 10 || spec.Timeout > min(a.cfg.ModelTimeout, 1800) {
+		return nil, fmt.Errorf("timeout10..%d seconds per model call; gateway cannot extend backend deadline", min(a.cfg.ModelTimeout, 1800))
 	}
 	if spec.Profile == "" {
 		spec.Profile = a.selectedProfile()
@@ -205,7 +217,7 @@ func (a *App) submit(spec TaskSpec) (*Task, error) {
 		return nil, e
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	t := &Task{ID: id(), Status: "queued", Profile: spec.Profile, ContextFiles: w.Selected, ContextEstimate: w.Estimate, Attempts: []Attempt{}, FilesChanged: []string{}, cancel: cancel, done: make(chan struct{}), spec: spec, workspace: w, created: time.Now()}
+	t := &Task{ID: id(), Status: "queued", Profile: spec.Profile, ReasoningEffort: p.Reasoning, ContextFiles: w.Selected, ContextEstimate: w.Estimate, Attempts: []Attempt{}, FilesChanged: []string{}, cancel: cancel, done: make(chan struct{}), spec: spec, workspace: w, created: time.Now()}
 	t.ContextFormat = "json"
 	t.output = filepath.Join(a.cfg.StateDir, "tasks", t.ID)
 	if e = os.MkdirAll(t.output, 0700); e != nil {
@@ -267,13 +279,26 @@ func (a *App) runTask(ctx context.Context, t *Task, p Profile) {
 		sort.Strings(allowed)
 		prompt := buildCodingPrompt(t.spec.Task, files, allowed, feedback)
 		payload := map[string]any{"model": a.cfg.Model, "messages": []map[string]string{{"role": "system", "content": codingSystem}, {"role": "user", "content": prompt}}, "temperature": 0, "seed": 1, "n": 1, "max_tokens": p.MaxTokens, "chat_template_kwargs": map[string]any{"reasoning_effort": p.Reasoning}, "_timeout": t.spec.Timeout}
+		if t.spec.ThinkingTokenBudget != nil {
+			payload["thinking_token_budget"] = *t.spec.ThinkingTokenBudget
+		}
 		ar := Attempt{Index: attempt, Reasoning: p.Reasoning, EffectiveReasoning: p.Reasoning, Status: "FAIL"}
 		if p.Reasoning == "medium" {
 			ar.EffectiveReasoning = "max"
 		}
 		raw := filepath.Join(t.output, fmt.Sprintf("attempt-%02d", attempt))
 		t.save()
-		result, e := a.generate(ctx, payload, raw)
+		lastProgress := time.Time{}
+		result, e := a.generateProgress(ctx, payload, raw, func(m Metrics) {
+			if time.Since(lastProgress) < time.Second {
+				return
+			}
+			lastProgress = time.Now()
+			t.mu.Lock()
+			t.Metrics = m
+			t.mu.Unlock()
+			t.save()
+		})
 		if result.Requested {
 			t.mu.Lock()
 			t.ModelCalls++

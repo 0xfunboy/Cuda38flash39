@@ -1,0 +1,3237 @@
+{
+  "schema": 1,
+  "audited_utc": "2026-09-08T14:20:09.858Z",
+  "activity_source": "active_model_id is the configured backend model, not a health claim; consult /v1/status for current paired health",
+  "inventory_method": "NODE01 Lstat only: no weight contents, no hash, no download, no load, no SSH. NODE02 source-pinned prior receipts shown as REMOTE_NOT_CHECKED. Disk bytes are not UMA residency.",
+  "sources": [
+    "/home/funboy/ai/bin/llama-strix-console",
+    "/home/funboy/ai/config/strix-halo-models.json",
+    "/home/funboy/ai/config/frontier-models.json",
+    "/home/funboy/ai-exp/config/frontier-models.json",
+    "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md",
+    "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json",
+    "/home/funboy/ai-exp/strix-ciru-tp2/config/artifacts.lock.json"
+  ],
+  "models": [
+    {
+      "id": "glm-ciru-flash-w4",
+      "name": "GLM-5.3-Flash CIRU W4 · operational",
+      "priority": 10,
+      "status": "READY",
+      "format": "CIRU hybrid W4 safetensors; group128 routed quantization, selected BF16 tensors",
+      "runtime": "Preserved CIRU custom vLLM/ROCm gfx1151; Go product gateway/coordinator",
+      "architecture": "Glm5NextForConditionalGeneration; 45 layers, 288 routed experts, top8; hybrid linear/sparse attention",
+      "distribution": "TP2/PP1 on both EVO-X3, RCCL Socket USB4; DFlash2 k5/local-draft0",
+      "testability": "Operational backend only; explicit bounded benchmark action, no automatic switch",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "DFlash2 block drafter consumes target hidden features; not text ngram lookup",
+      "quality_limits": [
+        "10 distinct compact C++ fixtures eventually PASS, 9 first-pass and one true test-guided repair; not near-SOTA or large-repository certification",
+        "Historical fast/balanced/quality were identical low aliases; current UI uses explicit low/high/max. Source-selection budgets remain estimates; chat admission uses the runtime tokenizer",
+        "Long-context coding failed/incomplete; 2575 actual tokens largest passing integration fixture",
+        "No new quantization/kernel approximations; safe-prefill, canonical MoE, stable routing, coherent tiles, F1 and prefix OFF preserved"
+      ],
+      "blockers": [],
+      "sources": [
+        {
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "evidence": "/home/funboy/ai-exp/strix-ciru-tp2/config/artifacts.lock.json"
+        },
+        {
+          "url": "https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2",
+          "revision": "bf582e4eacc1810f76656d1811693ff6c6737d2a",
+          "evidence": "/home/funboy/ai-exp/strix-ciru-tp2/config/artifacts.lock.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "glm-ciru-0",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-0.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 7851586392,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-0.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "ef19436bd7ed4b030542f2f430bbff5461cca3196a3496ed85ba8b34d02bf1bd",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-1",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-1.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435312,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-1.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "f9481d5cbee96e04d6fa7d8ac854d9b8a3788f2578b0ea449b9b4d4428418685",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-2",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-2.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-2.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "da923ce1bc6ec9bc84218b79631259f61daa7831567202f85dc52ee5621882bc",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-3",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-3.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-3.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "4e5eb60ddefb69dd40c8f237684f85ea2f5962735d8b2381a05341d15226d14b",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-4",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-4.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-4.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "35655df15dcdd18310154faf21e89bff5ba94db900d6ff387c3dd0c911cea8f6",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-5",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-5.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-5.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "f0fb0284599e35c612be8ce091e3cb56b98e4d0113f7728ca35e667078c203a0",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-6",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-6.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-6.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "25c2ad306aebb38b0e8f1835261c4235189b6a42d2f839013995acd9d4525f34",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-7",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-7.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-7.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "42c1f7b625973f489c18c15f15ef995db98b62b425595c7f494ea3e91b7e619d",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-8",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-8.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-8.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "167074d6cf6295125735d26896aa567d7df17c381b313eb913152986bf7461de",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-9",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-9.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-9.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "c76e83307ed3ea7da0651153a4202b45b0934a72b66a1cc215fd0bcb8bdc6969",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-10",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-10.safetensors",
+          "node": "NODE01",
+          "role": "TP2 rank 0 target weights",
+          "expected_bytes": 7563801048,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-10.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "76408c5361f4f990f1ab2d6cf43729cd6e80aa709940c2c740c24a04236ff4f1",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-11",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-0.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 7851586392,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-0.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "3c59dcf14b7e07de2e785cd54669535e182382e9d07462b27a9be562d43ffe70",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-12",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-1.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435312,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-1.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "a15e8b26dd65e990dcdddebcd1a39d6f6adb6711b5c64a7ba2acb9094e02ecfe",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-13",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-2.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-2.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "aa7604365a912e6508471168c4933e3df2d824bd5e831350293e870c609e37ff",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-14",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-3.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-3.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "d8fad4c06940747bbff7822487be448ca7af323523814039f80cfa6f22e9e77a",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-15",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-4.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-4.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "d028bef6fdbac3d4018bb0c5ff0db83eb367e812d57d91ec66a445ae2c2a328d",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-16",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-5.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-5.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "cb7af5e468a95a6cebb2d77c80eb4696a75384860545cb9cb4b90e9c4b3af7e6",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-17",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-6.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-6.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "63d6f709d50f520739f753991a20c3275dd65fa6a60144f60c9195e5d718ffcd",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-18",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-7.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-7.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "625149b168a7fc16117555925180e498a77a5d5bd6902bee4ffd3ae4a9cf9325",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-19",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-8.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-8.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "4f18105aeea29c721cf86ffd90538c74b67938d92216125b594b0b64a9bf8502",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-20",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-9.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 8218435424,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-9.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "4b26298300acb849b141fbce2ce4c691e0115dd817134e184eaedbccc6bca852",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-21",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-10.safetensors",
+          "node": "NODE02",
+          "role": "TP2 rank 1 target weights",
+          "expected_bytes": 7563801048,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Remote rank assets use paired transfer, not a local Internet redownload",
+          "url": "https://huggingface.co/jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4/resolve/a1ab828d8bd5b0ba8e3281febfe3d34b12072040/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-10.safetensors?download=true",
+          "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",
+          "sha256": "af9104a902644e4e7f296c5ce3947e8897809e9b00bdeb3cfde011b08957b716",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        },
+        {
+          "id": "glm-ciru-22",
+          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/dflash2/model.safetensors",
+          "node": "NODE01",
+          "role": "DFlash2 draft weights (shared deployment; not target model)",
+          "expected_bytes": 2342169800,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/resolve/bf582e4eacc1810f76656d1811693ff6c6737d2a/model.safetensors?download=true",
+          "revision": "bf582e4eacc1810f76656d1811693ff6c6737d2a",
+          "sha256": "b038e1d9d1e7833fa3880c2c0135ba9b673013f03da1b29fb831931584759dac",
+          "hash_source": "/home/funboy/StrixHaloClusterGLM/runtime/manifest.json; preserved pin, no fresh rehash"
+        }
+      ],
+      "presets": [
+        {
+          "id": "fast",
+          "label": "fast (same qualified low configuration)",
+          "distribution": "TP2/PP1 on both EVO-X3, RCCL Socket USB4; DFlash2 k5/local-draft0",
+          "status": "READY",
+          "reasoning": "low",
+          "blockers": []
+        },
+        {
+          "id": "balanced",
+          "label": "balanced (same qualified low configuration)",
+          "distribution": "TP2/PP1 on both EVO-X3, RCCL Socket USB4; DFlash2 k5/local-draft0",
+          "status": "READY",
+          "reasoning": "low",
+          "blockers": []
+        },
+        {
+          "id": "quality",
+          "label": "quality (same qualified low configuration)",
+          "distribution": "TP2/PP1 on both EVO-X3, RCCL Socket USB4; DFlash2 k5/local-draft0",
+          "status": "READY",
+          "reasoning": "low",
+          "blockers": []
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Already configured; use whole-pair controller, never an isolated rank restart"
+        },
+        "benchmark": {
+          "enabled": true,
+          "reason": "Only explicitly selected registered compact tests on the currently configured GLM; active pair health/ownership checked by operation manager"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Historical qualified109/256",
+          "status": "PASS",
+          "decode_tps": 24.850999963,
+          "http_tps": 23.666712684,
+          "context_tokens": null,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/CIRU-TP2-001/",
+          "notes": "Same qualified W4 target, k5/local0; not new measurement"
+        },
+        {
+          "label": "Native coding confirmation03/05",
+          "status": "PASS",
+          "decode_tps": 25.962370043240192,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-001/native-confirmation/summary.json",
+          "notes": "2 tasks, not repeated throughput median;20.137s/correct; context594/872"
+        },
+        {
+          "label": "Coding qualification",
+          "status": "PASS",
+          "decode_tps": null,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/StrixHaloClusterGLM/QUALIFICATION.md",
+          "notes": "10 distinct small C++ fixtures; context failures and incomplete outputs retained"
+        }
+      ],
+      "serving_model_id": "GLM5.3-Flash-CIRU-STRIX-IU4"
+    },
+    {
+      "id": "qwen-coder-next-q6",
+      "name": "Qwen3-Coder-Next80B-A3B Q6",
+      "priority": 20,
+      "status": "BLOCKED",
+      "format": "GGUF UD-Q6_K",
+      "runtime": "Existing /ai llama.cpp Vulkan launcher; not CIRU GLM",
+      "architecture": "MoE80B,3B active (historical model description)",
+      "distribution": "Single-node Vulkan preferred historically; old serial layer-RPC is capacity, not qualified acceleration",
+      "testability": "Local checkpoint/preset exist; product switch adapter not registered. Do not stop GLM automatically",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "48.7048TPS baseline lacks preserved prompt hash/TTFT/E2E; not comparable to current GLM coding workload",
+        "vLLM FP8 TP2 historical19.26449TPS did not beat local GGUF; do not reopen unchanged campaign"
+      ],
+      "blockers": [
+        "Local checkpoint/preset exist; product switch adapter not registered. Do not stop GLM automatically"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF",
+          "revision": "ce09c67b53bc8739eef83fe67b2f5d293c270632",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section5"
+        }
+      ],
+      "assets": [
+        {
+          "id": "coder-q6-0",
+          "path": "/home/funboy/models/gguf/qwen3-coder-next-80b-a3b-ud-q6-k/Qwen3-Coder-Next-UD-Q6_K-00001-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 5936288,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Revision and historical SHA are preserved, but exact remote shard subpath has not been audited; no speculative URL",
+          "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section5; historical SHA",
+          "sha256": "68f03d9c0cc72c3359ed94e2058230a1ff484e6403b842e5db499c12f9157fd6",
+          "revision": "ce09c67b53bc8739eef83fe67b2f5d293c270632"
+        },
+        {
+          "id": "coder-q6-1",
+          "path": "/home/funboy/models/gguf/qwen3-coder-next-80b-a3b-ud-q6-k/Qwen3-Coder-Next-UD-Q6_K-00002-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49964843648,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Revision and historical SHA are preserved, but exact remote shard subpath has not been audited; no speculative URL",
+          "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section5; historical SHA",
+          "sha256": "048f963be0031eb9781a99e69425373c476047dbbeeee42f40923314af64803d",
+          "revision": "ce09c67b53bc8739eef83fe67b2f5d293c270632"
+        },
+        {
+          "id": "coder-q6-2",
+          "path": "/home/funboy/models/gguf/qwen3-coder-next-80b-a3b-ud-q6-k/Qwen3-Coder-Next-UD-Q6_K-00003-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 15818312224,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Revision and historical SHA are preserved, but exact remote shard subpath has not been audited; no speculative URL",
+          "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section5; historical SHA",
+          "sha256": "99b277cae9a934aebecac33351b1142bd1844cb4ebb1ad2791eef66a54d55bd7",
+          "revision": "ce09c67b53bc8739eef83fe67b2f5d293c270632"
+        }
+      ],
+      "presets": [
+        {
+          "id": "qwen-coder-next-q6-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Single-node Vulkan preferred historically; old serial layer-RPC is capacity, not qualified acceleration",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Local checkpoint/preset exist; product switch adapter not registered. Do not stop GLM automatically"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "qwen3-coder-next-80b-a3b-ud-q6-k",
+        "qwen3-coder-next-80b-a3b-ud-q6-k-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Local checkpoint/preset exist; product switch adapter not registered. Do not stop GLM automatically"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Local checkpoint/preset exist; product switch adapter not registered. Do not stop GLM automatically"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Historical local decode at2K",
+          "status": "HISTORICAL",
+          "decode_tps": 48.7048,
+          "http_tps": null,
+          "context_tokens": 2048,
+          "report": "/home/funboy/ai/reports/20260902-llamacpp-tp2-architecture-gate.md",
+          "notes": "Incomplete historical protocol; prefill810.996TPS"
+        },
+        {
+          "label": "Historical FP8 TP2, OSL8",
+          "status": "NO_GAIN",
+          "decode_tps": 19.26449,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/ai/reports/frontier-cluster/20260902-131501/05-coder-tp2-raw.json",
+          "notes": "Different format and very short output; not quality-equivalent comparison"
+        }
+      ]
+    },
+    {
+      "id": "deepseek-v4-flash-iq3",
+      "name": "DeepSeek-V4-Flash0731 IQ3/Q6-attention",
+      "priority": 30,
+      "status": "BLOCKED",
+      "format": "GGUF UD-IQ3_XXS-q6kattn composite",
+      "runtime": "Existing /ai llama.cpp Vulkan",
+      "architecture": "deepseek4;43layers,256 routed experts,top6",
+      "distribution": "Existing single-node preset; layer-RPC45:55 is serial capacity; route-level EP closed",
+      "testability": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "EP routed compute fraction0.1092949651, idealEP2 1.05780646x; no+15% even without network in measured bound",
+        "No DFlash/MTP sidecar locally qualified; do not infer current functionality from unrelated FP8 source support"
+      ],
+      "blockers": [
+        "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/Kevletesteur/DeepSeek-V4-Flash-0731-StrixHalo-Verified-GGUF",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section8.2; revision NOT preserved; no pinned download offered"
+        }
+      ],
+      "assets": [
+        {
+          "id": "deepseek-iq3-0",
+          "path": "/home/funboy/models/gguf/deepseek-v4-flash-0731-strixhalo/DeepSeek-V4-Flash-0731-UD-IQ3_XXS-q6kattn.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 103159533696,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section8.2; historical SHA",
+          "sha256": "538ec6932c50c6993f8a2cb18dc138e0fb5f6a7c2659e53a7566f1dc8ebb4344"
+        }
+      ],
+      "presets": [
+        {
+          "id": "deepseek-v4-flash-iq3-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Existing single-node preset; layer-RPC45:55 is serial capacity; route-level EP closed",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "deepseek-v4-flash-0731-strixhalo-iq3",
+        "deepseek-v4-flash-0731-strixhalo-iq3-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Route-level expert parallelism",
+          "status": "CLOSED",
+          "decode_tps": null,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md",
+          "notes": "Measured F0.1092949651; ideal1.05780646x; no model throughput claim"
+        }
+      ]
+    },
+    {
+      "id": "qwen-flash-next-iq3",
+      "name": "Qwen3.8-Flash-Next original IQ3",
+      "priority": 40,
+      "status": "BLOCKED",
+      "format": "GGUF UD-IQ3_XXS",
+      "runtime": "EngramHalo HIP gfx1151 commit930918c59767aafcedb11149f5f855f1367afcdd",
+      "architecture": "Qwen Flash-Next MoE plus PLE/ngram embeddings; not the dense27B",
+      "distribution": "Only NODE01 qualified as a local experiment; no demonstrated TP2 across hosts",
+      "testability": "Local target can be studied only with an authorized ownership-aware switch adapter. Nonexact SPEED mode is not a production-equivalent replacement",
+      "ngram_embedding": "PLE model embedding table IQ4_NL28,800,138,240bytes, mmap/SSD lazy; part of target weights, NOT the draft text cache",
+      "draft_lookup": "Optional ngram-mod speculative token-history lookup48/64/match24 plus MTPN4; persisted history explains very high repeated-code TPS",
+      "quality_limits": [
+        "Target-only repeatPASS1000tokens at23.49TPS",
+        "Spec93.156TPS repeated-code median is history-sensitive/nonexact; not novel coding or reasoning speed; prose23.0866TPS",
+        "Utility12/12PASS per arm and8/8reasoning later; xhigh3072cap12/12codingINCOMPLETE in both arms; no general intelligence equivalence"
+      ],
+      "blockers": [
+        "Local target can be studied only with an authorized ownership-aware switch adapter. Nonexact SPEED mode is not a production-equivalent replacement"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF",
+          "revision": "2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb",
+          "evidence": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/artifact-verification.json"
+        },
+        {
+          "url": "https://github.com/abliter8-ai/qwen-3.8-next-flash-amd-strix-halo",
+          "revision": "0d31cd77c8cab5932088a8ed35de7e5bdd5801bc",
+          "evidence": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/SOURCE-RECIPE-AUDIT.md"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen-iq3-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-iq3-xxs/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 10946624,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "sha256": "268f81fdedf3149a538f252308927a4d5d1f6e062c178568a51e3b519744f8a8",
+          "hash_source": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/artifact-verification.json; SHA previously passed, current audit stat only",
+          "revision": "2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf"
+        },
+        {
+          "id": "qwen-iq3-1",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-iq3-xxs/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00002-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49567921344,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "sha256": "cfe600b236b88c7fad1613a5ca5e83b9f2beb63cbd44c32b2be50a44747c695f",
+          "hash_source": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/artifact-verification.json; SHA previously passed, current audit stat only",
+          "revision": "2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00002-of-00003.gguf"
+        },
+        {
+          "id": "qwen-iq3-2",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-iq3-xxs/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00003-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 32382955968,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "sha256": "f1912ba34c79427d2295a58dcb2b732b5931af5bef7a373c60557a57d9ee7250",
+          "hash_source": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/artifact-verification.json; SHA previously passed, current audit stat only",
+          "revision": "2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/2c41bd2a0b3f51c503c11f1c7ed2e6bb34036beb/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00003-of-00003.gguf"
+        },
+        {
+          "id": "qwen-iq3-easiix-mtp",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-mtp-easiix/mtp-Qwen3.8-Flash-Next-Q8_0.gguf",
+          "node": "NODE01",
+          "role": "Optional EasiiX MTP Q8,34 tensors, owns embedding/head; not shared-Q8 sidecar",
+          "expected_bytes": 4137429088,
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "sha256": "9db03a687670608286e99b563fcc86d0ee76c8dd863f64b2afc0b54eb0eb975d",
+          "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md16.14; no immutable revision preserved here"
+        }
+      ],
+      "presets": [
+        {
+          "id": "iq3-target",
+          "label": "Target-only, context8192/F16/PLElazy",
+          "distribution": "Single NODE01",
+          "status": "PASS",
+          "reasoning": "xhigh for utility; thinking OFF speed",
+          "blockers": [
+            "Local target can be studied only with an authorized ownership-aware switch adapter. Nonexact SPEED mode is not a production-equivalent replacement"
+          ]
+        },
+        {
+          "id": "iq3-speed",
+          "label": "MTP+ngram N4/pmin0.75",
+          "distribution": "Single NODE01",
+          "status": "FAIL_CORRECTNESS",
+          "reasoning": "xhigh utility / OFF speed",
+          "blockers": [
+            "Repeat and own-target token fidelity FAIL; never label exact or TP2"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Local target can be studied only with an authorized ownership-aware switch adapter. Nonexact SPEED mode is not a production-equivalent replacement"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Local target can be studied only with an authorized ownership-aware switch adapter. Nonexact SPEED mode is not a production-equivalent replacement"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "IQ3 target code3runs",
+          "status": "PASS",
+          "decode_tps": 23.486569,
+          "http_tps": 23.455052,
+          "context_tokens": 8192,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/a-public/summary.json",
+          "notes": "84input1000cappedoutput, thinkingOFF; repeatPASS"
+        },
+        {
+          "label": "MTP+ngram repeated code5runs",
+          "status": "FAIL_CORRECTNESS",
+          "decode_tps": 93.156025,
+          "http_tps": 90.334515,
+          "context_tokens": 8192,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/B-RESULT.md",
+          "notes": "32.318668–96.678573TPS; repeatFAIL921, targetFAIL26; not exact"
+        },
+        {
+          "label": "MTP+ngram prosa3runs",
+          "status": "FAIL_CORRECTNESS",
+          "decode_tps": 23.086579,
+          "http_tps": 23.021285,
+          "context_tokens": 8192,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-SPEED-001/B-RESULT.md",
+          "notes": "No median prose gain; repeat/referenceFAIL"
+        },
+        {
+          "label": "New reasoning and coding quality",
+          "status": "PARTIAL",
+          "decode_tps": 29.196526,
+          "http_tps": null,
+          "context_tokens": 8192,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-IQ3-QUALITY-002/RESULT.md",
+          "notes": "B8/8reasoningPASS;12/12newcodingINCOMPLETE at3072cap; neither general equivalence nor40newcodePASS"
+        }
+      ]
+    },
+    {
+      "id": "qwen-flash-next-q5",
+      "name": "Qwen3.8-Flash-Next original Q5",
+      "priority": 50,
+      "status": "BLOCKED",
+      "format": "GGUF UD-Q5_K_XL + optional shared-Q8 MTP",
+      "runtime": "Custom llama.cpp HIP/RPC, QWEN-QUAL-001C1/C2; not GLM CIRU vLLM",
+      "architecture": "Qwen Flash-Next MoE plus PLE/ngram embeddings",
+      "distribution": "Layer-RPC split22:78, SERIAL capacity distribution on two EVO; NOT TP2 or overlapped verification",
+      "testability": "Target-only historical capacity baseline exists; safe product switch not registered. MTP branch remains correctness-blocked",
+      "ngram_embedding": "Target PLE/ngram embedding weights are distinct from speculative ngram token-history lookup",
+      "draft_lookup": "Optional MTP shared-Q8; correctness failure remains; no qualified token-history acceleration promoted",
+      "quality_limits": [
+        "Original target-only18.108746TPS; later C1code18.684/prose18.6543TPS repeat3/3, ctx4096",
+        "C2MTP25.698125TPS singleton256tokens FAIL146; short64PASS does not qualify longer generation",
+        "No renewed Q5 debug or assumptions that GLM kernels/runtime transfer"
+      ],
+      "blockers": [
+        "Target-only historical capacity baseline exists; safe product switch not registered. MTP branch remains correctness-blocked"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "evidence": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen-q5-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00001-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 10946618,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00001-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "610922cdb1afe1094e95d7a3e86b12ee33317ebbf7320ac9344e21b6ae4bb69f",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-1",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00002-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 682434912,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00002-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "494ca4ed3dbf97bc28da88af3890b8877b9032f909812d00c0526a9ca5e91d2e",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-2",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00003-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 54400261312,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00003-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "34efd79a80a1ce540a517a5d56171924b66ce1c38b04c904f17ad6d8ef17cf20",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-3",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00004-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49990245824,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00004-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "9ee6bbe462e6830864382d629101490625b1c95afa15492b7ad550c7bed2dd13",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-4",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00005-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49882416192,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00005-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "0b2437f661f584030cb5aeb8fb1bb70f6422518a6746bfcc0304167c7b6b8beb",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-5",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-unsloth-q5-k-xl/Qwen3.8-Flash-Next-UD-Q5_K_XL-00006-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 3320101792,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/UD-Q5_K_XL/Qwen3.8-Flash-Next-UD-Q5_K_XL-00006-of-00006.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "55dd96c5ad0863b06b6393151b9ad0ac727b8d58a62e02a296ca5d5ddbfee4a3",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "qwen-q5-shared-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-mtp-unsloth-shared-q8/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+          "node": "NODE01",
+          "role": "Optional shared-Q8 MTP32 tensors; target owns shared embedding/head; NOT EasiiX34-tensor draft",
+          "expected_bytes": 2786568256,
+          "required": false,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/Qwen3.8-Flash-Next-GGUF/resolve/38bb39ee97821de2c9009abb7e93950eec396e66/MTP/mtp-Qwen3.8-Flash-Next-shared-Q8_0.gguf",
+          "revision": "38bb39ee97821de2c9009abb7e93950eec396e66",
+          "sha256": "5ff54097406a905cf3a724c709124ceb0e3e10235ee862298969e91c96fa96e6",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        }
+      ],
+      "presets": [
+        {
+          "id": "q5-target-capacity",
+          "label": "C1 target-only capacity",
+          "distribution": "Serial layer-RPC22:78",
+          "status": "PASS",
+          "reasoning": "xhigh chat; native TPS payload distinct",
+          "blockers": [
+            "Target-only historical capacity baseline exists; safe product switch not registered. MTP branch remains correctness-blocked"
+          ]
+        },
+        {
+          "id": "q5-mtp-blocked",
+          "label": "MTP3 (not qualified)",
+          "distribution": "Serial layer-RPC",
+          "status": "FAIL_CORRECTNESS",
+          "reasoning": "xhigh",
+          "blockers": [
+            "Long256token same-build referenceFAIL146"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Target-only historical capacity baseline exists; safe product switch not registered. MTP branch remains correctness-blocked"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Target-only historical capacity baseline exists; safe product switch not registered. MTP branch remains correctness-blocked"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Original target-only",
+          "status": "HISTORICAL",
+          "decode_tps": 18.108746,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md",
+          "notes": "Not newly measured"
+        },
+        {
+          "label": "C1 target-only code/prosa",
+          "status": "PASS",
+          "decode_tps": 18.684,
+          "http_tps": 17.9852,
+          "context_tokens": 4096,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-QUAL-001/C1-RESULT-TABLE.md",
+          "notes": "Code18.684/prosa18.6543; repeat3/3; serialcapacity, notTP2"
+        },
+        {
+          "label": "C2MTP256singleton",
+          "status": "FAIL_CORRECTNESS",
+          "decode_tps": 25.698125,
+          "http_tps": 24.082371,
+          "context_tokens": 4096,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/QWEN-QUAL-001/C2-RESIDUAL-BLOCKER.md",
+          "notes": "ReferenceFAIL146; not qualifiedmedian"
+        }
+      ]
+    },
+    {
+      "id": "qwen-flash-next-iq4-uncensored",
+      "name": "Qwen3.8-Flash-Next uncensored IQ4",
+      "priority": 60,
+      "status": "BLOCKED",
+      "format": "GGUF IQ4_XS, different/uncensored weights",
+      "runtime": "Existing EngramHalo HIP and llama.cpp Vulkan presets",
+      "architecture": "Flash-Next MoE + PLE/ngram embeddings; altered weights",
+      "distribution": "Single-node experimental reference; serial layer-RPC alternative is capacity only",
+      "testability": "Existing local checkpoint and legacy presets; no product load adapter and no equivalence to original Q5/IQ3",
+      "ngram_embedding": "Model PLE/ngram embeddings, not a speculative drafter",
+      "draft_lookup": "Legacy presets separately include MTP Q8 and optional ngram-mod token-history lookup; do not conflate with PLE",
+      "quality_limits": [
+        "Uncensored is a different target, not original Q5 quality equivalent",
+        "34.7714TPS is historical experimental MTP reference; not current product certification"
+      ],
+      "blockers": [
+        "Existing local checkpoint and legacy presets; no product load adapter and no equivalence to original Q5/IQ3"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/orcarouter/Qwen3.8-Flash-Next-Uncensored-GGUF",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section8/FINAL RESEARCH VERDICT; revision not preserved here"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen-uncensored-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-uncensored-iq4-xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 44766155936,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "qwen-uncensored-1",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-uncensored-iq4-xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00002-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 44735995008,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "qwen-uncensored-2",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-uncensored-iq4-xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00003-of-00003.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 7971004256,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        }
+      ],
+      "presets": [
+        {
+          "id": "qwen-flash-next-iq4-uncensored-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Single-node experimental reference; serial layer-RPC alternative is capacity only",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Existing local checkpoint and legacy presets; no product load adapter and no equivalence to original Q5/IQ3"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "qwen3.8-flash-next-uncensored-iq4-xs",
+        "qwen3.8-flash-next-uncensored-iq4-xs-engram-hip",
+        "qwen3.8-flash-next-uncensored-iq4-xs-mtp-vulkan",
+        "qwen3.8-flash-next-uncensored-iq4-xs-engram-hip-ngram",
+        "qwen3.8-flash-next-uncensored-iq4-xs-cluster-usb4",
+        "qwen3.8-flash-next-uncensored-iq4-xs-engram-hip-cluster-usb4",
+        "qwen3.8-flash-next-uncensored-iq4-xs-mtp-vulkan-cluster-usb4",
+        "qwen3.8-flash-next-uncensored-iq4-xs-engram-hip-ngram-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Existing local checkpoint and legacy presets; no product load adapter and no equivalence to original Q5/IQ3"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Existing local checkpoint and legacy presets; no product load adapter and no equivalence to original Q5/IQ3"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Historical EngramHalo HIP+MTP",
+          "status": "KEEP",
+          "decode_tps": 34.7714296,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md",
+          "notes": "Two runs35.6968335/33.8460257, prior zero majorfault on those runs only"
+        }
+      ]
+    },
+    {
+      "id": "qwen-flash-next-q4-original",
+      "name": "Qwen3.8-Flash-Next original Q4",
+      "priority": 70,
+      "status": "BLOCKED",
+      "format": "GGUF UD-Q4_K_XL",
+      "runtime": "Legacy custom llama.cpp Vulkan MTP",
+      "architecture": "Flash-Next MoE plus PLE/ngram embeddings",
+      "distribution": "Legacy local or serialRPC capacity; no qualifiedTP2",
+      "testability": "Local checkpoint; MTP3 repeat/reference failure, no product switch adapter",
+      "ngram_embedding": "Target PLE/ngram embeddings",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "29.250663TPS MTP3 not qualified: repeat/referenceFAIL"
+      ],
+      "blockers": [
+        "Local checkpoint; MTP3 repeat/reference failure, no product switch adapter"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/ai/config/strix-halo-models.json; use current pinned Q5/IQ3 recipes for provenance, not interchangeable quantizations"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen-q4-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 10946624,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "qwen-q4-1",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49859583136,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "qwen-q4-2",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl/Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49376141504,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "qwen-q4-3",
+          "path": "/home/funboy/models/gguf/qwen3.8-flash-next-original-q4-k-xl/Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 12087983520,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        }
+      ],
+      "presets": [
+        {
+          "id": "qwen-flash-next-q4-original-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Legacy local or serialRPC capacity; no qualifiedTP2",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Local checkpoint; MTP3 repeat/reference failure, no product switch adapter"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "qwen3.8-flash-next-original-q4-k-xl",
+        "qwen3.8-flash-next-original-q4-k-xl-mtp",
+        "qwen3.8-flash-next-original-q4-k-xl-cluster-usb4",
+        "qwen3.8-flash-next-original-q4-k-xl-mtp-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Local checkpoint; MTP3 repeat/reference failure, no product switch adapter"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Local checkpoint; MTP3 repeat/reference failure, no product switch adapter"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Q4MTP3",
+          "status": "FAIL_CORRECTNESS",
+          "decode_tps": 29.250663,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md",
+          "notes": "Historical failedrepeat/reference; do not promote"
+        }
+      ]
+    },
+    {
+      "id": "glm-flash-gguf-q4",
+      "name": "GLM-5.3-Flash Unsloth Q4 GGUF",
+      "priority": 80,
+      "status": "BLOCKED",
+      "format": "GGUF UD-Q4_K_XL",
+      "runtime": "Historical llama.cpp Vulkan/RPC, NOT current CIRU hybridW4",
+      "architecture": "GLMFlash MoE hybridattention",
+      "distribution": "Serial layer-RPC capacity path; current GLM uses different safetensors TP2",
+      "testability": "All sixGGUFfiles local; historical route not promoted; product adapter absent",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Different pack/quant from operational CIRU; no matching quality or performance equivalence claim",
+        "Do not interpret Unsloth public speedups as measured on this retained GGUF"
+      ],
+      "blockers": [
+        "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "evidence": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "glm-gguf-q4-0",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00001-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 9429859,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00001-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "00dceaf3ed08781b1e44513a44ebb19e96248d01ba2a80b17f675a2b6fa9a1ee",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "glm-gguf-q4-1",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00002-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49198039200,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00002-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "d3ecb6ff3957a99878f9a0352676a0913748a431a9a4a1b1ffa5ade9b8947a74",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "glm-gguf-q4-2",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00003-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49988626304,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00003-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "328073c004e7c5395b208247feed26089db247b94dd8fa4ab0f2569d86c1d770",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "glm-gguf-q4-3",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00004-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 48700701344,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00004-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "6803ab7effa6da4a0b02c9c7865952fdd6c5b2e10e53903348da369e90bd13f9",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "glm-gguf-q4-4",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00005-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49026026752,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00005-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "852f3df9dacde3d196796f9fe738468e80c8701555ff0a8c30bc010fb8974dd8",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        },
+        {
+          "id": "glm-gguf-q4-5",
+          "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00006-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 2784497888,
+          "required": true,
+          "download_enabled": true,
+          "download_blocked_reason": "",
+          "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00006-of-00006.gguf",
+          "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
+          "sha256": "c6ba510fafc1e12cc0addbc361a329c0c592ab96980098e7e25e107d8faa983e",
+          "hash_source": "/home/funboy/ai-exp/strix-moe-cluster/config/models.lock.json; pinned expected SHA, not a fresh validation"
+        }
+      ],
+      "presets": [
+        {
+          "id": "glm-flash-gguf-q4-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Serial layer-RPC capacity path; current GLM uses different safetensors TP2",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "glm-full-antirez-iq2",
+      "name": "GLM-5.3 FULL antirez mixed IQ2",
+      "priority": 90,
+      "status": "BLOCKED",
+      "format": "GGUF IQ2_XXS routed + block78Q2_K mixture",
+      "runtime": "Pinned DS4 full-model runner, not CIRUFlash runtime",
+      "architecture": "Full GLM-5.3, distinct larger architecture/checkpoint",
+      "distribution": "Serial DS4 split0:41/42:outputFP32 on both EVO; load blocked before first request",
+      "testability": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Zero FULL inference requests: TPS, quality, prefill and HTTP are N/A, not zero",
+        "Files complete does not mean loadable; no reservebypass or new automatic memory campaign"
+      ],
+      "blockers": [
+        "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/antirez/glm-5.3-gguf",
+          "revision": "1434dad1a25c6318c9befef38d7735a1e0e15f1d",
+          "evidence": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-GLM-NEXT-006/FINAL.md"
+        }
+      ],
+      "assets": [
+        {
+          "id": "glm-full-node01",
+          "path": "/home/funboy/models/gguf/glm-5.3-full-antirez-iq2/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 211075860864,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Already retained on both hosts; future missing-file recovery only with explicit need, FULL load remains blocked",
+          "revision": "1434dad1a25c6318c9befef38d7735a1e0e15f1d",
+          "sha256": "059b36accd4c9acf73099da9f703b574d627869d619b7c4c316aa856e33d472e",
+          "url": "https://huggingface.co/antirez/glm-5.3-gguf/resolve/1434dad1a25c6318c9befef38d7735a1e0e15f1d/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
+          "hash_source": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-GLM-NEXT-006/FINAL.md; SHA previously verified on both nodes; no new rehash"
+        },
+        {
+          "id": "glm-full-node02",
+          "path": "/home/funboy/models/gguf/glm-5.3-full-antirez-iq2/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
+          "node": "NODE02",
+          "role": "target weights",
+          "expected_bytes": 211075860864,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Already retained on both hosts; future missing-file recovery only with explicit need, FULL load remains blocked",
+          "revision": "1434dad1a25c6318c9befef38d7735a1e0e15f1d",
+          "sha256": "059b36accd4c9acf73099da9f703b574d627869d619b7c4c316aa856e33d472e",
+          "url": "https://huggingface.co/antirez/glm-5.3-gguf/resolve/1434dad1a25c6318c9befef38d7735a1e0e15f1d/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
+          "hash_source": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-GLM-NEXT-006/FINAL.md; SHA previously verified on both nodes; no new rehash"
+        }
+      ],
+      "presets": [
+        {
+          "id": "glm-full-antirez-iq2-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Serial DS4 split0:41/42:outputFP32 on both EVO; load blocked before first request",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Actual whole-pair FULLload",
+          "status": "BLOCKED_RESOURCE",
+          "decode_tps": null,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-GLM-NEXT-006/N006-16-FULL-TEST/LOAD-RESOURCE-AUDIT.md",
+          "notes": "Target images102.006/95.507GiB, allocator refused before model request"
+        }
+      ]
+    },
+    {
+      "id": "glm-full-legacy-iq2m",
+      "name": "GLM-5.3 FULL legacy IQ2_M SSD hybrid",
+      "priority": 95,
+      "status": "BLOCKED",
+      "format": "GGUF UD-IQ2_M six shards",
+      "runtime": "Legacy /ai llama.cpp Vulkan/SSD hybrid preset",
+      "architecture": "Full GLM5.3 historical744B/40B-active preset description",
+      "distribution": "Single-node SSD hybrid; neither operational CIRU nor qualified full TP2",
+      "testability": "Historical preset remains in /ai; no product adapter or current memory qualification",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Preset existence is not a successful load/quality result; no inventedTPS"
+      ],
+      "blockers": [
+        "Historical preset remains in /ai; no product adapter or current memory qualification"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/ai/config/strix-halo-models.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "glm-legacy-iq2m-0",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00001-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 9428677,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "glm-legacy-iq2m-1",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00002-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49223976800,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "glm-legacy-iq2m-2",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00003-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49143176640,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "glm-legacy-iq2m-3",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00004-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49143176640,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "glm-legacy-iq2m-4",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00005-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 49143176640,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        },
+        {
+          "id": "glm-legacy-iq2m-5",
+          "path": "/home/funboy/models/gguf/glm-5.3-ud-iq2-m/GLM-5.3-UD-IQ2_M-00006-of-00006.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 41914650304,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Local inventory stat only; no checksum recomputed"
+        }
+      ],
+      "presets": [
+        {
+          "id": "glm-full-legacy-iq2m-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Single-node SSD hybrid; neither operational CIRU nor qualified full TP2",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Historical preset remains in /ai; no product adapter or current memory qualification"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "glm-5.3-ud-iq2-m-ssd-hybrid"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Historical preset remains in /ai; no product adapter or current memory qualification"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Historical preset remains in /ai; no product adapter or current memory qualification"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "qwen27-dense-q5-historical",
+      "name": "Qwen3.8-27B Q5 +MTP (historical)",
+      "priority": 110,
+      "status": "HISTORICAL",
+      "format": "Historical GGUF or safetensors",
+      "runtime": "Existing /ai preset only",
+      "architecture": "Dense27B; MTP sidecar",
+      "distribution": "Historical local/cluster recipes; no new qualification",
+      "testability": "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps"
+      ],
+      "blockers": [
+        "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/ai/config/strix-halo-models.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen27-dense-q5-historical-0",
+          "path": "/home/funboy/models/gguf/qwen3.8-27b-q5-xl/Qwen3.8-27B-UD-Q5_K_XL.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 20876938144,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Current stat inventory only"
+        },
+        {
+          "id": "qwen27-mtp",
+          "path": "/home/funboy/models/gguf/qwen3.8-27b-q5-xl/MTP/mtp-Qwen3.8-27B-Q4_0.gguf",
+          "node": "NODE01",
+          "role": "Optional historical MTP",
+          "expected_bytes": 1369590656,
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical dense not reopened"
+        },
+        {
+          "id": "qwen27-lora",
+          "path": "/home/funboy/models/gguf/qwen3.8-27b-absolute-heresy-lora/Qwen3.8-27B-absolute-heresy-LoRA-F32.gguf",
+          "node": "NODE01",
+          "role": "Optional unfiltered LoRA, different behavior",
+          "expected_bytes": 276842560,
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical dense not reopened"
+        }
+      ],
+      "presets": [
+        {
+          "id": "qwen27-dense-q5-historical-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Historical local/cluster recipes; no new qualification",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "qwen3.8-27b-q5-xl-mtp",
+        "qwen3.8-27b-q5-xl-mtp-unfiltered-lora",
+        "qwen3.8-27b-q5-xl-mtp-local-vulkan",
+        "qwen3.8-27b-q5-xl-mtp-cluster-usb4",
+        "qwen3.8-27b-q5-xl-mtp-unfiltered-lora-cluster-usb4",
+        "qwen3.8-27b-q5-xl-mtp-local-vulkan-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Dense campaigns closed; inventory only, do not reopen HaloPipe or cluster sweeps"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "qwen35-fable9b-historical",
+      "name": "Qwen3.5-9B Defiant Fable (historical)",
+      "priority": 111,
+      "status": "HISTORICAL",
+      "format": "Historical GGUF or safetensors",
+      "runtime": "Existing /ai preset only",
+      "architecture": "Dense9B altered/uncensored weights; embeddedMTP",
+      "distribution": "Historical local/cluster recipes; no new qualification",
+      "testability": "Historical/uncensored model; not equivalent quality and dense research not reopened",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Historical/uncensored model; not equivalent quality and dense research not reopened"
+      ],
+      "blockers": [
+        "Historical/uncensored model; not equivalent quality and dense research not reopened"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/ai/config/strix-halo-models.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen35-fable9b-historical-0",
+          "path": "/home/funboy/models/gguf/qwen3.5-9b-defiant-fable-q5-mtp/Qwen3.5-9B-The-Defiant-Fable-Uncnr-Heretic-NEO-MAX-MTP-Q5_K_M.gguf",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 7842429152,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Current stat inventory only"
+        }
+      ],
+      "presets": [
+        {
+          "id": "qwen35-fable9b-historical-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Historical local/cluster recipes; no new qualification",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Historical/uncensored model; not equivalent quality and dense research not reopened"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [
+        "qwen3.5-9b-defiant-fable-q5-mtp",
+        "qwen3.5-9b-defiant-fable-q5-mtp-cluster-usb4"
+      ],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Historical/uncensored model; not equivalent quality and dense research not reopened"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Historical/uncensored model; not equivalent quality and dense research not reopened"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "lfm12-historical",
+      "name": "LFM2.5-1.2B smoke (historical)",
+      "priority": 112,
+      "status": "HISTORICAL",
+      "format": "Historical GGUF or safetensors",
+      "runtime": "Existing /ai preset only",
+      "architecture": "Small dense smoke model",
+      "distribution": "Historical local/cluster recipes; no new qualification",
+      "testability": "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate"
+      ],
+      "blockers": [
+        "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/ai/config/strix-halo-models.json"
+        }
+      ],
+      "assets": [
+        {
+          "id": "lfm12-historical-0",
+          "path": "/home/funboy/models/vllm/lfm2.5-1.2b-instruct/model.safetensors",
+          "node": "NODE01",
+          "role": "target weights",
+          "expected_bytes": 2340697936,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "hash_source": "Current stat inventory only"
+        }
+      ],
+      "presets": [
+        {
+          "id": "lfm12-historical-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Historical local/cluster recipes; no new qualification",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Smoke-only historic vLLM1/2node presets; not frontier-quality candidate"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "qwen27-quark-retired",
+      "name": "Qwen3.8-27B Quark W4A16 (retired)",
+      "priority": 130,
+      "status": "HISTORICAL",
+      "format": "Quark AWQ INT4W4A16 safetensors",
+      "runtime": "Historical vLLM experimental; disabled in frontier-models.json",
+      "architecture": "Dense27B, not Flash-Next",
+      "distribution": "Retired TP1/TP2 profiles, not reopened",
+      "testability": "NODE01 target weights pruned in N006; directory metadata is NOT a complete checkpoint. LocalNODE02 recovery historically retained; no download/reload",
+      "ngram_embedding": "Not identified as a model embedding table in the audited sources",
+      "draft_lookup": "None qualified in this entry",
+      "quality_limits": [
+        "Retired profiles intentionally disabled; do not infer file completeness from an existing directory"
+      ],
+      "blockers": [
+        "NODE01 target weights pruned in N006; directory metadata is NOT a complete checkpoint. LocalNODE02 recovery historically retained; no download/reload"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/amd/Qwen3.8-27B-Quark-AWQ-INT4-W4A16",
+          "revision": "0f7ee2559e8dbc25879e1fe1677b2b10708b91a9",
+          "evidence": "/home/funboy/ai/config/frontier-models.json"
+        }
+      ],
+      "assets": [],
+      "presets": [
+        {
+          "id": "qwen27-quark-retired-inventory",
+          "label": "Inventory only — no product load action",
+          "distribution": "Retired TP1/TP2 profiles, not reopened",
+          "status": "BLOCKED",
+          "reasoning": "Historical payload only",
+          "blockers": [
+            "NODE01 target weights pruned in N006; directory metadata is NOT a complete checkpoint. LocalNODE02 recovery historically retained; no download/reload"
+          ]
+        }
+      ],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "NODE01 target weights pruned in N006; directory metadata is NOT a complete checkpoint. LocalNODE02 recovery historically retained; no download/reload"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "NODE01 target weights pruned in N006; directory metadata is NOT a complete checkpoint. LocalNODE02 recovery historically retained; no download/reload"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Inventory only; download eligibility evaluated per missing asset"
+        }
+      },
+      "evidence": [
+        {
+          "label": "Retired weight cleanup",
+          "status": "WEIGHTS_PRUNED",
+          "decode_tps": null,
+          "http_tps": null,
+          "context_tokens": null,
+          "report": "/home/funboy/ai-exp/reports/moe-cluster/STRIX-GLM-NEXT-006/cleanup-manifest.json",
+          "notes": "19,512,852,480B freed onNODE01; target metadata directory may remain"
+        }
+      ]
+    },
+    {
+      "id": "qwen-coder-next-fp8-historical",
+      "name": "Qwen3-Coder-Next FP8 (historical TP2)",
+      "priority": 154,
+      "status": "HISTORICAL",
+      "format": "Safetensors FP8,40shards",
+      "runtime": "Historical /ai branch, not active CIRU product",
+      "architecture": "MoE80B/3B active",
+      "distribution": "Historical only; no registered product switch",
+      "testability": "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign",
+      "ngram_embedding": "No PLE table inferred from unrelated Flash-Next model",
+      "draft_lookup": "No qualified speculative mode asserted",
+      "quality_limits": [
+        "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign"
+      ],
+      "blockers": [
+        "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md; localstat only"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen-coder-next-fp8-historical-0",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00001-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2313917472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-1",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00002-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001731528,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-2",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00003-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001406544,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-3",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00004-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001732024,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-4",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00005-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001732960,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-5",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00006-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2002790192,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-6",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00007-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001731792,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-7",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00008-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001731960,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-8",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00009-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001737552,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-9",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00010-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001411064,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-10",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00011-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2003119416,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-11",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00012-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735720,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-12",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00013-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001410320,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-13",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00014-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001736280,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-14",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00015-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2003119368,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-15",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00016-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001409888,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-16",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00017-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735720,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-17",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00018-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735784,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-18",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00019-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001736712,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-19",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00020-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2002792760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-20",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00021-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735552,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-21",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00022-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735720,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-22",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00023-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001410368,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-23",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00024-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001737192,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-24",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00025-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2003119408,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-25",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00026-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001410328,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-26",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00027-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735720,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-27",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00028-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001736272,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-28",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00029-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2002793952,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-29",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00030-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735296,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-30",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00031-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735720,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-31",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00032-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735784,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-32",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00033-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001410816,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-33",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00034-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2003119328,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-34",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00035-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735544,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-35",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00036-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001410328,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-36",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00037-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001735824,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-37",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00038-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2001737184,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-38",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00039-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 2002794000,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen-coder-next-fp8-historical-39",
+          "path": "/home/funboy/models/vllm/qwen3-coder-next-fp8/model-00040-of-00040.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 1994375208,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        }
+      ],
+      "presets": [],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Old TP2 vLLM19.26449TPS did not beat localGGUF; do not reopen unchanged campaign"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "qwen27-fp8-historical",
+      "name": "Qwen3.8-27B FP8 (historical dense)",
+      "priority": 155,
+      "status": "HISTORICAL",
+      "format": "Safetensors layer-packed FP8 plus outside/MTP",
+      "runtime": "Historical /ai branch, not active CIRU product",
+      "architecture": "Dense27B, NOT Flash-Next",
+      "distribution": "Historical only; no registered product switch",
+      "testability": "Dense/HaloPipe research closed; inventory only",
+      "ngram_embedding": "No PLE table inferred from unrelated Flash-Next model",
+      "draft_lookup": "No qualified speculative mode asserted",
+      "quality_limits": [
+        "Dense/HaloPipe research closed; inventory only"
+      ],
+      "blockers": [
+        "Dense/HaloPipe research closed; inventory only"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md; localstat only"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen27-fp8-historical-0",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-0.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-1",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-1.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-2",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-10.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-3",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-11.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-4",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-12.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-5",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-13.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-6",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-14.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-7",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-15.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-8",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-16.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-9",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-17.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-10",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-18.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-11",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-19.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-12",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-2.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-13",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-20.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-14",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-21.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-15",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-22.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-16",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-23.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-17",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-24.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-18",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-25.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-19",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-26.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-20",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-27.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-21",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-28.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-22",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-29.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-23",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-3.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313744,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-24",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-30.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-25",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-31.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-26",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-32.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-27",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-33.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-28",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-34.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-29",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-35.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-30",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-36.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-31",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-37.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-32",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-38.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-33",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-39.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-34",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-4.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-35",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-40.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-36",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-41.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-37",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-42.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-38",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-43.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-39",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-44.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-40",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-45.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-41",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-46.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-42",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-47.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-43",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-48.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-44",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-49.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-45",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-5.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-46",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-50.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-47",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-51.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-48",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-52.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-49",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-53.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-50",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-54.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-51",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-55.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-52",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-56.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-53",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-57.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-54",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-58.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-55",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-59.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-56",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-6.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-57",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-60.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-58",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-61.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-59",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-62.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865472,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-60",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-63.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313760,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-61",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-7.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 372313744,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-62",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-8.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-63",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/layers-9.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 383865448,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-64",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/mtp.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 477202224,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen27-fp8-historical-65",
+          "path": "/home/funboy/models/vllm/qwen3.8-27b-fp8/outside.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 6007102112,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        }
+      ],
+      "presets": [],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Dense/HaloPipe research closed; inventory only"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Dense/HaloPipe research closed; inventory only"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Dense/HaloPipe research closed; inventory only"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "qwen35-bf16-historical",
+      "name": "Qwen3.5-9B Defiant Fable BF16 (historical)",
+      "priority": 156,
+      "status": "HISTORICAL",
+      "format": "BF16 safetensors,4shards plus restoredMTP",
+      "runtime": "Historical /ai branch, not active CIRU product",
+      "architecture": "Dense9B altered/uncensored",
+      "distribution": "Historical only; no registered product switch",
+      "testability": "Historical conversion, not a newly qualified target",
+      "ngram_embedding": "No PLE table inferred from unrelated Flash-Next model",
+      "draft_lookup": "No qualified speculative mode asserted",
+      "quality_limits": [
+        "Historical conversion, not a newly qualified target"
+      ],
+      "blockers": [
+        "Historical conversion, not a newly qualified target"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md; localstat only"
+        }
+      ],
+      "assets": [
+        {
+          "id": "qwen35-bf16-historical-0",
+          "path": "/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16/model-00001-of-00004.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 4942706128,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen35-bf16-historical-1",
+          "path": "/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16/model-00002-of-00004.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 4987758072,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen35-bf16-historical-2",
+          "path": "/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16/model-00003-of-00004.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 4954219624,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen35-bf16-historical-3",
+          "path": "/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16/model-00004-of-00004.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 4354511264,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        },
+        {
+          "id": "qwen35-bf16-historical-4",
+          "path": "/home/funboy/models/vllm/qwen3.5-9b-defiant-fable-bf16/model-mtp-restored.safetensors",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 67108960,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        }
+      ],
+      "presets": [],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Historical conversion, not a newly qualified target"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Historical conversion, not a newly qualified target"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Historical conversion, not a newly qualified target"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "smoke-qwen06-historical",
+      "name": "Qwen3-0.6B GGUF smoke (historical)",
+      "priority": 157,
+      "status": "HISTORICAL",
+      "format": "GGUF Q4_0",
+      "runtime": "Historical /ai branch, not active CIRU product",
+      "architecture": "Dense0.6B smoke",
+      "distribution": "Historical only; no registered product switch",
+      "testability": "Diagnostic smoke model, not intelligence target or automaticload",
+      "ngram_embedding": "No PLE table inferred from unrelated Flash-Next model",
+      "draft_lookup": "No qualified speculative mode asserted",
+      "quality_limits": [
+        "Diagnostic smoke model, not intelligence target or automaticload"
+      ],
+      "blockers": [
+        "Diagnostic smoke model, not intelligence target or automaticload"
+      ],
+      "sources": [
+        {
+          "url": "",
+          "revision": "",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md; localstat only"
+        }
+      ],
+      "assets": [
+        {
+          "id": "smoke-qwen06-historical-0",
+          "path": "/home/funboy/models/gguf/smoke/Qwen3-0.6B-Q4_0.gguf",
+          "node": "NODE01",
+          "role": "Historical weight component",
+          "expected_bytes": 428970080,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Historical branch; no immutable download action audited"
+        }
+      ],
+      "presets": [],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Diagnostic smoke model, not intelligence target or automaticload"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Diagnostic smoke model, not intelligence target or automaticload"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Diagnostic smoke model, not intelligence target or automaticload"
+        }
+      },
+      "evidence": []
+    },
+    {
+      "id": "deepseek-v4-fp8-not-local",
+      "name": "DeepSeek-V4-Flash FP8 preview (not local)",
+      "priority": 190,
+      "status": "BLOCKED",
+      "format": "Expected safetensorsFP8; checkpointmissing",
+      "runtime": "Source support alone is not installed model",
+      "architecture": "DeepSeek-V4Flash preview, not local0731GGUF",
+      "distribution": "No executable model qualification",
+      "testability": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload",
+      "ngram_embedding": "Not applicable to incompleteartifact",
+      "draft_lookup": "Not qualified",
+      "quality_limits": [
+        "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+      ],
+      "blockers": [
+        "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash",
+          "revision": "60d8d70770c6776ff598c94bb586a859a38244f1",
+          "evidence": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section8.2"
+        }
+      ],
+      "assets": [
+        {
+          "id": "deepseek-preview-config-required",
+          "path": "/home/funboy/models/vllm/deepseek-v4-flash-fp8/config.json",
+          "node": "NODE01",
+          "role": "Missing required config; no46shard inventoryclaim",
+          "expected_bytes": 0,
+          "required": true,
+          "download_enabled": false,
+          "download_blocked_reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+        }
+      ],
+      "presets": [],
+      "legacy_preset_ids": [],
+      "actions": {
+        "load": {
+          "enabled": false,
+          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+        },
+        "benchmark": {
+          "enabled": false,
+          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+        },
+        "download": {
+          "enabled": false,
+          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+        }
+      },
+      "evidence": []
+    }
+  ]
+}
