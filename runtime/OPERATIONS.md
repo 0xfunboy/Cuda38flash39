@@ -57,9 +57,13 @@ sudo bash /home/funboy/StrixHaloClusterGLM/deploy/headless-next-boot.sh
 This selects `multi-user.target` and disables future startup of printer,
 Bluetooth, modem and mDNS services. It does not terminate the current desktop
 session or reboot. SSH, networking/USB4, bolt, GPU drivers, time synchronization
-and security updates are retained. The cleanup agent could not execute this
-privileged step because sudo requires interactive authentication. Until the
-owner runs it, the default boot target remains graphical.
+and security updates are retained. This privileged step requires interactive
+sudo. It uses systemd properties directly, without requiring developer tools
+in root's PATH. Verify `systemctl get-default` returns `multi-user.target`.
+Warnings that triggering units are still active are expected: disabling startup
+does not stop the current session. The script verifies the stored unit states
+and reports completion only after all required steps succeed. It is safe to rerun
+after a partial attempt; an already-correct target is not a reason to skip it.
 
 ## API exposure
 
