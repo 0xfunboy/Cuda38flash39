@@ -508,7 +508,7 @@ func validateLocalWorkspace(c Config, root string) (string, error) {
 	if !allowed {
 		return "", errors.New("workspace outside configured roots")
 	}
-	protected := []string{c.StateDir, productRoot + "/.tools", productRoot + "/runtime", "/home/funboy/ai-exp/strix-ciru-tp2", "/home/funboy/models", "/home/funboy/ai-exp/models"}
+	protected := []string{c.StateDir, productRoot + "/.tools", productRoot + "/runtime", productRoot + "/.engine", productRoot + "/archives", "/home/funboy/models"}
 	for _, r := range protected {
 		if r != "" && (within(p, r) || within(r, p)) {
 			return "", errors.New("choose a project subdirectory that does not contain operational runtime, state or weights")

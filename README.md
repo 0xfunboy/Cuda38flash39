@@ -51,6 +51,15 @@ user-systemd scopes. Configure the backend and host paths before starting a new
 installation. Follow the [deployment guide](runtime/README.md) and
 [Pi setup](WORKSPACES.md) for the complete environment.
 
+On the two reference EVO-X3 hosts, HaloClu includes its controller, operational
+fixtures and service definitions in this repository. The provisioned inference
+engine lives in `.engine`; weights live in `/home/funboy/models`. Neither is
+committed to Git. The retired `ai` and `ai-exp` repositories are not required.
+`make` keeps Go workspace/module caches under the ignored `.tools` directory.
+
+[Start and maintain the cluster](runtime/OPERATIONS.md) ·
+[Production Ethernet and SSH](deploy/network/README.md)
+
 ## Chat
 
 ![HaloClu Chat with generation controls, attachments and response metrics](docs/assets/chat.png)

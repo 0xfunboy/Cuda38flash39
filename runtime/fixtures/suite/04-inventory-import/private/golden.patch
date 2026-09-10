@@ -1,0 +1,11 @@
+--- a/src/inventory.cpp
++++ b/src/inventory.cpp
+@@ -2,7 +2,7 @@
+ #include <charconv>
+ #include <stdexcept>
+ void import_inventory(Inventory& inventory,const std::string& csv) {
+-    Inventory& next=inventory;
++    Inventory next=inventory;
+     std::size_t start=0;
+     while(start<csv.size()) {
+         auto end=csv.find('\n',start); if(end==std::string::npos)end=csv.size();

@@ -1,0 +1,19 @@
+#include "policy.hpp"
+#include "services/service_000.hpp"
+#include "services/service_001.hpp"
+#include "services/service_002.hpp"
+#include "services/service_003.hpp"
+#include "services/service_004.hpp"
+#include "services/service_005.hpp"
+#include "services/service_006.hpp"
+std::vector<Policy> registry() {
+    return {
+        service_000::policy_011(),
+        service_001::policy_048(),
+        service_002::policy_085(),
+        service_003::policy_122(),
+        service_004::policy_159(),
+        service_005::policy_196(),
+        service_006::policy_233(),
+    };
+}

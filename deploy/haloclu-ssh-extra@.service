@@ -1,0 +1,17 @@
+[Unit]
+Description=HaloClu additional OpenSSH listener on port %i
+Requires=ssh.service
+After=network.target ssh.service
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/sshd -t -p %i -o ListenAddress=0.0.0.0:%i -o ListenAddress=[::]:%i -o PidFile=/run/haloclu-ssh-%i.pid
+ExecStart=/usr/sbin/sshd -D -e -p %i -o ListenAddress=0.0.0.0:%i -o ListenAddress=[::]:%i -o PidFile=/run/haloclu-ssh-%i.pid
+# Preserve established sessions if this additional listener is restarted.
+KillMode=process
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

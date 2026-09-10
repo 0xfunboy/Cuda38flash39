@@ -1,0 +1,91 @@
+{
+  "id": "02-ttl-cache",
+  "category": "mutable-state-boundary",
+  "language": "C++17",
+  "cases": 109,
+  "source_files": 2,
+  "context_characters": 2117,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/cache.hpp": {
+      "golden": "9499b6d56f6e2e77402050f49fd6694d5b353c4397b67d067279533dd8b3d1db",
+      "buggy": "9499b6d56f6e2e77402050f49fd6694d5b353c4397b67d067279533dd8b3d1db"
+    },
+    "src/cache.cpp": {
+      "golden": "703e91f6acf38371d9dbe89ddb1a3acb546e2c29962c660507e80938c79e51a0",
+      "buggy": "da3b702fe9bcb99da4e2c459d8a27d18d5c74a3b0ca6506604d69fcd22e37d77"
+    }
+  },
+  "test_sha256": "836ddcb7e90c4b9a1187d50b062897718f20d08efeceadfb517939bf0d0cdcdf",
+  "golden_patch_sha256": "594101b7ad4a1a5072637d1c5fd8b69b14e0740c36e3007a948fa6377e8a32db",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/cache.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.42463581,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0065153409999998075,
+      "stdout": "PASS ttl-cache: 109 cases\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/cache.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.4015457529999999,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006780479000000014,
+      "stdout": "",
+      "stderr": "FAIL line 10: !c.get(\"a\",5)\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/02-ttl-cache/task.json"
+}

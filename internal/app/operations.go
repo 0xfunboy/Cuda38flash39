@@ -27,24 +27,24 @@ import (
 	"time"
 )
 
-const operationSuite = "/home/funboy/ai-exp/reports/moe-cluster/STRIX-PRODUCT-001/suite/manifest.json"
-const operationSuiteSHA = "db34f470d20d3c365590a237a77cbc2d118e05c5133f44dd90a3e245195f5058"
-const operationHistorical = "/home/funboy/ai-exp/reports/moe-cluster/GLM-CIRU-OPT-004/g0/benchmark/protocol.json"
+const operationSuite = "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/manifest.json"
+const operationSuiteSHA = "94e6743320b56763ba5e8ee1db2432dbd4e17c676175a7931ea2ab34e90a970f"
+const operationHistorical = "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/historical-109-256.json"
 const operationHistoricalSHA = "735954ea7cb1f145d36fcd451486665db22ac1463dce1126b0f6520a53ed24d7"
 
 var operationSpecSHA = map[string]string{
-	"01-escaped-settings":     "bba41573d7dff3691e3752bda494a5286a891a9a38079fad4ea50fb98652a159",
-	"02-ttl-cache":            "2ac7e9fcb8e7a625aeae20f2a47a22882cb074d969d47cbcfbdc1614e75fcebd",
-	"03-schedule-difference":  "443970fba22a95eb93559d232976b8f9fe7e5f9bcfa3cb6f8be1f586086c0cb7",
-	"04-inventory-import":     "2b491878267f8b982ffa4dcf33e4fdfadd63917c7fc8ad7a295e39bee02455af",
-	"05-price-cache-refactor": "dae08f83a666a2b0087ae748701b3c7daf4f0c1ddcd906e500aa70a6ac926791",
-	"06-job-acknowledgement":  "937c1093d271840703e8ceabbc6863400c8d55926fbd4a3e5445bfb0e973a970",
-	"context-1k":              "c068dcbe9fee3797be3a88cc706e236ab6a9b64694587d56458aa39407d849ac",
-	"context-2k":              "aafe6e8716661d967c339b50a3f32031d3ffd0860f27a47be00dc507eb89b9d3",
-	"context-4k":              "b381f3752de228d48104d50d11549773afbbc84bcd3247ec3462bf0af0954319",
-	"context-8k":              "6b86a28b0babc6f2053e0d22736fa0b4867d56677be9b097275199fe8a1e6870",
-	"context-16k":             "7af4a9e48d30ca4d6d747c130520b249212fccf33da5b8338798ace136fdbfa3",
-	"context-32k":             "233e97b3e754fbaae5791db16dcaecc8a6a358b0b7b48bfbc365ae0743ff399b",
+	"01-escaped-settings":     "83da10f50024f07ed5d791cfa2df08a98969a72e0c329ff094649be67dbbfd34",
+	"02-ttl-cache":            "25571745a2bb1f26f6073c7f03d53aa9395c8af1ff3ed43d2906e6591f941d4e",
+	"03-schedule-difference":  "511f1610b90f98d4f03f0b4d18288d24c9dcbfd96beeed527c27be51dd8494de",
+	"04-inventory-import":     "050abc31928b5d06ae8b7e0a3e53d15af42ba65820ff0d7c4e6132a3cff826c3",
+	"05-price-cache-refactor": "d5c98b488f62ca1b79b8aa42e6f4647d4c621e5f65520fdaf649045d78ccfa0c",
+	"06-job-acknowledgement":  "c9d9db6ac5098e6107833c30d733f3a8f61b003eec686cc0dc4a3f983d5bf9cb",
+	"context-1k":              "98b898d1e3916b839768c5ef83a02a30fffe4e6735e837cedc3aed42879762d3",
+	"context-2k":              "04ab0c545e2ec0b98a7dd842b1a0a4a3ef0cdbb5407a1fa5e159601f430f87ae",
+	"context-4k":              "2212a2d0f650b2db5e70e0552b855f0cec11d02dd9fc17a9f01eb03b133ec1f5",
+	"context-8k":              "7313a0f55cf21330e1c07b61e3fad03e0913ead1e1dd2a7015922e192b2bd042",
+	"context-16k":             "1fba029f87e8a1ac81f9e7d66552625af507b395db558a8c36df0ba20798d280",
+	"context-32k":             "e6d4589a4ab6fd24a42d198cae99c6a8edc3f3710d677138a5c4378a8bc564c4",
 }
 
 type OperationOption struct {
@@ -811,8 +811,8 @@ func downloadOperationAsset(ctx context.Context, job *OperationJob, asset Catalo
 		return errors.New("catalog asset download is blocked")
 	}
 	base := "/home/funboy/models"
-	if within(asset.Path, "/home/funboy/ai-exp/strix-ciru-tp2/artifacts") {
-		base = "/home/funboy/ai-exp/strix-ciru-tp2/artifacts"
+	if within(asset.Path, "/home/funboy/StrixHaloClusterGLM/.engine/artifacts") {
+		base = "/home/funboy/StrixHaloClusterGLM/.engine/artifacts"
 	}
 	transport := &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext, ResponseHeaderTimeout: 30 * time.Second}
 	defer transport.CloseIdleConnections()

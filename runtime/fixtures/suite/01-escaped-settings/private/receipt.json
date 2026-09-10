@@ -1,0 +1,91 @@
+{
+  "id": "01-escaped-settings",
+  "category": "parser",
+  "language": "C++17",
+  "cases": 115,
+  "source_files": 2,
+  "context_characters": 1755,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/settings.hpp": {
+      "golden": "a65cb4f9e14bf1467e2f606ce257c554bc013df3f83e0cdc9d2a031be8181cac",
+      "buggy": "a65cb4f9e14bf1467e2f606ce257c554bc013df3f83e0cdc9d2a031be8181cac"
+    },
+    "src/settings.cpp": {
+      "golden": "5d0c7f8633b10af725dfd45b5feaa6c6ed269ac778c3144d0396d36bf3df6ad3",
+      "buggy": "8946f8fa54af674f9ed5eb2818544717ae6537d73f062f68f6c2e62c4e28a740"
+    }
+  },
+  "test_sha256": "139693731a73b2f10aa971034566f186f0a91ca47e27b5f7113bcba6f72b21c4",
+  "golden_patch_sha256": "01b09b778a503dab14277d8c4fafc9c09faf074375aeadfd332efc1d4585386d",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/settings.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.5238086009999999,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.007079088999999953,
+      "stdout": "PASS escaped-settings: 115 cases\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/settings.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.379363104,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 134,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0708420440000001,
+      "stdout": "",
+      "stderr": "terminate called after throwing an instance of 'std::invalid_argument'\n  what():  unknown escape\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/01-escaped-settings/task.json"
+}

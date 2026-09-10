@@ -1,0 +1,8 @@
+# Production Ethernet only. Wi-Fi and the USB4 inference link are untouched.
+network:
+  version: 2
+  ethernets:
+    eno1:
+      renderer: NetworkManager
+      dhcp4: true
+      addresses: [192.168.178.67/24]

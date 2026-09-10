@@ -1,7 +1,10 @@
-# Pinned external inference engine
+# Qualified inference engine
 
 The product controller and gateway are Go. CIRU/vLLM/torch/ROCm remain the
-already-installed external engine; no weights/frameworks are copied here.
+already-installed inference engine. On the production hosts its local files live
+in `/home/funboy/StrixHaloClusterGLM/.engine` (excluded from Git). Target/drafter
+weights live in `/home/funboy/models/ciru-glm53-flash`; `.engine/artifacts` points
+there. The old `ai` and `ai-exp` directories are not runtime dependencies.
 
 `manifest.json` pins model/drafter revisions, rank shard layout, existing SHA-256
 receipts and the actual qualified patched runtime files. Startup rehashes only
@@ -37,6 +40,12 @@ the five small local correctness fixes; rejected campaigns are not included.
 
 ## Whole-pair ownership and rollback
 
+Production startup is `haloclu-engine.service` → `strixglm-pair.service` →
+`strixglm.service`. Both hosts already have user lingering enabled. NODE01 waits
+for the USB4 peer using its dedicated SSH key, checks ownership, then starts or
+adopts the entire pair. A stale post-reboot owner is reconciled by the same
+all-rank controller. No rank has an independent restart policy.
+
 The Go controller uses distinct `strixglm-rank{0,1}` unit names and rank port18110.
 It refuses to start while any old rank or frontend is active. A durable owner
 reservation precedes every systemd write; nonce and InvocationID must agree
@@ -46,15 +55,17 @@ both, non-blocking. The gateway must never hold the product pair lock while
 calling the native coordinator. Poison is archived only after all owned ranks
 are proven stopped.
 
-The explicit legacy snapshot/stop/restore operations preserve the original
+The historical legacy snapshot/stop/restore operations preserve the original
 systemd argv, properties, owner metadata, and retention definitions without
 copying the engine or weights. Restore launches the entire old pair before its
 old frontend, updates InvocationIDs, and retains original ports18091/18092.
 The old Python frontend is used only for this explicitly selected rollback,
-never by the new native paired backend. Do not expose lifecycle commands as
+never by the production native paired backend. The old Python frontend is now
+archived, not installed; old-path snapshots require restoring the archived layout
+before using those historical restore operations. Do not expose lifecycle commands as
 unauthenticated HTTP endpoints. No automatic takeover/switch is performed.
 
 Native gateway/coordinator services are separate from the two owned rank units.
-Stopping or restarting those HTTP services does not stop/restart a rank, and
-cluster stop/restart does not manage the HTTP services. Close admission and
-drain those services before a maintenance operation; see OPERATIONS.md.
+Direct `cluster stop/start` CLI commands do not manage the HTTP services. For
+production maintenance, use `haloclu-engine.service`: its systemd dependencies
+drain and order the HTTP services around the whole pair; see OPERATIONS.md.

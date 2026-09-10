@@ -1,0 +1,36 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/04-inventory-import/repo",
+  "task": "Repair the inventory import API. import_inventory accepts LF-separated name,nonnegative_decimal_quantity records; an empty input is a no-op and one final LF is allowed. Names consist of ASCII letters, digits or underscore, nonempty. Quantities must contain only digits, range 0..1000000; repeated records add to current inventory and the resulting quantity must stay <=1000000. No whitespace/sign/suffix is accepted. A malformed record or overflow must throw std::invalid_argument and leave the entire inventory unchanged, including updates from earlier lines. Preserve existing entries and public API.",
+  "files": [
+    "include/inventory.hpp",
+    "src/inventory.cpp"
+  ],
+  "allowed_paths": [
+    "include/inventory.hpp",
+    "src/inventory.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/inventory.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/04-inventory-import/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

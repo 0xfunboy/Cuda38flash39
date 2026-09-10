@@ -9,10 +9,9 @@
   "model": "GLM5.3-Flash-CIRU-STRIX-IU4",
   "state_dir": "/home/funboy/StrixHaloClusterGLM/state/native-gateway",
   "workspace_roots": [
-    "/home/funboy/ai-exp",
     "/home/funboy/StrixHaloClusterGLM"
   ],
-  "pair_lock": "/home/funboy/ai-exp/strix-ciru-tp2/state/pair.lock",
+  "pair_lock": "/home/funboy/StrixHaloClusterGLM/.engine/state/pair.lock",
   "default_profile": "low",
   "profiles": {
     "low": {"reasoning": "low", "context_tokens": 4096, "max_tokens": 16384, "max_repairs": 2},

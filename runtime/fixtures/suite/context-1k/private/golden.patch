@@ -1,0 +1,11 @@
+--- a/src/registry.cpp
++++ b/src/registry.cpp
+@@ -1,2 +1,7 @@
+ #include "policy.hpp"
+-std::vector<Policy> registry() { return {}; }
++#include "services/service_000.hpp"
++std::vector<Policy> registry() {
++    return {
++        service_000::policy_011(),
++    };
++}

@@ -1,0 +1,41 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/05-price-cache-refactor/repo",
+  "task": "Fix the pricing repository regression after a refactor. Catalog owns current nonnegative integer-cent prices and a monotonically increasing revision. Every set_price changes the revision, even an update of the same SKU. InvoiceService quotes a cart by summing current catalog unit prices times nonnegative quantities; totals fit signed 64-bit. Unknown SKUs throw std::out_of_range and negative quantities throw std::invalid_argument. Cached quotes must never outlive catalog changes. Repeated items and ordering do not change the mathematical sum. Preserve the three public interfaces and the cache (do not remove caching).",
+  "files": [
+    "include/catalog.hpp",
+    "include/invoice.hpp",
+    "src/catalog.cpp",
+    "src/invoice.cpp"
+  ],
+  "allowed_paths": [
+    "include/catalog.hpp",
+    "include/invoice.hpp",
+    "src/catalog.cpp",
+    "src/invoice.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/catalog.cpp",
+    "src/invoice.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/05-price-cache-refactor/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

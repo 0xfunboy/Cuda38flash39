@@ -1,0 +1,97 @@
+{
+  "id": "06-job-acknowledgement",
+  "category": "multi-file-state-error",
+  "language": "C++17",
+  "cases": 12,
+  "source_files": 3,
+  "context_characters": 2065,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/jobs.hpp": {
+      "golden": "a0bd7228ea2a5682c9dcfcb7972f95fb248d3743b63125a28ed301121589d2ed",
+      "buggy": "a0bd7228ea2a5682c9dcfcb7972f95fb248d3743b63125a28ed301121589d2ed"
+    },
+    "src/queue.cpp": {
+      "golden": "795e1b2d0c32ec26a03ae08aac3a72517eeb5a9bfcc7d58a93e543633746f1c7",
+      "buggy": "795e1b2d0c32ec26a03ae08aac3a72517eeb5a9bfcc7d58a93e543633746f1c7"
+    },
+    "src/worker.cpp": {
+      "golden": "454cda1de7cb46c9a39a45eff6ef16108749f1c12ab8043d51a3c35c4f56d53f",
+      "buggy": "3fb24a6f6227be69e3a71bdf3c611a746949a3148f955a4725c57cf25f2751fd"
+    }
+  },
+  "test_sha256": "c9cef29b3a5f7706b4bddaf134d1d84bfdf51d4ef838c2ca364109bb55687b60",
+  "golden_patch_sha256": "610339191d8bf898d47af5e8225e7f7cc08844703aaed6ef5756f877b2592f42",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/queue.cpp",
+        "src/worker.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.49984266599999955,
+      "stdout": "",
+      "stderr": "verify.cpp: In lambda function:\nverify.cpp:10:37: warning: label ‘CHECK_UNUSED’ defined but not used [-Wunused-label]\n   10 |     try{w.run_one([&](const Job& j){CHECK_UNUSED: ++calls; if(j.id!=1)std::abort();throw std::runtime_error(\"temporary\");});}catch(const std::runtime_error& e){caught=std::string(e.what())==\"temporary\";}\n      |                                     ^~~~~~~~~~~~\n"
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006294214000000466,
+      "stdout": "PASS job-acknowledgement: 12 checks\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/queue.cpp",
+        "src/worker.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.5181100280000001,
+      "stdout": "",
+      "stderr": "verify.cpp: In lambda function:\nverify.cpp:10:37: warning: label ‘CHECK_UNUSED’ defined but not used [-Wunused-label]\n   10 |     try{w.run_one([&](const Job& j){CHECK_UNUSED: ++calls; if(j.id!=1)std::abort();throw std::runtime_error(\"temporary\");});}catch(const std::runtime_error& e){caught=std::string(e.what())==\"temporary\";}\n      |                                     ^~~~~~~~~~~~\n"
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006422218000000612,
+      "stdout": "",
+      "stderr": "FAIL line 12: id==1\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/06-job-acknowledgement/task.json"
+}

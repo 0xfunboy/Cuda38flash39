@@ -1,0 +1,95 @@
+{
+  "id": "context-1k",
+  "category": "context-service-integration",
+  "language": "C++17",
+  "cases": 8,
+  "source_files": 3,
+  "context_characters": 1900,
+  "nominal_context": "1k",
+  "context_caveat": "Synthetic but functional cross-file integration coverage; no claim of arbitrary repository understanding at this context size.",
+  "hashes": {
+    "include/policy.hpp": {
+      "golden": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de",
+      "buggy": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de"
+    },
+    "include/services/service_000.hpp": {
+      "golden": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f",
+      "buggy": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f"
+    },
+    "src/registry.cpp": {
+      "golden": "bc3bd9d9d9ff55beca7cac3033a752032bfa69583ea0eeaf47720831930712cb",
+      "buggy": "c1789b017108d5a99e500abb965dc776877e4586f37944a42bc110d55925a019"
+    }
+  },
+  "test_sha256": "cf5c9db411fec75d8e8a27e8cafc8c93df1591785211f497bf1ce79259f229dd",
+  "golden_patch_sha256": "d59594d04968d086ace0210428835d9b3268d836c916366b0a50f2bb2fff155f",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.3608827860000001,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006550231999999596,
+      "stdout": "PASS service-registry: 1 distinct routes, 8 behavioral probes\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.34407421100000013,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0069876459999995855,
+      "stdout": "",
+      "stderr": "FAIL line 15: policies.size()==1\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-1k/task.json"
+}

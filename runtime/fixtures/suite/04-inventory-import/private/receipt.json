@@ -1,0 +1,91 @@
+{
+  "id": "04-inventory-import",
+  "category": "error-transaction",
+  "language": "C++17",
+  "cases": 12,
+  "source_files": 2,
+  "context_characters": 2070,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/inventory.hpp": {
+      "golden": "2d76420763dc679ee5c1c5cc5748f76e91f52336834491e3c6622da0d083f31a",
+      "buggy": "2d76420763dc679ee5c1c5cc5748f76e91f52336834491e3c6622da0d083f31a"
+    },
+    "src/inventory.cpp": {
+      "golden": "a295bdcd245805382955bda5761a075296f64a44550d5131457d945ea10dbf0c",
+      "buggy": "3e332ee2fad25f39ee0172606244dc76ab82840007bc455c5131a2f3d150c894"
+    }
+  },
+  "test_sha256": "edcb225fe4db8e8c5f6fa2be1c32241094e5e409bbfc18323817662a339d938f",
+  "golden_patch_sha256": "1565bc125f8581b01f9d3fb4fce6d71ebe096498d7633ed8f87af87cef86ce76",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/inventory.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.5082475180000001,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006920395000000099,
+      "stdout": "PASS inventory-import: 12 scenarios\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/inventory.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.5004490549999996,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 134,
+      "signal": null,
+      "error": null,
+      "seconds": 0.06893554200000017,
+      "stdout": "",
+      "stderr": "terminate called after throwing an instance of 'std::out_of_range'\n  what():  map::at\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/04-inventory-import/task.json"
+}

@@ -1,0 +1,36 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/03-schedule-difference/repo",
+  "task": "Fix the scheduling library: subtract every blocked half-open interval from a single half-open working interval. Blocked intervals can be unsorted, overlapping, nested, duplicated, empty or outside the working interval. Return ordered, nonempty, disjoint remaining intervals; touching blocks leave no gap. Reject any interval with start>end using std::invalid_argument, including invalid blocked intervals when the working interval is empty. Empty intervals otherwise do nothing. Preserve the public API and signed 64-bit endpoints.",
+  "files": [
+    "include/schedule.hpp",
+    "src/schedule.cpp"
+  ],
+  "allowed_paths": [
+    "include/schedule.hpp",
+    "src/schedule.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/schedule.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/03-schedule-difference/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

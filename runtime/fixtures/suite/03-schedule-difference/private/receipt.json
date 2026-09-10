@@ -1,0 +1,91 @@
+{
+  "id": "03-schedule-difference",
+  "category": "algorithm",
+  "language": "C++17",
+  "cases": 165,
+  "source_files": 2,
+  "context_characters": 1436,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/schedule.hpp": {
+      "golden": "4a7c1088fd121f4f913783458f4255402ae36260b125b11eb19d03608974ab4e",
+      "buggy": "4a7c1088fd121f4f913783458f4255402ae36260b125b11eb19d03608974ab4e"
+    },
+    "src/schedule.cpp": {
+      "golden": "a4a69e56bb7936cf8acd2e15569933c5c61403b75a92e408a1252998b04b576b",
+      "buggy": "5ec662e849ebb926652455a192142dfe644f7cc02629434b8e8f6a1e772828a7"
+    }
+  },
+  "test_sha256": "b666db9ffb67bcba314634fcdfb42de711bb5e4d353c6f49016204362909d862",
+  "golden_patch_sha256": "ae419c1b4b22b5faeace9e79023c86d607a399f7756688aa2c306263bed39f73",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/schedule.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.37825244799999996,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006224631999999929,
+      "stdout": "PASS schedule-difference: 165 scenarios\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/schedule.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.3749351810000003,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0075302940000001395,
+      "stdout": "",
+      "stderr": "FAIL line 9: (available({0,10},{{1,8},{2,3}})==std::vector<Interval>{{0,1},{8,10}})\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/03-schedule-difference/task.json"
+}

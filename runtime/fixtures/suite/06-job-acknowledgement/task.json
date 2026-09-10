@@ -1,0 +1,39 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/06-job-acknowledgement/repo",
+  "task": "Repair the durable-job coordinator state transitions. Queue::lease returns the first pending job and marks it in flight; exhausted returns nullopt. Worker::run_one returns false if no job exists. Otherwise it calls the supplied handler once. Success acknowledges the job and returns true; a handler exception must release the same job to pending and propagate the original exception. Queue::ack/release only accept an in-flight existing ID and otherwise throw std::logic_error without changing state. Completed jobs must not run again; failed jobs must be available to retry. Preserve public interfaces and FIFO ordering by insertion.",
+  "files": [
+    "include/jobs.hpp",
+    "src/queue.cpp",
+    "src/worker.cpp"
+  ],
+  "allowed_paths": [
+    "include/jobs.hpp",
+    "src/queue.cpp",
+    "src/worker.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/queue.cpp",
+    "src/worker.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/06-job-acknowledgement/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

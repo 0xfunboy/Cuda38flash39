@@ -1,0 +1,50 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-8k/repo",
+  "task": "Repair the production service registry. It must expose exactly one Policy from every production header under include/services, ordered lexicographically by route. Each service header defines its own documented factory export; names cannot be inferred from the filename. Return the actual factory descriptor so each route retains its existing quota, validation, privileged rebate and cap behavior. Do not copy/reimplement policy functions or change headers; wire them into src/registry.cpp. All 15 service routes are required. The current registry was broken by an integration refactor.",
+  "files": [
+    "include/policy.hpp",
+    "include/services/service_000.hpp",
+    "include/services/service_001.hpp",
+    "include/services/service_002.hpp",
+    "include/services/service_003.hpp",
+    "include/services/service_004.hpp",
+    "include/services/service_005.hpp",
+    "include/services/service_006.hpp",
+    "include/services/service_007.hpp",
+    "include/services/service_008.hpp",
+    "include/services/service_009.hpp",
+    "include/services/service_010.hpp",
+    "include/services/service_011.hpp",
+    "include/services/service_012.hpp",
+    "include/services/service_013.hpp",
+    "include/services/service_014.hpp",
+    "src/registry.cpp"
+  ],
+  "allowed_paths": [
+    "src/registry.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/registry.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-8k/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

@@ -1,0 +1,343 @@
+{
+  "id": "context-32k",
+  "category": "context-service-integration",
+  "language": "C++17",
+  "cases": 504,
+  "source_files": 65,
+  "context_characters": 65919,
+  "nominal_context": "32k",
+  "context_caveat": "Synthetic but functional cross-file integration coverage; no claim of arbitrary repository understanding at this context size.",
+  "hashes": {
+    "include/policy.hpp": {
+      "golden": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de",
+      "buggy": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de"
+    },
+    "include/services/service_000.hpp": {
+      "golden": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f",
+      "buggy": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f"
+    },
+    "include/services/service_001.hpp": {
+      "golden": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e",
+      "buggy": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e"
+    },
+    "include/services/service_002.hpp": {
+      "golden": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4",
+      "buggy": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4"
+    },
+    "include/services/service_003.hpp": {
+      "golden": "a07195d673d8b4501a3e242eee049e6b4bffc88a63414311a362628196f35449",
+      "buggy": "a07195d673d8b4501a3e242eee049e6b4bffc88a63414311a362628196f35449"
+    },
+    "include/services/service_004.hpp": {
+      "golden": "4f010397ef695871b9d5eaa63597e04b993c93a5592347e4ee7d7cac5b091291",
+      "buggy": "4f010397ef695871b9d5eaa63597e04b993c93a5592347e4ee7d7cac5b091291"
+    },
+    "include/services/service_005.hpp": {
+      "golden": "fd6860acfbe6a1015bdcfedc9ec1f0c0bcf9b3386a83d74d3740f58ab7a378b8",
+      "buggy": "fd6860acfbe6a1015bdcfedc9ec1f0c0bcf9b3386a83d74d3740f58ab7a378b8"
+    },
+    "include/services/service_006.hpp": {
+      "golden": "76cf38af11099c4139172cbfe7c2b5ba2ec410f02e8158bb30d727d021669ae7",
+      "buggy": "76cf38af11099c4139172cbfe7c2b5ba2ec410f02e8158bb30d727d021669ae7"
+    },
+    "include/services/service_007.hpp": {
+      "golden": "7e972d52dba9399666b59fbbafc43024a3f75d3436be5f902f43942109db95a5",
+      "buggy": "7e972d52dba9399666b59fbbafc43024a3f75d3436be5f902f43942109db95a5"
+    },
+    "include/services/service_008.hpp": {
+      "golden": "2cdde96fc9bbd3c9fb6118e33477edbfbe7f3fecf8fabcf7a92fef817c829c80",
+      "buggy": "2cdde96fc9bbd3c9fb6118e33477edbfbe7f3fecf8fabcf7a92fef817c829c80"
+    },
+    "include/services/service_009.hpp": {
+      "golden": "ec99ebdcb7d250c34bcbf3cd646dacc5a462bd48c897eb11dbdfb200f8e99f7c",
+      "buggy": "ec99ebdcb7d250c34bcbf3cd646dacc5a462bd48c897eb11dbdfb200f8e99f7c"
+    },
+    "include/services/service_010.hpp": {
+      "golden": "769c6549b54cc66433ff92a7900f928fac82bd2904f8bad76ed38ca8a1339459",
+      "buggy": "769c6549b54cc66433ff92a7900f928fac82bd2904f8bad76ed38ca8a1339459"
+    },
+    "include/services/service_011.hpp": {
+      "golden": "18c748cf0bfe05f138de6a4219dc085d8c0c3924b134d9bfaa491e406e5b1afe",
+      "buggy": "18c748cf0bfe05f138de6a4219dc085d8c0c3924b134d9bfaa491e406e5b1afe"
+    },
+    "include/services/service_012.hpp": {
+      "golden": "dc8969054d9cef06e49cd1c686fd8241819a1dae556cc5c7db4bf159e3b0b383",
+      "buggy": "dc8969054d9cef06e49cd1c686fd8241819a1dae556cc5c7db4bf159e3b0b383"
+    },
+    "include/services/service_013.hpp": {
+      "golden": "6b4b51b8d11873a2fe937e2901c5bec6feab9b46d03cd34e7a0973fdf566d191",
+      "buggy": "6b4b51b8d11873a2fe937e2901c5bec6feab9b46d03cd34e7a0973fdf566d191"
+    },
+    "include/services/service_014.hpp": {
+      "golden": "11a1e284a59f9d20ca9adf8ab01b0eefff17f04c5f258e762d577b71426d3317",
+      "buggy": "11a1e284a59f9d20ca9adf8ab01b0eefff17f04c5f258e762d577b71426d3317"
+    },
+    "include/services/service_015.hpp": {
+      "golden": "25c362857f5a222fd5483bfb1ca92d2856da9a3ecd78e8d8474f0d82b6475ef5",
+      "buggy": "25c362857f5a222fd5483bfb1ca92d2856da9a3ecd78e8d8474f0d82b6475ef5"
+    },
+    "include/services/service_016.hpp": {
+      "golden": "585a8e2ae16749bff90665017fbd732e776af5d1c62812fa10fc004625c9afa5",
+      "buggy": "585a8e2ae16749bff90665017fbd732e776af5d1c62812fa10fc004625c9afa5"
+    },
+    "include/services/service_017.hpp": {
+      "golden": "b2b92a7047857ee1bb762f351ada0b3cdfa663e731975b09731fcc37404eea45",
+      "buggy": "b2b92a7047857ee1bb762f351ada0b3cdfa663e731975b09731fcc37404eea45"
+    },
+    "include/services/service_018.hpp": {
+      "golden": "0360d4e430874c003e6c62aaaa818b3bd0aa3e7b7b1195d790f374bb88f5a703",
+      "buggy": "0360d4e430874c003e6c62aaaa818b3bd0aa3e7b7b1195d790f374bb88f5a703"
+    },
+    "include/services/service_019.hpp": {
+      "golden": "280e12e0a6893508b6a5847ded583658a0340c8607004218763b15387a4ba034",
+      "buggy": "280e12e0a6893508b6a5847ded583658a0340c8607004218763b15387a4ba034"
+    },
+    "include/services/service_020.hpp": {
+      "golden": "e248605ba26c6ad7e14ebdf61dfb920cec4543db7b488151a3a662d570e65331",
+      "buggy": "e248605ba26c6ad7e14ebdf61dfb920cec4543db7b488151a3a662d570e65331"
+    },
+    "include/services/service_021.hpp": {
+      "golden": "5ccdc09a0df880b76305b3ea7caf16b3be2aac0e889139cfff3a65b18779a0f5",
+      "buggy": "5ccdc09a0df880b76305b3ea7caf16b3be2aac0e889139cfff3a65b18779a0f5"
+    },
+    "include/services/service_022.hpp": {
+      "golden": "fb518efe7723a1422af0f97510bf41b833820322cbb22bf2f45a49e3b9e6d57d",
+      "buggy": "fb518efe7723a1422af0f97510bf41b833820322cbb22bf2f45a49e3b9e6d57d"
+    },
+    "include/services/service_023.hpp": {
+      "golden": "d751659e5dbf62c7ccedacee6a8db5ee2c2baef91299b8d84e95552a2f69ee4f",
+      "buggy": "d751659e5dbf62c7ccedacee6a8db5ee2c2baef91299b8d84e95552a2f69ee4f"
+    },
+    "include/services/service_024.hpp": {
+      "golden": "ed11856add4960d9623e8dc63dbc0cc6dafe002b8aa9dbd4f7ec83509bd641f8",
+      "buggy": "ed11856add4960d9623e8dc63dbc0cc6dafe002b8aa9dbd4f7ec83509bd641f8"
+    },
+    "include/services/service_025.hpp": {
+      "golden": "89399e326062cfc1f2939a9f4b0799bffee8057db0260f86402b15a24da8d0f1",
+      "buggy": "89399e326062cfc1f2939a9f4b0799bffee8057db0260f86402b15a24da8d0f1"
+    },
+    "include/services/service_026.hpp": {
+      "golden": "292b4c92a7ce99fb88ae902479694aa2d14f64cb7c7d0c56e54d1040b3e76203",
+      "buggy": "292b4c92a7ce99fb88ae902479694aa2d14f64cb7c7d0c56e54d1040b3e76203"
+    },
+    "include/services/service_027.hpp": {
+      "golden": "8edcccc3b8c87a8f2d5f8dd25939b67023ce761c8efccf0506bedc8d5ab5569a",
+      "buggy": "8edcccc3b8c87a8f2d5f8dd25939b67023ce761c8efccf0506bedc8d5ab5569a"
+    },
+    "include/services/service_028.hpp": {
+      "golden": "3bf3f2b98636b777de8bd5dea37378deddb3670fd38913ba5862357340d9dddf",
+      "buggy": "3bf3f2b98636b777de8bd5dea37378deddb3670fd38913ba5862357340d9dddf"
+    },
+    "include/services/service_029.hpp": {
+      "golden": "4c0b7a8683980bc2f03795c7e36720e48c9d484c8fc5f8c3cdd7eb73b34ec827",
+      "buggy": "4c0b7a8683980bc2f03795c7e36720e48c9d484c8fc5f8c3cdd7eb73b34ec827"
+    },
+    "include/services/service_030.hpp": {
+      "golden": "c90d3c4b6ee224a668ec487c461ae514b9ea7b7a4909349fc8aeec5dafe2f6c2",
+      "buggy": "c90d3c4b6ee224a668ec487c461ae514b9ea7b7a4909349fc8aeec5dafe2f6c2"
+    },
+    "include/services/service_031.hpp": {
+      "golden": "b05c8ad5feeeb636f30a0a948f338e9c3a56020bf194517fc18bc2ef42d1c775",
+      "buggy": "b05c8ad5feeeb636f30a0a948f338e9c3a56020bf194517fc18bc2ef42d1c775"
+    },
+    "include/services/service_032.hpp": {
+      "golden": "cef8dd1ecda5babadaf599d775f1851d2712ed9a76417207c402860a327086df",
+      "buggy": "cef8dd1ecda5babadaf599d775f1851d2712ed9a76417207c402860a327086df"
+    },
+    "include/services/service_033.hpp": {
+      "golden": "3bccfbfcb0bb532685701efebda4e764c1133ab858ecb4555b4d68c29b6db9a0",
+      "buggy": "3bccfbfcb0bb532685701efebda4e764c1133ab858ecb4555b4d68c29b6db9a0"
+    },
+    "include/services/service_034.hpp": {
+      "golden": "f65145769f8917f43817b4302721918ef2a58ed9fe654c72c5f2a059088b4607",
+      "buggy": "f65145769f8917f43817b4302721918ef2a58ed9fe654c72c5f2a059088b4607"
+    },
+    "include/services/service_035.hpp": {
+      "golden": "b6235506b7f1924adb281d549656b267c2d6fbc607cb8ca9001a7dd3135afb7d",
+      "buggy": "b6235506b7f1924adb281d549656b267c2d6fbc607cb8ca9001a7dd3135afb7d"
+    },
+    "include/services/service_036.hpp": {
+      "golden": "35c3a3d20dd63a0b567756cfaec7712936c693bf681ad213548a913d7c532cf5",
+      "buggy": "35c3a3d20dd63a0b567756cfaec7712936c693bf681ad213548a913d7c532cf5"
+    },
+    "include/services/service_037.hpp": {
+      "golden": "15c50aff969c2c1b98a0d69376b51e0e3591f743df7d561266772199e895b86d",
+      "buggy": "15c50aff969c2c1b98a0d69376b51e0e3591f743df7d561266772199e895b86d"
+    },
+    "include/services/service_038.hpp": {
+      "golden": "99b6893c882b62bc758ee8d96c90ddaf5b35e8cb1c2dc9209e005fe45e777f01",
+      "buggy": "99b6893c882b62bc758ee8d96c90ddaf5b35e8cb1c2dc9209e005fe45e777f01"
+    },
+    "include/services/service_039.hpp": {
+      "golden": "5f9b43a3a5b5d8303c9cc375774fc7e2c34b12038b38d57cd65e949f1d38f2bd",
+      "buggy": "5f9b43a3a5b5d8303c9cc375774fc7e2c34b12038b38d57cd65e949f1d38f2bd"
+    },
+    "include/services/service_040.hpp": {
+      "golden": "63d0553dc49d444c7568fb9d7111836c0ac118a9e7b660eb3271b592908f59ca",
+      "buggy": "63d0553dc49d444c7568fb9d7111836c0ac118a9e7b660eb3271b592908f59ca"
+    },
+    "include/services/service_041.hpp": {
+      "golden": "8983909263379bd4c77e6190f09f275c233197c0a8691ae3d4c26fad38f7784a",
+      "buggy": "8983909263379bd4c77e6190f09f275c233197c0a8691ae3d4c26fad38f7784a"
+    },
+    "include/services/service_042.hpp": {
+      "golden": "1e3611a36fff44d5210aeaac91156717d6a3fec54dbb38584c8ebe81934f98c7",
+      "buggy": "1e3611a36fff44d5210aeaac91156717d6a3fec54dbb38584c8ebe81934f98c7"
+    },
+    "include/services/service_043.hpp": {
+      "golden": "90f0d256c5e6c4a263e1a73f0fbf5cd51f01868078e7ac6b3fc68b0335bd525b",
+      "buggy": "90f0d256c5e6c4a263e1a73f0fbf5cd51f01868078e7ac6b3fc68b0335bd525b"
+    },
+    "include/services/service_044.hpp": {
+      "golden": "eb74c4b8516a5d439448323dd25d9517a64b8517ae0ca890d5a8c40b7d02d253",
+      "buggy": "eb74c4b8516a5d439448323dd25d9517a64b8517ae0ca890d5a8c40b7d02d253"
+    },
+    "include/services/service_045.hpp": {
+      "golden": "8f7732c499c75cf7f0ce67c62085c517f02ab59dd75685a94a7ea2d0a43e86c9",
+      "buggy": "8f7732c499c75cf7f0ce67c62085c517f02ab59dd75685a94a7ea2d0a43e86c9"
+    },
+    "include/services/service_046.hpp": {
+      "golden": "23fc262fbe67899ce0c221d36b8b69845928ad08603ec058bf094c87d8f30149",
+      "buggy": "23fc262fbe67899ce0c221d36b8b69845928ad08603ec058bf094c87d8f30149"
+    },
+    "include/services/service_047.hpp": {
+      "golden": "10251531ba638d0e1e8350b9ede9c3bea81537a3f72e13ad7e8d9b743f148963",
+      "buggy": "10251531ba638d0e1e8350b9ede9c3bea81537a3f72e13ad7e8d9b743f148963"
+    },
+    "include/services/service_048.hpp": {
+      "golden": "d702e8eb9fa54d73979ed12b905dd40105355d2a7cabe8dd9bbd408328161198",
+      "buggy": "d702e8eb9fa54d73979ed12b905dd40105355d2a7cabe8dd9bbd408328161198"
+    },
+    "include/services/service_049.hpp": {
+      "golden": "6f812634ac24676e58f1a9d1c5447858aef249037fe8b935688f3b32c01b815e",
+      "buggy": "6f812634ac24676e58f1a9d1c5447858aef249037fe8b935688f3b32c01b815e"
+    },
+    "include/services/service_050.hpp": {
+      "golden": "8eb63c8564ab8b457064c86842cd56cf12738c8acca70e4d93fddd22be846bd3",
+      "buggy": "8eb63c8564ab8b457064c86842cd56cf12738c8acca70e4d93fddd22be846bd3"
+    },
+    "include/services/service_051.hpp": {
+      "golden": "e762300684a2731ff056b8c15b02ef25836f8daaa567f9dc425a534585235564",
+      "buggy": "e762300684a2731ff056b8c15b02ef25836f8daaa567f9dc425a534585235564"
+    },
+    "include/services/service_052.hpp": {
+      "golden": "c071df097a610309f7b3afc96f99f4f132fee0dec1cee990bde80a2cbefdf48d",
+      "buggy": "c071df097a610309f7b3afc96f99f4f132fee0dec1cee990bde80a2cbefdf48d"
+    },
+    "include/services/service_053.hpp": {
+      "golden": "48a1595dc73e2c932d326421ef58a874b265d0ada05df3cdda0803d89ddd58a9",
+      "buggy": "48a1595dc73e2c932d326421ef58a874b265d0ada05df3cdda0803d89ddd58a9"
+    },
+    "include/services/service_054.hpp": {
+      "golden": "121698fd777e7729dcf74ec5552d7ea4a1b5bacad132be7dc907db5681d539dd",
+      "buggy": "121698fd777e7729dcf74ec5552d7ea4a1b5bacad132be7dc907db5681d539dd"
+    },
+    "include/services/service_055.hpp": {
+      "golden": "eb0e13d0cfea9def6e0e63f9432cf85b83a6fc7313cff710053f32c096dcdd56",
+      "buggy": "eb0e13d0cfea9def6e0e63f9432cf85b83a6fc7313cff710053f32c096dcdd56"
+    },
+    "include/services/service_056.hpp": {
+      "golden": "024cf55dbdae8d635ca42989e42ebaae3c962cdb36696df9a48d8b1f5e852f30",
+      "buggy": "024cf55dbdae8d635ca42989e42ebaae3c962cdb36696df9a48d8b1f5e852f30"
+    },
+    "include/services/service_057.hpp": {
+      "golden": "fec56fec6529e7381c102a4820429589e6673d8c7fe6fe3882c10a1ee8536ab0",
+      "buggy": "fec56fec6529e7381c102a4820429589e6673d8c7fe6fe3882c10a1ee8536ab0"
+    },
+    "include/services/service_058.hpp": {
+      "golden": "101c9f1a3d161faf8131d9daeb2f6efb5bfc04b9cf3260e4d04850616cc74d37",
+      "buggy": "101c9f1a3d161faf8131d9daeb2f6efb5bfc04b9cf3260e4d04850616cc74d37"
+    },
+    "include/services/service_059.hpp": {
+      "golden": "e6e3b1a27b35852dcb73889df522f85e6f5df90ebc71cb560395b95d8fa97ec3",
+      "buggy": "e6e3b1a27b35852dcb73889df522f85e6f5df90ebc71cb560395b95d8fa97ec3"
+    },
+    "include/services/service_060.hpp": {
+      "golden": "f2b08652d444f5e22b05a8dc0dc26b6e38d95d7f5c83ec7515a1d1772e37133c",
+      "buggy": "f2b08652d444f5e22b05a8dc0dc26b6e38d95d7f5c83ec7515a1d1772e37133c"
+    },
+    "include/services/service_061.hpp": {
+      "golden": "3caa18d54cf0f6c6cfe330a6eeb1a13f871b1c061ad94866019b6f8b77ae7ab6",
+      "buggy": "3caa18d54cf0f6c6cfe330a6eeb1a13f871b1c061ad94866019b6f8b77ae7ab6"
+    },
+    "include/services/service_062.hpp": {
+      "golden": "377e665b586e4d23fe87cde40c9145a42ef75361ea6b009dccb61a1271cecc9e",
+      "buggy": "377e665b586e4d23fe87cde40c9145a42ef75361ea6b009dccb61a1271cecc9e"
+    },
+    "src/registry.cpp": {
+      "golden": "631fb001e1f14ac1fed47d8435286e0f7c1048a6fbd839b96384f6a947bd48c5",
+      "buggy": "c1789b017108d5a99e500abb965dc776877e4586f37944a42bc110d55925a019"
+    }
+  },
+  "test_sha256": "36eca7aa0f77cc621a6632e3d0ae93a60a85ab5d3a460a0e21654e9f28f07883",
+  "golden_patch_sha256": "92726826fc1fbf29f07cbb35230d5aa46127b833904255dd9b5648a5f9d9b1c1",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.5544370340000004,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0059988139999986746,
+      "stdout": "PASS service-registry: 63 distinct routes, 504 behavioral probes\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.38908754899999987,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006100737999999183,
+      "stdout": "",
+      "stderr": "FAIL line 77: policies.size()==63\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-32k/task.json"
+}

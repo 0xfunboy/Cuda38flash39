@@ -1,0 +1,17 @@
+[Unit]
+Description=HaloClu qualified GLM whole-pair lifecycle
+Before=strixglm-pair.service strixglm.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/funboy/StrixHaloClusterGLM
+ExecStart=/usr/bin/bash /home/funboy/StrixHaloClusterGLM/runtime/boot-pair.sh start
+ExecStop=/usr/bin/bash /home/funboy/StrixHaloClusterGLM/runtime/boot-pair.sh stop
+TimeoutStartSec=1800
+TimeoutStopSec=1900
+UMask=0077
+Restart=no
+
+[Install]
+WantedBy=default.target

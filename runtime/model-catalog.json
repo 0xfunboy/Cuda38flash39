@@ -47,7 +47,7 @@
       "assets": [
         {
           "id": "glm-ciru-0",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-0.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-0.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 7851586392,
@@ -61,7 +61,7 @@
         },
         {
           "id": "glm-ciru-1",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-1.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-1.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435312,
@@ -75,7 +75,7 @@
         },
         {
           "id": "glm-ciru-2",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-2.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-2.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -89,7 +89,7 @@
         },
         {
           "id": "glm-ciru-3",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-3.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-3.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -103,7 +103,7 @@
         },
         {
           "id": "glm-ciru-4",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-4.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-4.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -117,7 +117,7 @@
         },
         {
           "id": "glm-ciru-5",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-5.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-5.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -131,7 +131,7 @@
         },
         {
           "id": "glm-ciru-6",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-6.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-6.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -145,7 +145,7 @@
         },
         {
           "id": "glm-ciru-7",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-7.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-7.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -159,7 +159,7 @@
         },
         {
           "id": "glm-ciru-8",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-8.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-8.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -173,7 +173,7 @@
         },
         {
           "id": "glm-ciru-9",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-9.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-9.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 8218435424,
@@ -187,7 +187,7 @@
         },
         {
           "id": "glm-ciru-10",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-10.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-0/GLM5.3-Flash-CIRU-STRIX-IU4-rank-0-part-10.safetensors",
           "node": "NODE01",
           "role": "TP2 rank 0 target weights",
           "expected_bytes": 7563801048,
@@ -201,7 +201,7 @@
         },
         {
           "id": "glm-ciru-11",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-0.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-0.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 7851586392,
@@ -215,7 +215,7 @@
         },
         {
           "id": "glm-ciru-12",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-1.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-1.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435312,
@@ -229,7 +229,7 @@
         },
         {
           "id": "glm-ciru-13",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-2.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-2.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -243,7 +243,7 @@
         },
         {
           "id": "glm-ciru-14",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-3.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-3.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -257,7 +257,7 @@
         },
         {
           "id": "glm-ciru-15",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-4.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-4.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -271,7 +271,7 @@
         },
         {
           "id": "glm-ciru-16",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-5.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-5.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -285,7 +285,7 @@
         },
         {
           "id": "glm-ciru-17",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-6.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-6.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -299,7 +299,7 @@
         },
         {
           "id": "glm-ciru-18",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-7.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-7.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -313,7 +313,7 @@
         },
         {
           "id": "glm-ciru-19",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-8.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-8.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -327,7 +327,7 @@
         },
         {
           "id": "glm-ciru-20",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-9.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-9.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 8218435424,
@@ -341,7 +341,7 @@
         },
         {
           "id": "glm-ciru-21",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-10.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/ciru/rank-1/GLM5.3-Flash-CIRU-STRIX-IU4-rank-1-part-10.safetensors",
           "node": "NODE02",
           "role": "TP2 rank 1 target weights",
           "expected_bytes": 7563801048,
@@ -355,7 +355,7 @@
         },
         {
           "id": "glm-ciru-22",
-          "path": "/home/funboy/ai-exp/strix-ciru-tp2/artifacts/dflash2/model.safetensors",
+          "path": "/home/funboy/models/ciru-glm53-flash/dflash2/model.safetensors",
           "node": "NODE01",
           "role": "DFlash2 draft weights (shared deployment; not target model)",
           "expected_bytes": 2342169800,

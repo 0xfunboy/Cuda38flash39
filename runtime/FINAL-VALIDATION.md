@@ -1,5 +1,11 @@
 # Final native validation checklist
 
+Historical acceptance procedure for the isolated native gateway. Since
+SYSTEM-CLEANUP-001, the native backend is the production backend, the duplicate
+`strixglm-native.service` is retired, and engine paths have moved. Use
+[OPERATIONS.md](OPERATIONS.md) for current startup, maintenance and recovery;
+do not execute this old port/layout procedure against the live pair unchanged.
+
 This is a short acceptance procedure, not a benchmark sweep. It requires an
 explicit maintenance window after active coding work has drained. Preserve the
 original gateway configuration and use a **new** snapshot filename each time.

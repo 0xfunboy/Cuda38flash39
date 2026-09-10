@@ -1,0 +1,151 @@
+{
+  "id": "context-8k",
+  "category": "context-service-integration",
+  "language": "C++17",
+  "cases": 120,
+  "source_files": 17,
+  "context_characters": 16339,
+  "nominal_context": "8k",
+  "context_caveat": "Synthetic but functional cross-file integration coverage; no claim of arbitrary repository understanding at this context size.",
+  "hashes": {
+    "include/policy.hpp": {
+      "golden": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de",
+      "buggy": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de"
+    },
+    "include/services/service_000.hpp": {
+      "golden": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f",
+      "buggy": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f"
+    },
+    "include/services/service_001.hpp": {
+      "golden": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e",
+      "buggy": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e"
+    },
+    "include/services/service_002.hpp": {
+      "golden": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4",
+      "buggy": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4"
+    },
+    "include/services/service_003.hpp": {
+      "golden": "a07195d673d8b4501a3e242eee049e6b4bffc88a63414311a362628196f35449",
+      "buggy": "a07195d673d8b4501a3e242eee049e6b4bffc88a63414311a362628196f35449"
+    },
+    "include/services/service_004.hpp": {
+      "golden": "4f010397ef695871b9d5eaa63597e04b993c93a5592347e4ee7d7cac5b091291",
+      "buggy": "4f010397ef695871b9d5eaa63597e04b993c93a5592347e4ee7d7cac5b091291"
+    },
+    "include/services/service_005.hpp": {
+      "golden": "fd6860acfbe6a1015bdcfedc9ec1f0c0bcf9b3386a83d74d3740f58ab7a378b8",
+      "buggy": "fd6860acfbe6a1015bdcfedc9ec1f0c0bcf9b3386a83d74d3740f58ab7a378b8"
+    },
+    "include/services/service_006.hpp": {
+      "golden": "76cf38af11099c4139172cbfe7c2b5ba2ec410f02e8158bb30d727d021669ae7",
+      "buggy": "76cf38af11099c4139172cbfe7c2b5ba2ec410f02e8158bb30d727d021669ae7"
+    },
+    "include/services/service_007.hpp": {
+      "golden": "7e972d52dba9399666b59fbbafc43024a3f75d3436be5f902f43942109db95a5",
+      "buggy": "7e972d52dba9399666b59fbbafc43024a3f75d3436be5f902f43942109db95a5"
+    },
+    "include/services/service_008.hpp": {
+      "golden": "2cdde96fc9bbd3c9fb6118e33477edbfbe7f3fecf8fabcf7a92fef817c829c80",
+      "buggy": "2cdde96fc9bbd3c9fb6118e33477edbfbe7f3fecf8fabcf7a92fef817c829c80"
+    },
+    "include/services/service_009.hpp": {
+      "golden": "ec99ebdcb7d250c34bcbf3cd646dacc5a462bd48c897eb11dbdfb200f8e99f7c",
+      "buggy": "ec99ebdcb7d250c34bcbf3cd646dacc5a462bd48c897eb11dbdfb200f8e99f7c"
+    },
+    "include/services/service_010.hpp": {
+      "golden": "769c6549b54cc66433ff92a7900f928fac82bd2904f8bad76ed38ca8a1339459",
+      "buggy": "769c6549b54cc66433ff92a7900f928fac82bd2904f8bad76ed38ca8a1339459"
+    },
+    "include/services/service_011.hpp": {
+      "golden": "18c748cf0bfe05f138de6a4219dc085d8c0c3924b134d9bfaa491e406e5b1afe",
+      "buggy": "18c748cf0bfe05f138de6a4219dc085d8c0c3924b134d9bfaa491e406e5b1afe"
+    },
+    "include/services/service_012.hpp": {
+      "golden": "dc8969054d9cef06e49cd1c686fd8241819a1dae556cc5c7db4bf159e3b0b383",
+      "buggy": "dc8969054d9cef06e49cd1c686fd8241819a1dae556cc5c7db4bf159e3b0b383"
+    },
+    "include/services/service_013.hpp": {
+      "golden": "6b4b51b8d11873a2fe937e2901c5bec6feab9b46d03cd34e7a0973fdf566d191",
+      "buggy": "6b4b51b8d11873a2fe937e2901c5bec6feab9b46d03cd34e7a0973fdf566d191"
+    },
+    "include/services/service_014.hpp": {
+      "golden": "11a1e284a59f9d20ca9adf8ab01b0eefff17f04c5f258e762d577b71426d3317",
+      "buggy": "11a1e284a59f9d20ca9adf8ab01b0eefff17f04c5f258e762d577b71426d3317"
+    },
+    "src/registry.cpp": {
+      "golden": "aa0f1bdafa251c395998a07448fd7752a77fd6d411679796ea33849f56e2576a",
+      "buggy": "c1789b017108d5a99e500abb965dc776877e4586f37944a42bc110d55925a019"
+    }
+  },
+  "test_sha256": "9483074097cd72a2b85a3cbf0c477b7a1276f0d664e1c59f64d59be4410215cc",
+  "golden_patch_sha256": "2e7c111916d96b71fc1dcdeb136061b8406f29b71a5118339b85c7872f972054",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.40660494599999947,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006335424999999305,
+      "stdout": "PASS service-registry: 15 distinct routes, 120 behavioral probes\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.3564272519999995,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.0055644110000012004,
+      "stdout": "",
+      "stderr": "FAIL line 29: policies.size()==15\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-8k/task.json"
+}

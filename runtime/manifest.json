@@ -1,6 +1,6 @@
 {
   "schema": "strixglm-runtime-v1",
-  "engine_root": "/home/funboy/ai-exp/strix-ciru-tp2",
+  "engine_root": "/home/funboy/StrixHaloClusterGLM/.engine",
   "repositories": {
     "jcbtc/GLM5.3-Flash-CIRU-STRIX-IU4": {
       "revision": "a1ab828d8bd5b0ba8e3281febfe3d34b12072040",

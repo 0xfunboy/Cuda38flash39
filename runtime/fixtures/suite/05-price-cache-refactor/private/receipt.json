@@ -1,0 +1,101 @@
+{
+  "id": "05-price-cache-refactor",
+  "category": "multi-file-cache",
+  "language": "C++17",
+  "cases": 92,
+  "source_files": 4,
+  "context_characters": 2202,
+  "nominal_context": null,
+  "context_caveat": null,
+  "hashes": {
+    "include/catalog.hpp": {
+      "golden": "65a34d915d3ba5ff9b621704e0174f47e058628605751a3f569469a324407c1e",
+      "buggy": "65a34d915d3ba5ff9b621704e0174f47e058628605751a3f569469a324407c1e"
+    },
+    "include/invoice.hpp": {
+      "golden": "d46e91e873a438fa0f6aaa0887b7448b1e91e345792ab8a48e24245f3f0c3713",
+      "buggy": "d46e91e873a438fa0f6aaa0887b7448b1e91e345792ab8a48e24245f3f0c3713"
+    },
+    "src/catalog.cpp": {
+      "golden": "3c9442a52f26db825ba6833afde6ebc2d876860cde5f6823623f790505b4f0a3",
+      "buggy": "5e51b1e4bf7eb6281bddbf19fc684c3240d822eaf0f70843b8385ab742b4ea22"
+    },
+    "src/invoice.cpp": {
+      "golden": "9ebac09ae6706dd9f1ce55875c0e8372ce3c4f14f19fecfe9ab63fd01d9fd24b",
+      "buggy": "9ebac09ae6706dd9f1ce55875c0e8372ce3c4f14f19fecfe9ab63fd01d9fd24b"
+    }
+  },
+  "test_sha256": "756f4a81854686bf1daadbc51ac3bb329eb62921123ea2bd8707d0958cb01aee",
+  "golden_patch_sha256": "a8527ee173d5f80cf7fe065761a2d1a16b7edef183e8b43c9056fd416c3ee157",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/catalog.cpp",
+        "src/invoice.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.558300529,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.007007576999999401,
+      "stdout": "PASS price-cache-refactor: 92 checks\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/catalog.cpp",
+        "src/invoice.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.549982449,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006889643999999862,
+      "stdout": "",
+      "stderr": "FAIL line 11: c.revision()==version+1\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/05-price-cache-refactor/task.json"
+}

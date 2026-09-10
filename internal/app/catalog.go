@@ -116,7 +116,7 @@ func validCatalogDownload(a CatalogAsset) error {
 	if len(parts) < 5 || parts[2] != "resolve" || parts[3] != a.Revision || strings.Contains(u.Path, "..") {
 		return errors.New("download URL does not contain the pinned resolve revision")
 	}
-	if a.Node != "NODE01" || !filepath.IsAbs(a.Path) || filepath.Clean(a.Path) != a.Path || !(within(a.Path, "/home/funboy/models") || within(a.Path, "/home/funboy/ai-exp/strix-ciru-tp2/artifacts")) {
+	if a.Node != "NODE01" || !filepath.IsAbs(a.Path) || filepath.Clean(a.Path) != a.Path || !(within(a.Path, "/home/funboy/models") || within(a.Path, "/home/funboy/StrixHaloClusterGLM/.engine/artifacts")) {
 		return errors.New("download destination outside audited local artifact roots")
 	}
 	return nil

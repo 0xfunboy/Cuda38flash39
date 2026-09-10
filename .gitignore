@@ -1,4 +1,6 @@
 /.tools/
+/.engine/
+/archives/
 /bin/
 /state/
 /config.local.json

@@ -1,0 +1,11 @@
+--- a/src/settings.cpp
++++ b/src/settings.cpp
+@@ -11,7 +11,7 @@
+         key.clear(); value.clear(); in_value = false;
+     };
+     for (char c : input) {
+-        if (escaped && c != ';') {
++        if (escaped) {
+             if (c != ';' && c != '=' && c != '\\') throw std::invalid_argument("unknown escape");
+             (in_value ? value : key).push_back(c); escaped = false;
+         } else if (c == '\\') {

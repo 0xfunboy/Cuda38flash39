@@ -1,4 +1,6 @@
 GO := $(if $(wildcard .tools/go/bin/go),$(CURDIR)/.tools/go/bin/go,go)
+export GOPATH ?= $(CURDIR)/.tools/gopath
+export GOMODCACHE ?= $(GOPATH)/pkg/mod
 
 .PHONY: build test
 build:

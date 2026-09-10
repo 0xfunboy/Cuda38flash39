@@ -1,0 +1,36 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/01-escaped-settings/repo",
+  "task": "Fix the settings parser regression. Preserve the public API. The configuration format is semicolon-separated key=value pairs; backslash escapes only semicolon, equals or backslash in either field. Exactly the first unescaped equals separates key/value. Empty input is an empty map; values may be empty. Reject empty keys, duplicate keys, dangling or unknown escapes, missing equals, empty pairs and trailing separators with std::invalid_argument. Preserve bytes and whitespace. Make existing and independent tests pass; do not change the API contract.",
+  "files": [
+    "include/settings.hpp",
+    "src/settings.cpp"
+  ],
+  "allowed_paths": [
+    "include/settings.hpp",
+    "src/settings.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/settings.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/01-escaped-settings/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

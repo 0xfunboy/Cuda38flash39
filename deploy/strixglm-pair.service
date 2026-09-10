@@ -1,11 +1,13 @@
 [Unit]
 Description=StrixHaloClusterGLM native paired OpenAI coordinator
-After=network-online.target
+Requires=haloclu-engine.service
+After=haloclu-engine.service
+PartOf=haloclu-engine.service
 
 [Service]
 Type=simple
 WorkingDirectory=/home/funboy/StrixHaloClusterGLM
-ExecStart=/home/funboy/StrixHaloClusterGLM/bin/strixglm cluster --config /home/funboy/StrixHaloClusterGLM/config.native.json serve-pair
+ExecStart=/home/funboy/StrixHaloClusterGLM/bin/strixglm cluster --config /home/funboy/StrixHaloClusterGLM/config.json serve-pair
 KillMode=control-group
 KillSignal=SIGTERM
 TimeoutStopSec=1850

@@ -1,0 +1,103 @@
+{
+  "id": "context-2k",
+  "category": "context-service-integration",
+  "language": "C++17",
+  "cases": 24,
+  "source_files": 5,
+  "context_characters": 3962,
+  "nominal_context": "2k",
+  "context_caveat": "Synthetic but functional cross-file integration coverage; no claim of arbitrary repository understanding at this context size.",
+  "hashes": {
+    "include/policy.hpp": {
+      "golden": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de",
+      "buggy": "047b05e402f43250ca001b379cfc97d232bddd34745249251771a32fa6c871de"
+    },
+    "include/services/service_000.hpp": {
+      "golden": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f",
+      "buggy": "0d61cb14f2c3d656a59106c80ea51215e05478cdab248fab4bf76398f77b419f"
+    },
+    "include/services/service_001.hpp": {
+      "golden": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e",
+      "buggy": "c10647e2b81c7231001d2c86456ea619745091c2e84a707c3e4cb37a3862cd0e"
+    },
+    "include/services/service_002.hpp": {
+      "golden": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4",
+      "buggy": "99d7b714cd37b614bce10d0bf0e0d8d198477bbb66e259dfcf9c0115eed2eed4"
+    },
+    "src/registry.cpp": {
+      "golden": "33f548f3c713e04626f4793322856863d54bc8c9d40997604aa9182f0948635a",
+      "buggy": "c1789b017108d5a99e500abb965dc776877e4586f37944a42bc110d55925a019"
+    }
+  },
+  "test_sha256": "8c95f446905f41c82a1bbe9a09343415aa03189833c37c552ff24bd34f16ec77",
+  "golden_patch_sha256": "60857af3b22bdf9e2984cd4bf002cf30a054604748bca9fab36de585b6490f0c",
+  "golden": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.3605996269999996,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.005622501999999258,
+      "stdout": "PASS service-registry: 3 distinct routes, 24 behavioral probes\n",
+      "stderr": ""
+    }
+  },
+  "buggy": {
+    "build": {
+      "command": [
+        "g++",
+        "-std=c++17",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Iinclude",
+        "src/registry.cpp",
+        "verify.cpp",
+        "-o",
+        "verify-bin"
+      ],
+      "exit_code": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.3591109689999994,
+      "stdout": "",
+      "stderr": ""
+    },
+    "test": {
+      "command": [
+        "./verify-bin"
+      ],
+      "exit_code": 1,
+      "signal": null,
+      "error": null,
+      "seconds": 0.006728998000000501,
+      "stdout": "",
+      "stderr": "FAIL line 17: policies.size()==3\n"
+    }
+  },
+  "spec": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/context-2k/task.json"
+}

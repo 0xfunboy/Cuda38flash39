@@ -1,0 +1,36 @@
+{
+  "repo": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/02-ttl-cache/repo",
+  "task": "Repair the expiring LRU cache without changing its API. Each put records a value expiring at now+ttl; zero/negative TTL removes the key. A key is expired when now >= expires_at. get returns nullopt on absent/expired entries and otherwise marks the item most recently used. put updates value, expiry and recency; capacity is enforced over live entries and expired entries must be discarded before eviction. A zero-capacity cache never stores values. All calls in a sequence have nondecreasing time. Timestamps and TTL in tests fit signed 64-bit without addition overflow.",
+  "files": [
+    "include/cache.hpp",
+    "src/cache.cpp"
+  ],
+  "allowed_paths": [
+    "include/cache.hpp",
+    "src/cache.cpp"
+  ],
+  "build_command": [
+    "g++",
+    "-std=c++17",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-pedantic",
+    "-Iinclude",
+    "src/cache.cpp",
+    "verify.cpp",
+    "-o",
+    "verify-bin"
+  ],
+  "test_command": [
+    "./verify-bin"
+  ],
+  "test_files": {
+    "verify.cpp": "/home/funboy/StrixHaloClusterGLM/runtime/fixtures/suite/02-ttl-cache/private/verify.cpp"
+  },
+  "profile": "fast",
+  "max_repairs": 2,
+  "timeout": 300,
+  "test_timeout": 60,
+  "max_tokens": 4096
+}

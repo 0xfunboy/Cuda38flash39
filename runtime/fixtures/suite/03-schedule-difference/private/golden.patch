@@ -1,0 +1,11 @@
+--- a/src/schedule.cpp
++++ b/src/schedule.cpp
+@@ -11,7 +11,7 @@
+         a=std::max(a,work.first); b=std::min(b,work.second);
+         if(a>=b) continue;
+         if(cursor<a) result.emplace_back(cursor,a);
+-        cursor=b;
++        cursor=std::max(cursor,b);
+     }
+     if(cursor<work.second) result.emplace_back(cursor,work.second);
+     return result;

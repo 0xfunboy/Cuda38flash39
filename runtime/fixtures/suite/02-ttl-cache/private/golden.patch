@@ -1,0 +1,11 @@
+--- a/src/cache.cpp
++++ b/src/cache.cpp
+@@ -1,7 +1,7 @@
+ #include "cache.hpp"
+ void Cache::purge(std::int64_t now) {
+     for (auto it=entries.begin(); it!=entries.end();) {
+-        if (it->second.expires < now) { lru.erase(it->second.order); it=entries.erase(it); }
++        if (it->second.expires <= now) { lru.erase(it->second.order); it=entries.erase(it); }
+         else ++it;
+     }
+ }

@@ -1,0 +1,13 @@
+--- a/src/catalog.cpp
++++ b/src/catalog.cpp
+@@ -2,8 +2,7 @@
+ #include <stdexcept>
+ void Catalog::set_price(const std::string& sku,std::int64_t cents) {
+     if(cents<0)throw std::invalid_argument("negative price");
+-    auto inserted=prices_.emplace(sku,cents);
+-    if(inserted.second)++revision_;
+-    else inserted.first->second=cents;
++    prices_[sku]=cents;
++    ++revision_;
+ }
+ std::int64_t Catalog::price(const std::string& sku)const {return prices_.at(sku);}

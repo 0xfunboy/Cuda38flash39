@@ -1,0 +1,35 @@
+#include "policy.hpp"
+#include "services/service_000.hpp"
+#include "services/service_001.hpp"
+#include "services/service_002.hpp"
+#include "services/service_003.hpp"
+#include "services/service_004.hpp"
+#include "services/service_005.hpp"
+#include "services/service_006.hpp"
+#include "services/service_007.hpp"
+#include "services/service_008.hpp"
+#include "services/service_009.hpp"
+#include "services/service_010.hpp"
+#include "services/service_011.hpp"
+#include "services/service_012.hpp"
+#include "services/service_013.hpp"
+#include "services/service_014.hpp"
+std::vector<Policy> registry() {
+    return {
+        service_000::policy_011(),
+        service_001::policy_048(),
+        service_002::policy_085(),
+        service_003::policy_122(),
+        service_004::policy_159(),
+        service_005::policy_196(),
+        service_006::policy_233(),
+        service_007::policy_270(),
+        service_008::policy_307(),
+        service_009::policy_344(),
+        service_010::policy_381(),
+        service_011::policy_418(),
+        service_012::policy_455(),
+        service_013::policy_492(),
+        service_014::policy_529(),
+    };
+}

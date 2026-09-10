@@ -1,125 +1,96 @@
-# Exact whole-pair operations
+# Operating HaloClu on two EVO-X3 hosts
 
-Run from the product repository. These commands never invoke the old Python
-controller. The existing Python CIRU inference engine is an external dependency.
-`runtime/cluster.json` defines the paths, private rank ports and new frontend.
+## Production layout
 
-Run commands from /home/funboy/StrixHaloClusterGLM: the cluster configuration
-path is resolved from the current directory. The CLI --config flag selects the
-application configuration (including the paired request timeout); it does not
-select a different runtime/cluster.json.
+| Component | Location |
+|---|---|
+| Gateway, frontend, Pi and management | `/home/funboy/StrixHaloClusterGLM` |
+| Qualified CIRU/vLLM/ROCm environment | `StrixHaloClusterGLM/.engine` on both hosts |
+| GLM target shards and DFlash2 weights | `/home/funboy/models/ciru-glm53-flash` on both hosts |
+| Other retained model checkpoints | `/home/funboy/models` |
+| API credentials, sessions, conversations, pair ownership | `StrixHaloClusterGLM/state` |
+| Frozen operational test fixtures | `StrixHaloClusterGLM/runtime/fixtures` |
+| Research archives | `StrixHaloClusterGLM/archives/research-node0N-20260910.tar.zst` on each host |
 
-## Read-only checks and preservation
+The numerical preset remains W4, TP2/PP1, DFlash2 k5/local0, Socket over USB4,
+prefix cache off, 64K engine profile. All five correctness fixes and the
+operational JIT caches remain installed. No model download is required.
 
-```sh
+## Start, stop and restart
+
+Run on NODE01 as `funboy`:
+
+```bash
+systemctl --user start strixglm.service
+systemctl --user restart haloclu-engine.service
+systemctl --user stop haloclu-engine.service
+```
+
+The dependency order drains the gateway and coordinator before stopping the
+entire owned pair. Start/restart manages both ranks; never restart an individual
+rank. Startup waits up to five minutes for the USB4 peer; model loading also has
+a bounded deadline. A foreign/replaced unit fails ownership validation instead
+of being taken over. Failed inference requests are not automatically replayed.
+
+```bash
+systemctl --user status haloclu-engine.service strixglm-pair.service strixglm.service
+cd /home/funboy/StrixHaloClusterGLM
 ./bin/strixglm cluster status
-./bin/strixglm cluster verify
-./bin/strixglm cluster snapshot-legacy /home/funboy/StrixHaloClusterGLM/state/rollback-original.json
+journalctl --user -u haloclu-engine.service -u strixglm-pair.service -u strixglm.service -n 100
 ```
 
-The snapshot destination must be a **new JSON file**, not a directory. The
-snapshot holds the owner, qualified preset, exact systemd argv (including empty
-arguments), properties and old retention identity. Runtime verification hashes
-the small pinned code/native files and checks shard lengths; it never hashes or
-copies all weights. Keep the snapshot private. No service is stopped here.
+Rank logs and current ownership are under `state/cluster`. Each boot uses fresh
+unit identities. Old snapshots are historical, not live ownership. To revert a
+future product edit, restore its saved configuration/binary and use this same
+whole-pair lifecycle. Archived old-path restore commands cannot be run against
+the relocated installation without first restoring their archived layout.
 
-Use the identical absolute snapshot pathname for stop/recover/restore. Restore
-checks that pathname against the stopped owner, not only file contents. After
-a successful restore, InvocationIDs and retention records have changed: create
-a new snapshot for the next maintenance window rather than replaying the old
-one. This is a restorer for the pinned qualified recipe, not a generic importer
-of arbitrary systemd properties or modified engine installations.
+## Headless next boot
 
-Restore also requires the stopped owner's epoch and complete rank/name/nonce/
-InvocationID set to match the snapshot. It checks them on entry and re-reads
-them after the slow integrity checks, before the first reservation or launch.
-A replaced owner is left untouched; a matching path alone cannot authorize
-restoration.
+User lingering and NODE01 API startup units are enabled. Cluster SSH works
+without a graphical key agent. Run with sudo on **each** host:
 
-Install only the small product launcher at its configured path on NODE02 before
-the first native launch; both copies must have equal SHA-256. Do not copy the
-legacy repository, Python environment, model weights or reports.
-
-## Explicit final-validation window, not automatic migration
-
-Finish/cancel coding work and wait for the existing generation to drain. No
-concurrent benchmark or raw API client may submit work during this window.
-
-```sh
-./bin/strixglm cluster stop-legacy /home/funboy/StrixHaloClusterGLM/state/rollback-original.json
-./bin/strixglm cluster start
-./bin/strixglm cluster --config config.native.json serve-pair
+```bash
+sudo bash /home/funboy/StrixHaloClusterGLM/deploy/headless-next-boot.sh
 ```
 
-The last command serves the native paired API on the configured loopback port
-(default18094). Set a separate product gateway configuration's backend to that
-URL for the validation. Do not overwrite the fallback configuration. Native
-paired admission uses `state/cluster/pair.lock`; the gateway must **not** hold
-that same lock while calling it. Keep gateway admission serialized.
+This selects `multi-user.target` and disables future startup of printer,
+Bluetooth, modem and mDNS services. It does not terminate the current desktop
+session or reboot. SSH, networking/USB4, bolt, GPU drivers, time synchronization
+and security updates are retained. The cleanup agent could not execute this
+privileged step because sudo requires interactive authentication. Until the
+owner runs it, the default boot target remains graphical.
 
-On any launch/load failure, read the durable owner. Cleanup uncertainty means
-inspect both owned units and their nonces/InvocationIDs; do not use `pkill`, stop
-a single rank manually, or remove poison while either old rank may be live.
+## API exposure
 
-## Restart and original rollback
+For Ethernet DHCP plus the requested static LAN addresses and additional SSH
+listeners, use [Production Ethernet and SSH](../deploy/network/README.md).
+The installer leaves Wi-Fi, port22 and the USB4 rank link unchanged; it requires
+an explicit root invocation on each host. Do not use LAN addresses for RCCL.
 
-First close native API admission. If the supplied user-service templates were
-explicitly installed for this window, stop strixglm-native.service and wait for
-completion, then stop strixglm-pair.service and wait for its paired drain. For
-terminal-launched services send SIGTERM to their identified processes and wait
-for completion. Do not use a broad process-name kill.
+HaloClu remains bound to `127.0.0.1:18093`; the paired coordinator is loopback18094
+and rank APIs use private USB4 addresses, port18110. There is no new public
+listener. Before connecting a domain/public IP, configure authenticated HTTPS
+ingress and firewall the internal rank/RCCL ports. Public-domain deployment has
+not been performed by this cleanup.
 
-These HTTP services are not ranks. The controller owns only strixglm-rank0/1;
-cluster stop/restart does not terminate a still-running native coordinator or
-gateway. The service templates have Restart=no and no dependency that starts or
-stops the ranks automatically.
+## Research recovery
 
-```sh
-./bin/strixglm cluster restart
+History remains `/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md`. Historical
+paths are now archive member names, not live dependencies. Archives retain
+sources, Git metadata, configuration and raw reports. Old SDK installations,
+container caches, temporary files and downloads were excluded; the live runtime
+and all inference checkpoints were retained by relocation.
+
+For a particular report on NODE01, for example:
+
+```bash
+tar -xOf archives/research-node01-20260910.tar.zst ai-exp/reports/moe-cluster/GLM-M6-OPT-002/FINAL.md
 ```
 
-For continued native use, wait for ready, then start the coordinator and gateway
-in that order and check paired health before opening admission. For original
-rollback instead, with native HTTP services still stopped:
-
-```sh
-./bin/strixglm cluster stop
-./bin/strixglm cluster restore-legacy /home/funboy/StrixHaloClusterGLM/state/rollback-original.json
-```
-
-Restart never offers a rank parameter. Original restore requires the new owned
-pair proven stopped and the preserved old owner still belonging to this
-snapshot. It verifies old frontend/launcher/runtime identities, launches both old
-ranks, waits for both health checks, then restores the original frontend18091.
-It updates owner and retention InvocationIDs. The coder18092 is not removed.
-The coder may remain running during native validation, but its legacy18091
-backend is unavailable until rollback completes; preserved does not mean both
-complete model pairs can run simultaneously. Start/re-enable only the gateway
-configured for legacy18091 after original paired health returns.
-
-After a native paired frontend has poisoned in memory, its process must also be
-restarted after whole-pair recovery. Never clear a marker merely to make health
-green. Final adoption is an explicit user choice; leave the fallback intact.
-
-For the 2026-09-08 final-validation window the actual preserved snapshot is
-/home/funboy/StrixHaloClusterGLM/state/native-final-20260908.json. Substitute that
-exact path for the example rollback-original.json when restoring this window.
-Do not create another snapshot from the already stopped legacy units to replace
-the original receipt.
-
-If the old frontend is already poisoned, ordinary `stop-legacy` deliberately
-refuses it. The explicit recovery sequence is `snapshot-legacy NEW.json`,
-`recover-legacy NEW.json`, then `restore-legacy NEW.json`. Recovery retains raw
-poison in a durable intent, checks the complete original owner, stops all three
-owned process groups, and only then archives the live marker. A foreign or
-replaced peer causes zero stops and leaves poison intact. This is not an
-automatic HTTP retry and never clears poison while a rank may still be live.
-
-## Controller self-tests
-
-`go test -race ./...` covers owner replacement, both-rank stop, locking,
-identical paired input bytes, output agreement, SSE terminal withholding,
-truncation/poison, and cancellation with detached draining. The harmless local
-systemd probe used during development confirmed same-name transient restart
-works even with an infinity-retention drop-in; its temporary unit/file were
-removed. It did not touch either GLM rank.
+Archive manifests, exclusions, checksums and deletion receipts are in
+`reports/SYSTEM-CLEANUP-001`. Archives may contain private configuration/model
+outputs: they are permission-restricted and excluded from Git. They are local
+recovery copies, not off-machine backups. Extract into a separate recovery
+directory, never over the live product/models. Git worktrees may require their
+archived parent repository metadata as well as the worktree sources.
