@@ -43,6 +43,21 @@ Direct mode deliberately bypasses the source-copy/Apply boundary and requires
 explicit confirmation. Local sandboxing limits access/resources; neither mode
 turns an incorrect change into a correct one. [Exact scope and limits](PROTECTED_WORKSPACES.md).
 
+## Reading response speed
+
+`Decode TPS` excludes prompt processing; `(live)` marks the browser-observed
+rate until the final engine measurement arrives. `HTTP TPS` includes the entire
+request. A long conversation can add significant time before the first token.
+Draft acceptance and tokens per step explain how effectively speculative
+decoding accelerates that particular response; acceptance is not a quality score.
+The reference coding benchmark is one workload, not a fixed speed for every topic.
+
+Start a new conversation when changing to an unrelated topic, so previous text
+does not need to be processed again. Existing conversations remain available.
+The context dropdown sets an admission limit: lowering it does not trim history
+or change the engine's allocated KV cache. HaloClu never silently drops context
+to increase a speed counter.
+
 ## Limits that matter during work
 
 - Chat's output budget includes reasoning as well as the final answer. A cap hit

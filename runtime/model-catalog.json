@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "audited_utc": "2026-09-08T14:20:09.858Z",
+  "audited_utc": "2026-09-10T15:23:41Z",
   "activity_source": "active_model_id is the configured backend model, not a health claim; consult /v1/status for current paired health",
-  "inventory_method": "NODE01 Lstat only: no weight contents, no hash, no download, no load, no SSH. NODE02 source-pinned prior receipts shown as REMOTE_NOT_CHECKED. Disk bytes are not UMA residency.",
+  "inventory_method": "NODE01 live Lstat catalog snapshot: no hash or model-byte read. Retired-model presence was verified on both EVO-X3 over USB4 SSH during MODEL-CLEANUP-V41-001. No inference/model switch performed.",
   "sources": [
     "/home/funboy/ai/bin/llama-strix-console",
     "/home/funboy/ai/config/strix-halo-models.json",
@@ -562,12 +562,12 @@
       "id": "deepseek-v4-flash-iq3",
       "name": "DeepSeek-V4-Flash0731 IQ3/Q6-attention",
       "priority": 30,
-      "status": "BLOCKED",
+      "status": "HISTORICAL",
       "format": "GGUF UD-IQ3_XXS-q6kattn composite",
       "runtime": "Existing /ai llama.cpp Vulkan",
       "architecture": "deepseek4;43layers,256 routed experts,top6",
       "distribution": "Existing single-node preset; layer-RPC45:55 is serial capacity; route-level EP closed",
-      "testability": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint",
+      "testability": "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load.",
       "ngram_embedding": "Not identified as a model embedding table in the audited sources",
       "draft_lookup": "None qualified in this entry",
       "quality_limits": [
@@ -575,7 +575,7 @@
         "No DFlash/MTP sidecar locally qualified; do not infer current functionality from unrelated FP8 source support"
       ],
       "blockers": [
-        "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+        "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load."
       ],
       "sources": [
         {
@@ -591,9 +591,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 103159533696,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load.",
           "hash_source": "/home/funboy/STRIX_CLUSTER_ACCELERATION_PLAN.md section8.2; historical SHA",
           "sha256": "538ec6932c50c6993f8a2cb18dc138e0fb5f6a7c2659e53a7566f1dc8ebb4344"
         }
@@ -603,10 +603,10 @@
           "id": "deepseek-v4-flash-iq3-inventory",
           "label": "Inventory only — no product load action",
           "distribution": "Existing single-node preset; layer-RPC45:55 is serial capacity; route-level EP closed",
-          "status": "BLOCKED",
+          "status": "HISTORICAL",
           "reasoning": "Historical payload only",
           "blockers": [
-            "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+            "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load."
           ]
         }
       ],
@@ -617,15 +617,15 @@
       "actions": {
         "load": {
           "enabled": false,
-          "reason": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+          "reason": "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load."
         },
         "benchmark": {
           "enabled": false,
-          "reason": "Local GGUF; no product switch adapter. No qualified multi-node speed route for this checkpoint"
+          "reason": "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load."
         },
         "download": {
           "enabled": false,
-          "reason": "Inventory only; download eligibility evaluated per missing asset"
+          "reason": "Retired from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; historical evidence only; no automatic reacquisition or load."
         }
       },
       "evidence": [
@@ -1226,12 +1226,12 @@
       "id": "glm-flash-gguf-q4",
       "name": "GLM-5.3-Flash Unsloth Q4 GGUF",
       "priority": 80,
-      "status": "BLOCKED",
+      "status": "HISTORICAL",
       "format": "GGUF UD-Q4_K_XL",
       "runtime": "Historical llama.cpp Vulkan/RPC, NOT current CIRU hybridW4",
       "architecture": "GLMFlash MoE hybridattention",
       "distribution": "Serial layer-RPC capacity path; current GLM uses different safetensors TP2",
-      "testability": "All sixGGUFfiles local; historical route not promoted; product adapter absent",
+      "testability": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
       "ngram_embedding": "Not identified as a model embedding table in the audited sources",
       "draft_lookup": "None qualified in this entry",
       "quality_limits": [
@@ -1239,7 +1239,7 @@
         "Do not interpret Unsloth public speedups as measured on this retained GGUF"
       ],
       "blockers": [
-        "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+        "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact."
       ],
       "sources": [
         {
@@ -1253,11 +1253,11 @@
           "id": "glm-gguf-q4-0",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00001-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 9429859,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00001-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "00dceaf3ed08781b1e44513a44ebb19e96248d01ba2a80b17f675a2b6fa9a1ee",
@@ -1267,11 +1267,11 @@
           "id": "glm-gguf-q4-1",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00002-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 49198039200,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00002-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "d3ecb6ff3957a99878f9a0352676a0913748a431a9a4a1b1ffa5ade9b8947a74",
@@ -1281,11 +1281,11 @@
           "id": "glm-gguf-q4-2",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00003-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 49988626304,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00003-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "328073c004e7c5395b208247feed26089db247b94dd8fa4ab0f2569d86c1d770",
@@ -1295,11 +1295,11 @@
           "id": "glm-gguf-q4-3",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00004-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 48700701344,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00004-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "6803ab7effa6da4a0b02c9c7865952fdd6c5b2e10e53903348da369e90bd13f9",
@@ -1309,11 +1309,11 @@
           "id": "glm-gguf-q4-4",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00005-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 49026026752,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00005-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "852f3df9dacde3d196796f9fe738468e80c8701555ff0a8c30bc010fb8974dd8",
@@ -1323,11 +1323,11 @@
           "id": "glm-gguf-q4-5",
           "path": "/home/funboy/models/gguf/glm-5.3-flash-unsloth-q4-k-xl/GLM-5.3-Flash-UD-Q4_K_XL-00006-of-00006.gguf",
           "node": "NODE01",
-          "role": "target weights",
+          "role": "retired target weights; owner-authorized cleanup 2026-09-10",
           "expected_bytes": 2784497888,
-          "required": true,
-          "download_enabled": true,
-          "download_blocked_reason": "",
+          "required": false,
+          "download_enabled": false,
+          "download_blocked_reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact.",
           "url": "https://huggingface.co/unsloth/GLM-5.3-Flash-GGUF/resolve/2975ab414d30340466d8c51533c6e91f0cca64c1/UD-Q4_K_XL/GLM-5.3-Flash-UD-Q4_K_XL-00006-of-00006.gguf",
           "revision": "2975ab414d30340466d8c51533c6e91f0cca64c1",
           "sha256": "c6ba510fafc1e12cc0addbc361a329c0c592ab96980098e7e25e107d8faa983e",
@@ -1339,10 +1339,10 @@
           "id": "glm-flash-gguf-q4-inventory",
           "label": "Inventory only — no product load action",
           "distribution": "Serial layer-RPC capacity path; current GLM uses different safetensors TP2",
-          "status": "BLOCKED",
+          "status": "HISTORICAL",
           "reasoning": "Historical payload only",
           "blockers": [
-            "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+            "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact."
           ]
         }
       ],
@@ -1350,15 +1350,15 @@
       "actions": {
         "load": {
           "enabled": false,
-          "reason": "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+          "reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact."
         },
         "benchmark": {
           "enabled": false,
-          "reason": "All sixGGUFfiles local; historical route not promoted; product adapter absent"
+          "reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact."
         },
         "download": {
           "enabled": false,
-          "reason": "Inventory only; download eligibility evaluated per missing asset"
+          "reason": "Retired non-serving GLM Flash Q4 from local storage by MODEL-CLEANUP-V41-001; operational CIRU W4 is a different protected artifact."
         }
       },
       "evidence": []
@@ -1367,12 +1367,12 @@
       "id": "glm-full-antirez-iq2",
       "name": "GLM-5.3 FULL antirez mixed IQ2",
       "priority": 90,
-      "status": "BLOCKED",
+      "status": "HISTORICAL",
       "format": "GGUF IQ2_XXS routed + block78Q2_K mixture",
       "runtime": "Pinned DS4 full-model runner, not CIRUFlash runtime",
       "architecture": "Full GLM-5.3, distinct larger architecture/checkpoint",
       "distribution": "Serial DS4 split0:41/42:outputFP32 on both EVO; load blocked before first request",
-      "testability": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry",
+      "testability": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition.",
       "ngram_embedding": "Not identified as a model embedding table in the audited sources",
       "draft_lookup": "None qualified in this entry",
       "quality_limits": [
@@ -1380,7 +1380,7 @@
         "Files complete does not mean loadable; no reservebypass or new automatic memory campaign"
       ],
       "blockers": [
-        "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+        "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition."
       ],
       "sources": [
         {
@@ -1396,9 +1396,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 211075860864,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "Already retained on both hosts; future missing-file recovery only with explicit need, FULL load remains blocked",
+          "download_blocked_reason": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition.",
           "revision": "1434dad1a25c6318c9befef38d7735a1e0e15f1d",
           "sha256": "059b36accd4c9acf73099da9f703b574d627869d619b7c4c316aa856e33d472e",
           "url": "https://huggingface.co/antirez/glm-5.3-gguf/resolve/1434dad1a25c6318c9befef38d7735a1e0e15f1d/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
@@ -1410,9 +1410,9 @@
           "node": "NODE02",
           "role": "target weights",
           "expected_bytes": 211075860864,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "Already retained on both hosts; future missing-file recovery only with explicit need, FULL load remains blocked",
+          "download_blocked_reason": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition.",
           "revision": "1434dad1a25c6318c9befef38d7735a1e0e15f1d",
           "sha256": "059b36accd4c9acf73099da9f703b574d627869d619b7c4c316aa856e33d472e",
           "url": "https://huggingface.co/antirez/glm-5.3-gguf/resolve/1434dad1a25c6318c9befef38d7735a1e0e15f1d/GLM-5.3-UD-IQ2_XXS_RoutedIQ2XXS_blk78Q2K.gguf",
@@ -1424,10 +1424,10 @@
           "id": "glm-full-antirez-iq2-inventory",
           "label": "Inventory only — no product load action",
           "distribution": "Serial DS4 split0:41/42:outputFP32 on both EVO; load blocked before first request",
-          "status": "BLOCKED",
+          "status": "HISTORICAL",
           "reasoning": "Historical payload only",
           "blockers": [
-            "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+            "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition."
           ]
         }
       ],
@@ -1435,15 +1435,15 @@
       "actions": {
         "load": {
           "enabled": false,
-          "reason": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+          "reason": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition."
         },
         "benchmark": {
           "enabled": false,
-          "reason": "BLOCKED_RESOURCE: coordinator graphprefill allocation refused at2.18GiB usable before2GiB reserve. No automatic load/retry"
+          "reason": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition."
         },
         "download": {
           "enabled": false,
-          "reason": "Inventory only; download eligibility evaluated per missing asset"
+          "reason": "Historical BLOCKED_RESOURCE evidence preserved; the FULL IQ2 checkpoint was removed from local storage on both EVO-X3 by MODEL-CLEANUP-V41-001; no automatic retry/reacquisition."
         }
       },
       "evidence": [
@@ -1462,19 +1462,19 @@
       "id": "glm-full-legacy-iq2m",
       "name": "GLM-5.3 FULL legacy IQ2_M SSD hybrid",
       "priority": 95,
-      "status": "BLOCKED",
+      "status": "HISTORICAL",
       "format": "GGUF UD-IQ2_M six shards",
       "runtime": "Legacy /ai llama.cpp Vulkan/SSD hybrid preset",
       "architecture": "Full GLM5.3 historical744B/40B-active preset description",
       "distribution": "Single-node SSD hybrid; neither operational CIRU nor qualified full TP2",
-      "testability": "Historical preset remains in /ai; no product adapter or current memory qualification",
+      "testability": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
       "ngram_embedding": "Not identified as a model embedding table in the audited sources",
       "draft_lookup": "None qualified in this entry",
       "quality_limits": [
         "Preset existence is not a successful load/quality result; no inventedTPS"
       ],
       "blockers": [
-        "Historical preset remains in /ai; no product adapter or current memory qualification"
+        "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition."
       ],
       "sources": [
         {
@@ -1490,9 +1490,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 9428677,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         },
         {
@@ -1501,9 +1501,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 49223976800,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         },
         {
@@ -1512,9 +1512,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 49143176640,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         },
         {
@@ -1523,9 +1523,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 49143176640,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         },
         {
@@ -1534,9 +1534,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 49143176640,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         },
         {
@@ -1545,9 +1545,9 @@
           "node": "NODE01",
           "role": "target weights",
           "expected_bytes": 41914650304,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "No immutable source pin or no authorized operational benefit; do not download",
+          "download_blocked_reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition.",
           "hash_source": "Local inventory stat only; no checksum recomputed"
         }
       ],
@@ -1556,10 +1556,10 @@
           "id": "glm-full-legacy-iq2m-inventory",
           "label": "Inventory only — no product load action",
           "distribution": "Single-node SSD hybrid; neither operational CIRU nor qualified full TP2",
-          "status": "BLOCKED",
+          "status": "HISTORICAL",
           "reasoning": "Historical payload only",
           "blockers": [
-            "Historical preset remains in /ai; no product adapter or current memory qualification"
+            "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition."
           ]
         }
       ],
@@ -1569,15 +1569,15 @@
       "actions": {
         "load": {
           "enabled": false,
-          "reason": "Historical preset remains in /ai; no product adapter or current memory qualification"
+          "reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition."
         },
         "benchmark": {
           "enabled": false,
-          "reason": "Historical preset remains in /ai; no product adapter or current memory qualification"
+          "reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition."
         },
         "download": {
           "enabled": false,
-          "reason": "Inventory only; download eligibility evaluated per missing asset"
+          "reason": "Retired legacy GLM FULL IQ2_M from local storage by MODEL-CLEANUP-V41-001; old /ai runtime was already archived/removed; no automatic reacquisition."
         }
       },
       "evidence": []
@@ -3182,19 +3182,19 @@
       "id": "deepseek-v4-fp8-not-local",
       "name": "DeepSeek-V4-Flash FP8 preview (not local)",
       "priority": 190,
-      "status": "BLOCKED",
+      "status": "HISTORICAL",
       "format": "Expected safetensorsFP8; checkpointmissing",
       "runtime": "Source support alone is not installed model",
       "architecture": "DeepSeek-V4Flash preview, not local0731GGUF",
       "distribution": "No executable model qualification",
-      "testability": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload",
+      "testability": "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01.",
       "ngram_embedding": "Not applicable to incompleteartifact",
       "draft_lookup": "Not qualified",
       "quality_limits": [
         "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
       ],
       "blockers": [
-        "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+        "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01."
       ],
       "sources": [
         {
@@ -3210,9 +3210,9 @@
           "node": "NODE01",
           "role": "Missing required config; no46shard inventoryclaim",
           "expected_bytes": 0,
-          "required": true,
+          "required": false,
           "download_enabled": false,
-          "download_blocked_reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+          "download_blocked_reason": "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01."
         }
       ],
       "presets": [],
@@ -3220,15 +3220,15 @@
       "actions": {
         "load": {
           "enabled": false,
-          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+          "reason": "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01."
         },
         "benchmark": {
           "enabled": false,
-          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+          "reason": "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01."
         },
         "download": {
           "enabled": false,
-          "reason": "Preview directory is not checkpoint: config/index and46weightshards absent; no productadapter or exploratory159GBdownload"
+          "reason": "Retired incomplete FP8 preview metadata; no local checkpoint exists and MODEL-CLEANUP-V41-001 removed the remaining preview files on NODE01."
         }
       },
       "evidence": []

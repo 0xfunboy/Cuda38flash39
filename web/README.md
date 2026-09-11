@@ -137,7 +137,38 @@ Context/output settings in the plain-chat sidebar do not silently reconfigure
 an existing Pi process. A selectable 32K output cap does not promise completion
 within the displayed backend deadline.
 
-Observed TPS uses cumulative real completion tokens / observed HTTP time.
+`Decode TPS` updates during streaming from cumulative server token counts and
+browser time since the first content/reasoning token. The `(live)` suffix marks
+that browser-observed rate, which includes stream buffering; it is replaced by
+the engine decode metric when available. No live rate is guessed from chunks.
+`HTTP TPS` includes prefill, scheduling and transport. Long prompts can make it
+substantially lower than decode TPS. Saved conversations restore measured HTTP
+and engine decode rates, never a fabricated live rate.
+
+`Draft acceptance` and `Tokens/step` display the runtime's final speculative
+decoding statistics, including on history reload. Acceptance is not answer
+quality. The same qualified engine can run at different TPS on different text:
+fewer accepted draft tokens means more target verification steps per answer.
+
+Each submitted Chat prompt has a compact processing/latency row. Its wait timer
+updates every250ms and stops at the first content or reasoning token. Once known,
+`Prompt/TTFT` is the full tokenized prompt divided by gateway dispatch-to-first-
+token time. It includes backend transport and scheduling: it is **not** GPU-only
+prefill throughput. The current CIRU runtime does not stream completed prefill
+token counts, so no in-progress TPS or percent-complete value is fabricated.
+The measured prompt rate stays fixed during decode and survives history reload.
+
+Available latency fields are preparation, gateway admission, tokenizer preflight,
+backend response headers, gateway TTFT, engine queue and engine TTFT, all in ms.
+Intervals can overlap and must not be summed. Engine queue/TTFT arrive with the
+runtime's final metrics; missing measurements remain absent. The initial wait
+timer is browser-observed; persisted TTFT is gateway-observed.
+
+Only the browser opts into `X-HaloClu-Timings: 1`, receiving `haloclu.timing` SSE
+events before generation and at the first token. Plain OpenAI/Pi clients retain
+the existing protocol. The header is not forwarded to the model. An upstream
+failure after early streaming headers is an SSE error, never a successful answer.
+
 Never characters, words or SSE chunks. Final decode comes from the engine;
 chat TTFT is browser-observed. Missing metrics remain unavailable. Legacy task
 TPS distinguishes last-attempt decode from observed HTTP rate. Natural stop,

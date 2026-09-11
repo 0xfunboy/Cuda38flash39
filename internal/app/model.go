@@ -25,6 +25,7 @@ type Metrics struct {
 	ServerTTFTMS     *float64       `json:"server_ttft_ms"`
 	DecodeTPS        *float64       `json:"decode_tps"`
 	Acceptance       *float64       `json:"acceptance"`
+	PromptTiming     *PromptTiming  `json:"prompt_timing,omitempty"`
 	Raw              map[string]any `json:"raw,omitempty"`
 }
 type ModelResult struct {

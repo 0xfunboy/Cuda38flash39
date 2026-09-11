@@ -363,12 +363,16 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 		jsonReply(w, 400, map[string]string{"error": e.Error()})
 		return
 	}
+	timing := &PromptTiming{PreparationMS: elapsedMS(started)}
+	lockStarted := time.Now()
 	release, e := a.modelLock(r.Context())
 	if e != nil {
 		jsonReply(w, 409, map[string]string{"error": e.Error()})
 		return
 	}
 	defer release()
+	timing.AdmissionMS = elapsedMS(lockStarted)
+	tokenizeStarted := time.Now()
 	if e := a.admitChat(r.Context(), p, &settings); e != nil {
 		status := 413
 		if errors.Is(e, errTokenizerPreflight) {
@@ -377,6 +381,8 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 		jsonReply(w, status, map[string]string{"error": e.Error()})
 		return
 	}
+	timing.TokenizeMS = elapsedMS(tokenizeStarted)
+	timing.PromptTokens = settings.Prompt
 	if needsToolAdapter(p) {
 		a.proxyToolChat(w, r, p, settings, started)
 		return
@@ -390,18 +396,47 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	req, _ := http.NewRequestWithContext(ctx, "POST", a.cfg.Backend+"/v1/chat/completions", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
+	stream, _ := p["stream"].(bool)
+	// Opt-in UI metadata only. Other OpenAI/Pi clients retain the original wire
+	// protocol, HTTP errors and headers. No telemetry setting reaches the model.
+	telemetry := stream && r.Header.Get("X-HaloClu-Timings") == "1"
+	timing.DispatchMS = elapsedMS(started)
+	if telemetry {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-store")
+		setChatHeaders(w, settings)
+		w.WriteHeader(http.StatusOK)
+		writeChatEvent(w, "haloclu.timing", timing)
+	}
 	resp, e := a.client.Do(req)
 	if e != nil {
-		jsonReply(w, 502, map[string]string{"error": e.Error()})
+		if telemetry {
+			writeChatEvent(w, "error", map[string]string{"error": e.Error()})
+			history.finish(ModelResult{Metrics: Metrics{PromptTiming: timing}}, false)
+		} else {
+			jsonReply(w, 502, map[string]string{"error": e.Error()})
+		}
 		return
 	}
 	defer resp.Body.Close()
-	w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
-	w.Header().Set("Cache-Control", "no-store")
-	setChatHeaders(w, settings)
-	w.WriteHeader(resp.StatusCode)
+	headersMS := elapsedMS(started) - timing.DispatchMS
+	timing.BackendHeadersMS = &headersMS
+	if telemetry {
+		if resp.StatusCode != http.StatusOK || !strings.Contains(resp.Header.Get("Content-Type"), "text/event-stream") {
+			_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<20))
+			writeChatEvent(w, "error", map[string]string{"error": fmt.Sprintf("backend did not return an SSE success response (HTTP %d)", resp.StatusCode)})
+			history.finish(ModelResult{Metrics: Metrics{PromptTiming: timing}}, false)
+			return
+		}
+		writeChatEvent(w, "haloclu.timing", timing)
+	} else {
+		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
+		w.Header().Set("Cache-Control", "no-store")
+		setChatHeaders(w, settings)
+		w.WriteHeader(resp.StatusCode)
+	}
 	if strings.Contains(resp.Header.Get("Content-Type"), "text/event-stream") && resp.StatusCode == 200 {
-		var result ModelResult
+		result := ModelResult{Metrics: Metrics{PromptTiming: timing}}
 		detached := false
 		streamErr := consumeSSEProgress(resp.Body, started, func(b []byte) {
 			if detached {
@@ -415,7 +450,15 @@ func (a *App) proxyAuthorizedChat(w http.ResponseWriter, r *http.Request) {
 			if f, ok := w.(http.Flusher); ok {
 				f.Flush()
 			}
-		}, &result, func(_ Metrics) { history.progress(result) })
+		}, &result, func(m Metrics) {
+			if timing.FirstTokenMS == nil && m.TTFTMS != nil {
+				timing.FirstTokenMS = m.TTFTMS
+				if telemetry && !detached {
+					writeChatEvent(w, "haloclu.timing", timing)
+				}
+			}
+			history.progress(result)
+		})
 		if streamErr != nil {
 			a.journal.Log("chat_stream_error", map[string]any{"error": streamErr.Error()})
 		}

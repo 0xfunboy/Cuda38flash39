@@ -69,8 +69,8 @@ into readable Markdown with tables, lists and copyable code blocks. Keep
 thinking collapsed for a cleaner conversation or expand it as the model works.
 
 Tune reasoning, context window, thinking budget and response length from the
-sidebar. Track observed TPS, engine decode speed, time to first token and
-elapsed request time as you work.
+sidebar. Track live decode speed, HTTP throughput, draft acceptance, time to
+first token and elapsed request time as you work.
 
 Attach source code, text, Markdown, PDFs or DOCX files. Archive listings and
 binary inspection extend the same workflow to project artifacts. The current

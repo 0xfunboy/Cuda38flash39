@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import {
-  SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, commandText, completionDelta, completionState, decodeRate,
+  SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, commandText, completionDelta, completionState, decodeRate, draftStats, liveDecodeRate,
   errorMessage, escapeHTML, finite, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask,
   IT_LABELS, markdownBlocks, markdownInline, number, observedRate, pathList, percent, safeSourceURL, seconds, textBlocks,
 } from '../ui-core.mjs';
@@ -242,6 +242,27 @@ test('Custom workspace shell requires explicit backend capability and idle READY
   assert.equal(canRunWorkspaceShell(null), false);
 });
 
+test('Live decode excludes prefill; HTTP rate includes it and final engine rate takes precedence', () => {
+  const usage = {completion_tokens:575};
+  assert.equal(liveDecodeRate(usage, 21000, 69000), 574/48);
+  assert.equal(observedRate(usage, 69), 575/69);
+  assert.equal(decodeRate({generation_time_ms:48000}, usage), 574/48);
+  for (const first of [null, undefined, NaN, Infinity, -1, 69000, 70000]) assert.equal(liveDecodeRate(usage, first, 69000), null);
+  for (const completion_tokens of [null, undefined, '575', 0, 1, 1.5]) assert.equal(liveDecodeRate({completion_tokens}, 21000, 69000), null);
+  assert.equal(liveDecodeRate({completion_tokens:2}, 0, 1000), 1);
+  assert.equal(liveDecodeRate({completion_tokens:2}, 1000, 1001), null, 'No artificial spike from a sub-millisecond first event');
+  assert.equal(liveDecodeRate(usage, 21000, NaN), null);
+});
+
+test('Draft statistics use real current or persisted engine metrics, with zero acceptance valid', () => {
+  const spec = {draft_acceptance_rate:0.22279411764705884, mean_acceptance_length:2.1139705882352944};
+  assert.deepEqual(draftStats({speculative_decoding:spec}), {acceptance:spec.draft_acceptance_rate,length:spec.mean_acceptance_length});
+  assert.deepEqual(draftStats({raw:{speculative_decoding:spec}}), draftStats({speculative_decoding:spec}));
+  assert.deepEqual(draftStats({acceptance:0}), {acceptance:0,length:null});
+  assert.deepEqual(draftStats(null), {acceptance:null,length:null});
+  assert.deepEqual(draftStats({speculative_decoding:{draft_acceptance_rate:1.2,mean_acceptance_length:0}}), {acceptance:null,length:null});
+});
+
 test('Observed TPS uses cumulative real token usage, never text or stream chunks', () => {
   assert.equal(observedRate({ completion_tokens: 40 }, 2), 20);
   assert.equal(observedRate({ completion_tokens: 0 }, 2), 0);
@@ -276,5 +297,5 @@ test('Go explicitly embeds production frontend and brand assets, not tests or do
   const source = await readFile(new URL('../assets.go', import.meta.url), 'utf8');
   const match = source.match(/^\/\/go:embed (.+)$/m);
   assert.ok(match, 'Missing explicit production asset embed declaration');
-  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'assets/haloclu-social.png', 'downloads.mjs', 'favicon.ico', 'index.html', 'styles.css', 'ui-core.mjs']);
+  assert.deepEqual(match[1].trim().split(/\s+/).sort(), ['app.js', 'assets/haloclu-horizontal.png', 'assets/haloclu-icon.png', 'assets/haloclu-social.png', 'downloads.mjs', 'favicon.ico', 'index.html', 'prompt-meter.mjs', 'styles.css', 'ui-core.mjs']);
 });

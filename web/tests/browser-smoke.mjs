@@ -20,6 +20,7 @@ let browserSessionCounter = 0;
 let browserLogouts = 0;
 const modelReads = { catalog: 0, downloads: 0, mutations: 0 };
 const calls = { chat: [], coding: [], apply: 0, cancel: 0, interrupted_status: 0, operation: [], attachments: 0, workspace: [], terminal: 0, shell: [], settings: [], rotations: 0 };
+const fixturePromptTiming={prompt_tokens:99,preparation_ms:2,admission_ms:0,tokenize_ms:20,dispatch_ms:100,backend_headers_ms:50,first_token_ms:700};
 const conversations = new Map();
 let conversationCounter = 0;
 let handoffs = 0;
@@ -139,9 +140,17 @@ const server = createServer(async (request, response) => {
       c.messages.push({ id: `assistant-${calls.chat.length}`, origin: 'chat', role: 'assistant', content: calls.chat.length === 2 ? 'Truncated transport output' : `Working code 🌱 ${forbidden}\n\n\`\`\`html\n${forbidden}\n\`\`\`\n`, reasoning: 'brief reasoning', status: calls.chat.length === 2 ? 'error' : 'complete', settings: { reasoning_effort: payload.reasoning_effort, metrics: { prompt_tokens: 99, completion_tokens: 17, http_seconds: .8, ttft_ms: 30, decode_tps: null } } }); c.revision++;
       response.writeHead(200, { 'Content-Type': 'text/event-stream', 'X-StrixGLM-Context-Tokens': '65536', 'X-StrixGLM-Prompt-Tokens': '99', 'X-StrixGLM-Max-Tokens': '16384' });
       if (calls.chat.length === 2) return response.end(`data: ${JSON.stringify({ choices: [{ delta: { content: 'Truncated transport output' }, finish_reason: 'stop' }] })}\n\n`);
+      assert.equal(request.headers['x-haloclu-timings'],'1');
+      c.messages.at(-1).settings.metrics.prompt_timing=fixturePromptTiming;
+      c.messages.at(-1).settings.metrics.raw={queue_time_ms:3,time_to_first_token_ms:550,speculative_decoding:{draft_acceptance_rate:0.22,mean_acceptance_length:2.1}};
+      response.write(`event: haloclu.timing\ndata: ${JSON.stringify({...fixturePromptTiming,first_token_ms:undefined})}\n\n`);
+      await new Promise(resolve=>setTimeout(resolve,1200));
       const stream = `data: ${JSON.stringify({ choices: [{ delta: { reasoning_content: 'brief reasoning' } }], usage: { prompt_tokens: 99, completion_tokens: 2 } })}\r\n\r\ndata: ${JSON.stringify({ choices: [{ delta: { content: `Working code 🌱 ${forbidden}\n\n\`\`\`html\n${forbidden}\n\`\`\`\n` } }], usage: { prompt_tokens: 99, completion_tokens: 15 } })}\n\ndata: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }], usage: { prompt_tokens: 99, completion_tokens: 17 } })}\n\ndata: [DONE]\n\n`;
-      const data = Buffer.from(stream);
-      for (let index = 0; index < data.length; index += 3) response.write(data.subarray(index, index + 3));
+      const data = Buffer.from(stream.replace('\r\n\r\n',`\r\n\r\nevent: haloclu.timing\ndata: ${JSON.stringify(fixturePromptTiming)}\n\n`));
+      const firstEnd = data.indexOf(Buffer.from('\r\n\r\n')) + 4;
+      response.write(data.subarray(0, firstEnd));
+      await new Promise(resolve=>setTimeout(resolve,1200));
+      for (let index = firstEnd; index < data.length; index += 3) response.write(data.subarray(index, index + 3));
       return response.end();
     }
     if (url.pathname === '/v1/coding/tasks' && request.method === 'POST') {
@@ -177,7 +186,7 @@ const server = createServer(async (request, response) => {
       });
     }
     const name = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
-    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'downloads.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
+    if (!['index.html', 'styles.css', 'app.js', 'ui-core.mjs', 'prompt-meter.mjs', 'downloads.mjs', 'assets/haloclu-icon.png', 'assets/haloclu-horizontal.png'].includes(name)) return json({ error: 'Not found' }, 404);
     response.writeHead(200, { 'Content-Type': name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript' });
     response.end(await readFile(join(web, name)));
   } catch (error) { console.error(JSON.stringify({ fixture_route: request.url, error: error.message })); response.writeHead(500); response.end(error.message); }
@@ -265,7 +274,17 @@ try {
   assert.equal(await execute('return !!document.querySelector(".attachment img")'), false);
   tests++;
   await execute("document.getElementById('chat-input').value='Smoke test';document.getElementById('chat-form').requestSubmit();document.getElementById('chat-form').requestSubmit();");
+  await until('document.querySelector(".message.user .prompt-meter")?.dataset.phase === "waiting" && document.querySelector(".message.user .prompt-meter").textContent.includes("99")');
+  assert.equal(await execute('return document.querySelector(".message.user .prompt-rate").textContent.includes("—")'),true,'No fabricated in-progress prefill TPS');
+  const earlyWait=await execute('return document.querySelector(".message.user .prompt-wait").textContent');
+  await new Promise(resolve=>setTimeout(resolve,300));
+  assert.notEqual(await execute('return document.querySelector(".message.user .prompt-wait").textContent'),earlyWait,'Live wait timer');
+  await until('document.getElementById("chat-tps").textContent.includes("(live)")');
+  assert.equal(await execute('return parseFloat(document.getElementById("chat-tps").textContent)>parseFloat(document.getElementById("chat-live-tps").textContent)'),true,'Live decode excludes the delayed prefill; HTTP does not');
   await until('document.querySelector(".message.assistant .message-meta")?.textContent.includes("complete")');
+  assert.equal(await execute('return document.querySelector(".message.user .prompt-rate").textContent.includes("165")'),true,'Measured rate survives history reload');
+  assert.equal(await execute('return document.querySelector(".message.user .prompt-meter").textContent.includes("550")'),true,'Saved engine latency');
+  await writeFile(join(output,'chat-prompt-timing.png'),Buffer.from(await command(`/session/${session}/screenshot`),'base64'));
   assert.equal(calls.chat.length, 1);
   assert.equal(calls.chat[0].stream, true);
   assert.equal(calls.chat[0].profile, undefined);
@@ -279,7 +298,10 @@ try {
   assert.equal(await execute('return document.querySelector(".message.assistant .message-content").textContent.includes("Working code 🌱")'), true);
   assert.equal(await execute('return !!window.__xss || !!document.querySelector(".conversation img")'), false);
   assert.equal(await execute('return document.getElementById("chat-context").textContent'), '99');
-  assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '—', 'Saved history must not pretend to be a live stream.');
+  assert.equal(await execute('return document.getElementById("chat-live-tps").textContent'), '21.25 tok/s', 'Restore measured HTTP rate, explicitly labelled as HTTP.');
+  assert.equal(await execute('return document.getElementById("chat-live-tps").title.startsWith("Saved")'), true);
+  assert.equal(await execute('return document.getElementById("chat-acceptance").textContent'), '22%');
+  assert.equal(await execute('return document.getElementById("chat-step-tokens").textContent'), '2.1');
   assert.equal(await execute('return document.getElementById("chat-ttft").title.includes("Saved gateway-observed")'), true);
   assert.equal(await execute('return document.getElementById("chat-tps").textContent'), '—');
   assert.equal(await execute('return document.querySelectorAll(".message .code-block").length'), 1);

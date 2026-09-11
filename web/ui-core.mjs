@@ -100,6 +100,11 @@ export const IT_LABELS = {
   "Response metrics": "Metriche risposta",
   "Observed TPS": "TPS osservati",
   "Final decode": "Decode finale",
+  "HTTP TPS": "TPS HTTP",
+  "Decode TPS": "TPS decode",
+  "Draft acceptance": "Accettazione draft",
+  "Tokens/step": "Token/passo",
+  "Decode excludes prefill; HTTP includes it. Live decode is browser-observed; final decode comes from the engine. Both include thinking tokens.": "Decode esclude il prefill; HTTP lo include. Il decode live è osservato dal browser; quello finale proviene dal motore. Entrambi includono i token di thinking.",
   "Context": "Contesto",
   "Message": "Messaggio",
   "Write a message…": "Scrivi un messaggio…",
@@ -414,6 +419,26 @@ export function decodeRate(timings, usage) {
 export function observedRate(usage, elapsedSeconds) {
   const tokens = usage?.completion_tokens;
   return Number.isSafeInteger(tokens) && tokens >= 0 && elapsedSeconds > 0 ? tokens / elapsedSeconds : null;
+}
+
+// Browser-observed decode rate, not a per-kernel measurement. Remove prefill
+// from the denominator; use only server token counts, never chunks or text.
+export function liveDecodeRate(usage, firstTokenMS, elapsedMS) {
+  const tokens = usage?.completion_tokens;
+  return Number.isSafeInteger(tokens) && tokens > 1
+    && Number.isFinite(firstTokenMS) && firstTokenMS >= 0
+    && Number.isFinite(elapsedMS) && elapsedMS - firstTokenMS >= 250
+    ? (tokens - 1) * 1000 / (elapsedMS - firstTokenMS) : null;
+}
+
+export function draftStats(metrics) {
+  const spec = (metrics?.raw || metrics)?.speculative_decoding;
+  const acceptance = finite(spec?.draft_acceptance_rate ?? metrics?.acceptance);
+  const length = finite(spec?.mean_acceptance_length);
+  return {
+    acceptance: acceptance !== null && acceptance >= 0 && acceptance <= 1 ? acceptance : null,
+    length: length !== null && length >= 1 ? length : null,
+  };
 }
 
 export function generationSettings(reasoning, context, output, options) {

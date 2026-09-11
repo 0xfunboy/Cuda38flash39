@@ -1,9 +1,10 @@
 import {
-  SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, completionDelta, completionState, decodeRate,
+  SSEParser, activeRequestLabel, bytes, canCancelTask, canRunWorkspaceShell, classifyStatus, completionDelta, completionState, decodeRate, draftStats, liveDecodeRate,
   apiSettings, displayPreferences, errorMessage, finite, generationPanelState, generationSettings, healthStatus, importedTaskSpec, isSuccess, isTerminal, normalizeTask, number,
   IT_LABELS, markdownBlocks, markdownInline, observedRate, pathList, percent, safeSourceURL, seconds,
 } from './ui-core.mjs';
 import { initDownloads } from './downloads.mjs';
+import { renderPromptMeter, refreshPromptMeters } from './prompt-meter.mjs';
 
 const $ = id => document.getElementById(id);
 const state = {
@@ -27,6 +28,7 @@ function applyLanguage(language) {
     if (entry.attribute) entry.node.setAttribute(entry.attribute, replacement); else entry.node.data = replacement;
   }
   $('view-label').textContent = $(`tab-${state.activeTab}`)?.querySelector('.nav-label')?.textContent || state.activeTab;
+  refreshPromptMeters(state.language);
 }
 
 function initializeLanguage() {
@@ -402,12 +404,15 @@ function message(role, content = '') {
   details.open = $('show-thinking').checked;
   const error = element('p', 'message-error');
   error.hidden = true;
-  body.append(meta, details, text, error);
+  const promptMeter = element('div', 'prompt-meter');
+  promptMeter.setAttribute('aria-label', 'Prompt processing and latency metrics');
+  promptMeter.hidden = true;
+  body.append(meta, details, text, promptMeter, error);
   outer.append(avatar, body);
   $('conversation').append(outer);
   const record = { role, content, created_utc: new Date().toISOString(), status: role === 'user' ? 'submitted' : 'pending' };
   state.records.push(record);
-  return { outer, meta, text, details, reasoning, error, record };
+  return { outer, meta, text, details, reasoning, error, promptMeter, record };
 }
 
 function scrollChat() {
@@ -416,11 +421,17 @@ function scrollChat() {
 }
 
 function updateChatMetrics(usage, timings, firstTokenMS, started, finished = false, admitted = null) {
-  const live = observedRate(usage, (performance.now() - started) / 1000);
+  const elapsedMS = performance.now() - started;
+  const live = observedRate(usage, elapsedMS / 1000);
   $('chat-live-tps').textContent = live === null ? '—' : `${number(live, 2)} tok/s`;
-  const decode = decodeRate(timings, usage);
-  $('chat-tps').textContent = finite(decode) === null ? '—' : `${number(decode, 2)} tok/s`;
-  $('chat-tps').title = 'Server decode TPS, or (completion tokens − 1) / server generation time. Never HTTP tokens/second.';
+  $('chat-live-tps').title = 'Real completion tokens / browser HTTP time, including prefill and transport. Not decode speed.';
+  const engineDecode = decodeRate(timings, usage);
+  const decode = engineDecode ?? (!finished ? liveDecodeRate(usage, firstTokenMS, elapsedMS) : null);
+  $('chat-tps').textContent = finite(decode) === null ? '—' : `${number(decode, 2)} tok/s${engineDecode === null ? ' (live)' : ''}`;
+  $('chat-tps').title = engineDecode === null
+    ? 'Live browser-observed rate from server token counts after the first token. Excludes prefill; includes stream transport/buffering. Final engine measurement replaces it when available.'
+    : 'Engine decode TPS: (completion tokens − 1) / server generation time. Excludes prefill.';
+  updateDraftMetrics(timings);
   $('chat-ttft').textContent = firstTokenMS === null ? '—' : seconds(firstTokenMS / 1000);
   $('chat-ttft').title = 'Browser-observed first content or reasoning token; includes network transit.';
   $('chat-wall').textContent = seconds((performance.now() - started) / 1000) + (finished ? '' : ' …');
@@ -433,6 +444,14 @@ function updateChatMetrics(usage, timings, firstTokenMS, started, finished = fal
   $('chat-context').textContent = prompt === null ? '—'
     : `${number(prompt, 0)}${admitted?.context ? ` / ${number(admitted.context, 0)}` : ''}`;
   $('chat-context').title = 'Server-reported prompt tokens. This is not a local token estimate.';
+}
+
+function updateDraftMetrics(metrics) {
+  const draft = draftStats(metrics);
+  $('chat-acceptance').textContent = draft.acceptance === null ? '—' : `${number(draft.acceptance * 100, 1)}%`;
+  $('chat-step-tokens').textContent = draft.length === null ? '—' : number(draft.length, 2);
+  $('chat-acceptance').title = 'Engine-reported fraction of proposed draft tokens accepted. Not a measure of answer quality.';
+  $('chat-step-tokens').title = 'Engine-reported mean acceptance length, including the target bonus token. Fewer accepted tokens per step can lower decode TPS.';
 }
 
 async function sendChat(event) {
@@ -471,7 +490,12 @@ async function sendChat(event) {
   const started = performance.now();
   let text = '', reasoning = '', finish = null, usage = null, timings = null;
   let firstTokenMS = null, done = false, protocolError = null, admitted = null, lastRender = 0;
-  const ticker = setInterval(() => updateChatMetrics(usage, timings, firstTokenMS, started, false, admitted), 500);
+  let promptTiming = null;
+  function updatePrompt(stopped=false) {
+    renderPromptMeter(user.promptMeter, {timing:promptTiming, metrics:timings, usage, firstTokenMS, elapsedMS:performance.now()-started, stopped}, state.language);
+  }
+  updatePrompt();
+  const ticker = setInterval(() => { updateChatMetrics(usage, timings, firstTokenMS, started, false, admitted); updatePrompt(); }, 250);
   function receive(payload) {
     if (payload?.error) { protocolError = errorMessage(payload); return; }
     const delta = completionDelta(payload);
@@ -486,13 +510,14 @@ async function sendChat(event) {
     output.details.hidden = !reasoning;
     output.meta.textContent = `reasoning ${requestReasoning} · ${finish || 'streaming'}`;
     updateChatMetrics(usage, timings, firstTokenMS, started, false, admitted);
+    updatePrompt();
     scrollChat();
   }
   try {
     const response = await fetch('/v1/chat/completions', {
       method: 'POST', credentials: 'same-origin', cache: 'no-store', mode: 'same-origin', referrerPolicy: 'same-origin', redirect: 'error',
       signal: controller.signal,
-      headers: { ...headers(), Accept: 'text/event-stream', 'Content-Type': 'application/json' },
+      headers: { ...headers(), Accept: 'text/event-stream', 'Content-Type': 'application/json', 'X-HaloClu-Timings': '1' },
       body: JSON.stringify({ model: state.model, conversation_id: requestConversationID, ...settings, messages: [...state.chat, userMessage], stream: true, stream_options: { include_usage: true, continuous_usage_stats: true } }),
     });
     if (!response.ok) {
@@ -510,6 +535,11 @@ async function sendChat(event) {
       const parser = new SSEParser(event => {
         if (event.data.trim() === '[DONE]') { done = true; return; }
         if (event.event === 'error') { protocolError = errorMessage(event.data); return; }
+        if (event.event === 'haloclu.timing') {
+          try { promptTiming = JSON.parse(event.data); updatePrompt(); }
+          catch { protocolError = 'Malformed prompt timing event.'; }
+          return;
+        }
         try { receive(JSON.parse(event.data)); }
         catch { protocolError = 'Malformed JSON in the server event stream.'; }
       });
@@ -548,9 +578,10 @@ async function sendChat(event) {
     output.record.content = text;
     output.record.reasoning = reasoning;
     output.record.finish_reason = finish;
-    output.record.metrics = { usage, timings, browser_ttft_ms: firstTokenMS, http_seconds: (performance.now() - started) / 1000, admitted };
+    output.record.metrics = { usage, timings, prompt_timing:promptTiming, browser_ttft_ms: firstTokenMS, http_seconds: (performance.now() - started) / 1000, admitted };
     renderMarkdown(output.text, text);
     updateChatMetrics(usage, timings, firstTokenMS, started, true, admitted);
+    updatePrompt(true);
     $('send-chat').disabled = false;
     $('clear-chat').disabled = false;
     $('stop-chat').hidden = true;
@@ -754,19 +785,29 @@ async function openConversation(id) {
   if (!c.replay_messages) state.chat = (c.messages || []).filter(m => m.role === 'user' || (m.role === 'assistant' && m.status === 'complete')).map(m => ({ role: m.role, content: m.content || '', ...(m.attachment_ids?.length ? { attachment_ids: m.attachment_ids } : {}) }));
   state.records = [];
   $('conversation').querySelectorAll('.message').forEach(node => node.remove());
+  let promptView = null;
   for (const m of c.messages || []) {
     if (!['user', 'assistant'].includes(m.role)) continue;
     const view = message(m.role); Object.assign(view.record, m);
+    if (m.role === 'user') promptView = view;
+    if (m.role === 'assistant' && promptView && m.settings?.metrics && m.origin === 'chat') {
+      renderPromptMeter(promptView.promptMeter, {metrics:m.settings.metrics, stopped:m.status!=='pending'}, state.language);
+    }
     renderMarkdown(view.text, m.content || ''); view.reasoning.textContent = m.reasoning || ''; view.details.hidden = !m.reasoning;
     view.meta.textContent = `${m.origin || 'chat'} · ${m.role} · ${m.status}${m.settings?.reasoning_effort ? ` · reasoning ${m.settings.reasoning_effort}` : ''}`;
     if (m.role === 'assistant' && !['complete', 'completed', 'concluded'].includes(m.status)) { view.error.hidden = false; view.error.textContent = `${String(m.status || 'unknown').toUpperCase()} · retained for review, not replayed as a completed answer.`; }
   }
   state.records = c.messages || [];
   $('chat-empty').hidden = !!state.records.length; $('conversation-title').textContent = c.title;
-  for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context']) $(id).textContent = '—';
+  for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context', 'chat-acceptance', 'chat-step-tokens']) $(id).textContent = '—';
   const recorded = [...state.records].reverse().find(m => m.role === 'assistant')?.settings?.metrics;
   if (recorded) {
+    const savedHTTP = observedRate(recorded, recorded.http_seconds);
+    $('chat-live-tps').textContent = savedHTTP === null ? '—' : `${number(savedHTTP, 2)} tok/s`;
+    $('chat-live-tps').title = 'Saved completion tokens / gateway HTTP time, including prefill. Not a live stream or engine decode speed.';
     $('chat-tps').textContent = finite(recorded.decode_tps) === null ? '—' : `${number(recorded.decode_tps, 2)} tok/s`;
+    $('chat-tps').title = 'Saved engine decode TPS, excluding prefill.';
+    updateDraftMetrics(recorded);
     $('chat-ttft').textContent = finite(recorded.ttft_ms) === null ? '—' : seconds(recorded.ttft_ms / 1000);
     $('chat-ttft').title = 'Saved gateway-observed first content/reasoning token. Not browser network transit.';
     $('chat-wall').textContent = finite(recorded.http_seconds) === null ? '—' : seconds(recorded.http_seconds);
@@ -1307,7 +1348,7 @@ $('stop-chat').addEventListener('click', () => state.chatController?.abort());
 $('clear-chat').addEventListener('click', () => {
   if (state.chatController) return;
   resetConversation();
-  for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context']) $(id).textContent = '—';
+  for (const id of ['chat-live-tps', 'chat-tps', 'chat-ttft', 'chat-wall', 'chat-tokens', 'chat-context', 'chat-acceptance', 'chat-step-tokens']) $(id).textContent = '—';
   renderConversations();
   $('chat-input').focus();
 });
