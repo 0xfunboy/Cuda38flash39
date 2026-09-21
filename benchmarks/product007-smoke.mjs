@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 
-const [flag, rawReport, base = 'http://127.0.0.1:18093', tokenFile = '/home/funboy/StrixHaloClusterGLM/state/api-token'] = process.argv.slice(2);
+const [flag, rawReport, base = 'http://127.0.0.1:18093', tokenFile = '/home/funboy/Cuda38flash39/state/api-token'] = process.argv.slice(2);
 if (flag !== '--run-live' || !rawReport) throw Error('Explicit --run-live and a NEW report directory are required; this makes actual model calls.');
 const report = path.resolve(rawReport);
 const evidenceRoot = '/home/funboy/ai-exp/reports/moe-cluster/';
