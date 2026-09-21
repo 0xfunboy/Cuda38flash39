@@ -18,10 +18,10 @@ MODEL_PATH="${1:-$MODEL_DIR/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf}"
 LLAMA_SERVER="${LLAMA_SERVER:-$ROOT_DIR/.engine/llama.cpp/build/bin/llama-server}"
 PORT="${PORT:-18094}"
 HOST="${HOST:-127.0.0.1}"
-CTX_SIZE="${CTX_SIZE:-16384}"
+CTX_SIZE="${CTX_SIZE:-8192}"
 BATCH_SIZE="${BATCH_SIZE:-512}"
-THREADS="${THREADS:-16}"
-N_CPU_MOE="${N_CPU_MOE:-28}"
+THREADS="${THREADS:-12}"
+CPUS="${CPUS:-0-11}"
 
 if [[ ! -x "$LLAMA_SERVER" ]]; then
     echo "Error: llama-server executable not found at $LLAMA_SERVER" >&2
@@ -36,15 +36,15 @@ fi
 
 echo "==> Starting CUDA inference engine on $HOST:$PORT..."
 echo "    Model: $MODEL_PATH"
-echo "    Offload: -ngl 99 --n-cpu-moe $N_CPU_MOE (hot experts in 24GB VRAM, cold experts in 128GB RAM)"
+echo "    CPU Affinity: taskset -c $CPUS (P-cores optimized, avoiding E-core barrier stalls)"
 echo "    Context: $CTX_SIZE | Threads: $THREADS | Batch: $BATCH_SIZE"
 
-exec "$LLAMA_SERVER" \
+exec taskset -c "$CPUS" "$LLAMA_SERVER" \
     --model "$MODEL_PATH" \
     --host "$HOST" \
     --port "$PORT" \
-    --n-gpu-layers 99 \
-    --n-cpu-moe "$N_CPU_MOE" \
+    --fit on \
+    --fit-target 1536 \
     --ctx-size "$CTX_SIZE" \
     --batch-size "$BATCH_SIZE" \
     --ubatch-size 128 \
