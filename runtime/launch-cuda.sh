@@ -19,9 +19,11 @@ LLAMA_SERVER="${LLAMA_SERVER:-$ROOT_DIR/.engine/llama.cpp/build/bin/llama-server
 PORT="${PORT:-18094}"
 HOST="${HOST:-127.0.0.1}"
 CTX_SIZE="${CTX_SIZE:-8192}"
-BATCH_SIZE="${BATCH_SIZE:-512}"
+BATCH_SIZE="${BATCH_SIZE:-2048}"
+UBATCH_SIZE="${UBATCH_SIZE:-512}"
 THREADS="${THREADS:-12}"
 CPUS="${CPUS:-0-11}"
+N_CPU_MOE="${N_CPU_MOE:-30}"
 
 if [[ ! -x "$LLAMA_SERVER" ]]; then
     echo "Error: llama-server executable not found at $LLAMA_SERVER" >&2
@@ -37,18 +39,20 @@ fi
 echo "==> Starting CUDA inference engine on $HOST:$PORT..."
 echo "    Model: $MODEL_PATH"
 echo "    CPU Affinity: taskset -c $CPUS (P-cores optimized, avoiding E-core barrier stalls)"
-echo "    Context: $CTX_SIZE | Threads: $THREADS | Batch: $BATCH_SIZE"
+echo "    VRAM Allocation: -ngl 99 --n-cpu-moe $N_CPU_MOE (23.2GB VRAM on GPU 0, PCIe Gen4 x16)"
+echo "    RAM Allocation: --load-mode none (100% direct physical DDR RAM, zero mmap/NVMe paging)"
+echo "    Context: $CTX_SIZE | Threads: $THREADS | Batch: $BATCH_SIZE | UBatch: $UBATCH_SIZE"
 
 exec taskset -c "$CPUS" "$LLAMA_SERVER" \
     --model "$MODEL_PATH" \
     --host "$HOST" \
     --port "$PORT" \
-    --fit on \
-    --fit-target 1536 \
+    -ngl 99 \
+    --n-cpu-moe "$N_CPU_MOE" \
+    --load-mode none \
     --ctx-size "$CTX_SIZE" \
     --batch-size "$BATCH_SIZE" \
-    --ubatch-size 128 \
+    --ubatch-size "$UBATCH_SIZE" \
     --threads "$THREADS" \
     --flash-attn on \
-    --metrics \
-    --log-format text
+    --metrics

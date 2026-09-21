@@ -1,0 +1,102 @@
+{
+  "machine": {
+    "gpu_0": "NVIDIA GeForce RTX 3090 24GB (PCIe Gen4 x16)",
+    "gpu_1": "NVIDIA GeForce RTX 3090 24GB (PCIe Gen4 x4, isolated/untouched)",
+    "cpu": "Intel Core i5-13500 (6 P-cores + 8 E-cores, 20 threads)",
+    "ram_gb": 128,
+    "vram_gb": 24,
+    "total_fast_memory_gb": 152
+  },
+  "runs": [
+    {
+      "id": "run_01_baseline_mmap_allcores",
+      "date": "2026-09-21T08:51:03.067Z",
+      "model": "Qwen3.8-Flash-Next-UD-IQ3_XXS (77.5 GB)",
+      "configuration": {
+        "fit": "on",
+        "fit_target_mib": 1536,
+        "threads": 16,
+        "affinity": "all (0-19)",
+        "mlock": false,
+        "lazy_mode": "auto",
+        "batch_size": 512,
+        "ubatch_size": 128
+      },
+      "results": {
+        "code_novel": { "prompt_tokens": 93, "completion_tokens": 512, "ttft_ms": 1076.8, "prefill_tps": 58.5, "decode_tps": 33.6, "wall_sec": 16.31 },
+        "code_repeated": { "prompt_tokens": 98, "completion_tokens": 512, "ttft_ms": 1084.4, "prefill_tps": 62.7, "decode_tps": 33.3, "wall_sec": 16.46 },
+        "prose_reasoning": { "prompt_tokens": 113, "completion_tokens": 512, "ttft_ms": 1261.9, "prefill_tps": 65.8, "decode_tps": 32.7, "wall_sec": 17.02 },
+        "math_algorithmic": { "prompt_tokens": 104, "completion_tokens": 400, "ttft_ms": 1272.1, "prefill_tps": 58.2, "decode_tps": 33.8, "wall_sec": 13.21 }
+      },
+      "notes": "Initial run with virtual mmap; prompt evaluated partially on CPU due to layer splitting with fit."
+    },
+    {
+      "id": "run_02_pcore_pinning",
+      "date": "2026-09-21T08:52:28.436Z",
+      "model": "Qwen3.8-Flash-Next-UD-IQ3_XXS (77.5 GB)",
+      "configuration": {
+        "fit": "on",
+        "fit_target_mib": 1536,
+        "threads": 12,
+        "affinity": "taskset -c 0-11 (P-cores only)",
+        "mlock": false,
+        "lazy_mode": "auto",
+        "batch_size": 512,
+        "ubatch_size": 128
+      },
+      "results": {
+        "code_novel": { "prompt_tokens": 93, "completion_tokens": 512, "ttft_ms": 1076.4, "prefill_tps": 58.5, "decode_tps": 34.7, "wall_sec": 15.96 },
+        "code_repeated": { "prompt_tokens": 98, "completion_tokens": 512, "ttft_ms": 1060.7, "prefill_tps": 64.1, "decode_tps": 34.6, "wall_sec": 15.82 },
+        "prose_reasoning": { "prompt_tokens": 113, "completion_tokens": 512, "ttft_ms": 1253.4, "prefill_tps": 66.2, "decode_tps": 34.6, "wall_sec": 16.02 },
+        "math_algorithmic": { "prompt_tokens": 104, "completion_tokens": 400, "ttft_ms": 1251.5, "prefill_tps": 59.1, "decode_tps": 33.5, "wall_sec": 13.18 }
+      },
+      "notes": "P-core pinning eliminates OpenMP barrier sync delays on E-cores, boosting decode speed to 34.7 t/s."
+    },
+    {
+      "id": "run_03_load_mode_none_ncpu_moe_30",
+      "date": "2026-09-21T09:43:20.584Z",
+      "model": "Qwen3.8-Flash-Next-UD-IQ3_XXS (77.5 GB)",
+      "configuration": {
+        "ngl": 99,
+        "n_cpu_moe": 30,
+        "load_mode": "none (direct physical RAM allocation, zero mmap/NVMe paging)",
+        "vram_allocated_mib": 23216,
+        "threads": 12,
+        "affinity": "taskset -c 0-11 (P-cores only)",
+        "batch_size": 2048,
+        "ubatch_size": 512
+      },
+      "results": {
+        "code_novel": { "prompt_tokens": 105, "completion_tokens": 512, "ttft_ms": 983.6, "prefill_tps": 64.0, "decode_tps": 32.7, "wall_sec": 16.80 },
+        "code_repeated": { "prompt_tokens": 110, "completion_tokens": 512, "ttft_ms": 970.7, "prefill_tps": 70.0, "decode_tps": 32.9, "wall_sec": 16.64 },
+        "prose_reasoning": { "prompt_tokens": 125, "completion_tokens": 512, "ttft_ms": 1150.1, "prefill_tps": 72.2, "decode_tps": 32.8, "wall_sec": 16.85 },
+        "math_algorithmic": { "prompt_tokens": 116, "completion_tokens": 400, "ttft_ms": 1095.3, "prefill_tps": 67.6, "decode_tps": 32.5, "wall_sec": 13.49 }
+      },
+      "notes": "RAM-allocated direct memory (used: 36GB + shared 30GB = 66GB in physical RAM), VRAM maxed at 23.2GB (94.5%), TTFT reduced below 1s (970ms), prefill increased to 72.2 t/s."
+    },
+    {
+      "id": "run_04_spec_ngram_simple",
+      "date": "2026-09-21T09:45:33.444Z",
+      "model": "Qwen3.8-Flash-Next-UD-IQ3_XXS (77.5 GB)",
+      "configuration": {
+        "ngl": 99,
+        "n_cpu_moe": 30,
+        "load_mode": "none",
+        "spec_type": "ngram-simple",
+        "spec_draft_n_max": 3,
+        "vram_allocated_mib": 23216,
+        "threads": 12,
+        "affinity": "taskset -c 0-11 (P-cores only)",
+        "batch_size": 2048,
+        "ubatch_size": 512
+      },
+      "results": {
+        "code_novel": { "prompt_tokens": 105, "completion_tokens": 512, "ttft_ms": 1750.0, "prefill_tps": 60.0, "decode_tps": 32.0, "wall_sec": 17.74 },
+        "code_repeated": { "prompt_tokens": 110, "completion_tokens": 512, "ttft_ms": 941.6, "prefill_tps": 72.2, "decode_tps": 29.2, "wall_sec": 18.59 },
+        "prose_reasoning": { "prompt_tokens": 125, "completion_tokens": 512, "ttft_ms": 1116.1, "prefill_tps": 74.4, "decode_tps": 29.3, "wall_sec": 18.69 },
+        "math_algorithmic": { "prompt_tokens": 116, "completion_tokens": 400, "ttft_ms": 1068.1, "prefill_tps": 69.3, "decode_tps": 30.0, "wall_sec": 14.48 }
+      },
+      "notes": "Experimental finding: ngram-simple speculative drafting introduces verification overhead on non-repetitive reasoning, reducing decode throughput from ~34.7 t/s down to 29-32 t/s. Confirms that pure autoregressive generation is optimal without a calibrated MTP head."
+    }
+  ]
+}
