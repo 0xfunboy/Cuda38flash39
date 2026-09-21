@@ -28,17 +28,25 @@ echo "    Engram: --lazy-mode off (Preloaded into DDR RAM)"
 echo "    Prefill Batch: -b 2048 -ub 512 (Tensor Core saturated)"
 echo "    CPU Affinity: P-Cores 0-11, 12 threads"
 
-    taskset -c 0-11 "$LLAMA_SERVER" \
+    export OMP_WAIT_POLICY=ACTIVE
+    export OMP_PROC_BIND=CLOSE
+
+    taskset -c 0,2,4,6,8,10 "$LLAMA_SERVER" \
         -m "$MODEL_PATH" \
         --host 127.0.0.1 \
         --port 18094 \
         -ngl 99 \
-        --n-cpu-moe 30 \
+        --n-cpu-moe 29 \
         --load-mode none \
+        -np 1 \
+        --cache-type-k q8_0 \
+        --cache-type-v q8_0 \
+        --cache-reuse 64 \
+        --poll 100 \
         -c 8192 \
-        -b 2048 \
-        -ub 512 \
-        --threads 12 \
+        -b 1024 \
+        -ub 256 \
+        --threads 6 \
         --flash-attn on \
         --metrics \
         > "$LOG_FILE" 2>&1 &
