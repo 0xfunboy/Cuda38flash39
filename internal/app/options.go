@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -216,7 +217,34 @@ func (a *App) tokenizePrompt(ctx context.Context, p map[string]any) (int, int, [
 	if h := u.Hostname(); h != "10.55.0.1" && h != "10.55.0.2" && h != "127.0.0.1" && h != "localhost" && h != "::1" {
 		return 0, 0, nil, errors.New("tokenizer endpoint must be a configured local/private rank")
 	}
-	data := map[string]any{"model": a.cfg.Model, "messages": p["messages"], "chat_template_kwargs": p["chat_template_kwargs"], "add_generation_prompt": true}
+	var contentBuilder strings.Builder
+	if msgs, ok := p["messages"].([]any); ok {
+		for _, m := range msgs {
+			if mm, ok := m.(map[string]any); ok {
+				if c, ok := mm["content"].(string); ok {
+					if contentBuilder.Len() > 0 {
+						contentBuilder.WriteString("\n")
+					}
+					contentBuilder.WriteString(c)
+				}
+			}
+		}
+	} else if c, ok := p["content"].(string); ok {
+		contentBuilder.WriteString(c)
+	} else if pr, ok := p["prompt"].(string); ok {
+		contentBuilder.WriteString(pr)
+	}
+	contentStr := contentBuilder.String()
+	if contentStr == "" {
+		contentStr = " "
+	}
+	data := map[string]any{
+		"content":               contentStr,
+		"model":                 a.cfg.Model,
+		"messages":              p["messages"],
+		"chat_template_kwargs": p["chat_template_kwargs"],
+		"add_generation_prompt": true,
+	}
 	if p["tools"] != nil {
 		data["tools"] = p["tools"]
 	}
@@ -248,6 +276,15 @@ func (a *App) tokenizePrompt(ctx context.Context, p map[string]any) (int, int, [
 	}
 	if e = json.NewDecoder(io.LimitReader(response.Body, 8<<20)).Decode(&result); e != nil {
 		return 0, 0, nil, e
+	}
+	if result.Count == 0 && len(result.Tokens) > 0 {
+		result.Count = len(result.Tokens)
+	}
+	if result.Max < 1 {
+		result.Max = a.cfg.ChatContextTokens
+		if result.Max < 1 {
+			result.Max = 32768
+		}
 	}
 	if result.Count < 1 || result.Count != len(result.Tokens) || result.Max < 1 {
 		return 0, 0, nil, errors.New("invalid runtime token count")

@@ -1,18 +1,18 @@
 {
   "listen": "127.0.0.1:18093",
   "backend": "http://127.0.0.1:18094",
-  "tokenizer_endpoint": "http://10.55.0.1:18110/tokenize",
-  "chat_context_tokens": 65536,
-  "chat_default_output_tokens": 16384,
-  "chat_max_output_tokens": 32768,
+  "tokenizer_endpoint": "http://127.0.0.1:18094/tokenize",
+  "chat_context_tokens": 32768,
+  "chat_default_output_tokens": 4096,
+  "chat_max_output_tokens": 16384,
   "thinking_budget_supported": true,
   "tool_calls_supported": true,
-  "model": "GLM5.3-Flash-CIRU-STRIX-IU4",
-  "state_dir": "/home/funboy/StrixHaloClusterGLM/state",
+  "model": "qwen-flash-next-iq3",
+  "state_dir": "/home/funboy/Cuda38flash39/state",
   "workspace_roots": [
-    "/home/funboy/StrixHaloClusterGLM"
+    "/home/funboy/Cuda38flash39"
   ],
-  "pair_lock": "/home/funboy/StrixHaloClusterGLM/.engine/state/pair.lock",
+  "pair_lock": "/home/funboy/Cuda38flash39/state/engine.lock",
   "default_profile": "low",
   "profiles": {
     "low": {
@@ -52,15 +52,14 @@
       "max_repairs": 2
     }
   },
-  "profile_status": "EXPLICIT_LOW_HIGH_MAX; LEGACY_FAST_BALANCED_QUALITY_ARE_DEPRECATED_LOW_4096_ALIASES; COMPACT_CXX_QUALIFIED; NO_LONG_CONTEXT_QUALIFICATION",
+  "profile_status": "EXPLICIT_LOW_HIGH_MAX; LEGACY_FAST_BALANCED_QUALITY_ARE_DEPRECATED_LOW_4096_ALIASES; CUDA_RTX3090_QUALIFIED",
   "context_format": "json",
-  "max_context_tokens": 65536,
+  "max_context_tokens": 32768,
   "max_files": 300,
   "max_file_bytes": 262144,
   "max_repo_bytes": 33554432,
   "model_timeout": 600,
   "sandbox_timeout": 90,
   "sandbox_memory_bytes": 1073741824,
-  "sandbox_tasks": 64,
-  "remote_ssh": "02-evo-x3-tb"
+  "sandbox_tasks": 64
 }

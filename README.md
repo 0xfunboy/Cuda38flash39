@@ -15,35 +15,41 @@
   <a href="#documentation">Documentation</a>
 </p>
 
-HaloClu brings local AI chat, Pi-powered development and model operations into
-one focused workspace. Built for paired AMD Strix Halo systems, it combines
-distributed inference with a lightweight Go gateway and a clean browser interface.
+# Cuda38flash39
 
-Discuss a problem, attach your files, continue in a coding workspace and review
-the changes. Manage model downloads and monitor both machines from the same place.
+**Cuda38flash39** brings local AI chat, Pi-powered development and model operations into
+one focused workspace. Adapted for **NVIDIA CUDA** acceleration on a single **GeForce RTX 3090 (24GB VRAM)**
+installed on the **PCIe Gen4 x16** slot (`CUDA_VISIBLE_DEVICES=0`), combined with **Qwen 3.8 Flash Next MoE**
+expert memory tiering (attention and frequently used experts in 24GB VRAM, remaining experts in 128GB CPU RAM).
 
 ## At a glance
 
-- **Local AI chat** — streaming responses, document attachments and live token metrics.
+- **CUDA Acceleration** — Pinned to the 16x PCIe Gen4 RTX 3090 (`0000:01:00.0`) with sm_86 compute.
+- **Qwen 3.8 Flash Next MoE** — Hybrid MoE offloading with `--n-cpu-moe`, keeping hot experts in VRAM and cold experts in system RAM.
+- **Resumable Downloader** — Built-in resumable download tool (`bin/download-qwen`) with HTTP Range requests and SHA-256 validation.
+- **Local AI chat** — streaming SSE responses, document attachments and live token metrics.
 - **Pi coding workspaces** — repository tools, protected local edits, independent tests and reviewed Apply.
-- **Shared conversations** — persistent Chat/Pi history, explicit handoff and JSON export.
-- **Model management** — Hugging Face and ModelScope search, direct links and resumable downloads.
-- **Cluster visibility** — paired health, memory, GPU activity and benchmark results.
-- **A small footprint** — Go backend, framework-free frontend, grayscale design and responsive layout.
+- **A small footprint** — Go gateway on `:18093`, CUDA backend on `:18094`.
 
 ## Get started
 
-On an existing installation, open **[HaloClu](http://127.0.0.1:18093/)**.
-Go to **Options → Connection and secrets**, enter the token from
-`state/api-token`, and select **Connect**. The browser remembers your session
-for 180 days; **Forget** signs it out.
+### 1. Build and run the CUDA engine:
+```sh
+make engine-build
+make engine-run
+```
 
-To build and run the gateway against a configured inference backend:
+### 2. Download Qwen 3.8 Flash Next with resume:
+```sh
+make download-qwen
+```
 
+### 3. Build and run the gateway:
 ```sh
 make build
 ./bin/strixglm serve --config config.json
 ```
+Open **[HaloClu / Cuda38](http://127.0.0.1:18093/)** in your browser. Enter the token from `state/api-token`.
 
 The reference deployment uses Linux, Go 1.27.1, a provisioned CIRU inference
 environment and model weights. Pi workspaces also use Node.js, bubblewrap and

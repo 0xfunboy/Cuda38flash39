@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {loopbackEndpoint} from './product-e2e.mjs';
 
-export const MODEL='GLM5.3-Flash-CIRU-STRIX-IU4';
+export const MODEL=process.env.MODEL || 'GLM5.3-Flash-CIRU-STRIX-IU4';
 export function options(argv){
   const o={endpoint:'http://127.0.0.1:18093',token_file:fileURLToPath(new URL('../state/api-token',import.meta.url))};
   for(let i=0;i<argv.length;i++){
@@ -48,7 +48,7 @@ export function validateCompletion(body){
 }
 
 function healthyIdle(response){
-  return response.code===200&&response.body?.status==='ok'&&response.body.busy===false&&response.body.ranks?.length===2&&response.body.ranks.every(value=>value===true)&&!response.body.poison;
+  return response.code===200&&response.body?.status==='ok'&&(response.body.busy===false||response.body.busy===undefined)&&(!response.body.ranks||(response.body.ranks.length===2&&response.body.ranks.every(value=>value===true)))&&!response.body.poison;
 }
 
 export async function main(argv=process.argv.slice(2)){
